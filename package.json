@@ -1,0 +1,25 @@
+{
+  "name": "sos2526-27",
+  "version": "0.0.0",
+  "description": "",
+  "homepage": "https://github.com/gti-sos/SOS2526",
+  "bugs": {
+    "url": "https://github.com/gti-sos/SOS2526/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gti-sos/SOS2526-27"
+  },
+  "license": "ISC",
+  "author": "Grupo 27",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cool-ascii-faces": "^1.3.4",
+    "express": "^5.2.1"
+  }
+}
