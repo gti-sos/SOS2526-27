@@ -19,7 +19,7 @@ let drinking_water_services = [
     { entity: "Antigua and Barbuda", code: "ATG", year: 2022, wat_bas_pop_residence_urban: null }
 ];
 
-// --- RUTA DEL ALGORITMO (Tu lógica exacta) ---
+
 app.get("/samples/ACS", (req, res) => {
     const entidad_seleccionada= "Algeria"; 
 
