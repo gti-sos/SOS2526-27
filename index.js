@@ -117,7 +117,7 @@ app.put("/api/v1/drinking-water-services/:entity/:year", (req, res) => {
     const { entity, year } = req.params;
     const updatedData = req.body;
     
-    if (updatedData.entity !== entity || updatedData.year != year) {
+    if (updatedData.entity !== entity || updatedData.year !== Number(year)) {
         //Si los datos no coinciden con los actuales
         return res.status(400).send("Bad Request: Los datos no coinciden.");
     }
