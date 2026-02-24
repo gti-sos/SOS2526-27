@@ -1,9 +1,17 @@
 const express = require("express");
+const path = require("path"); 
 const app = express();
 const port = process.env.PORT || 10000;
 
 app.use(express.json());
 
+
+app.use(express.static(path.join(__dirname, "public")));
+
+
+app.get("/about", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "about.html"));
+});
 // 1. Datos iniciales
 let drinking_water_services = [
     { entity: "Afghanistan", code: "AFG", year: 2000, wat_bas_pop_residence_urban: 1564933.9 },
@@ -20,10 +28,6 @@ let drinking_water_services = [
 ];
 app.use("/", express.static("public"));
 
-// Ruta específica para /about que cargue el HTML
-app.get("/about", (req, res) => {
-    res.sendFile(__dirname + "/public/about.html");
-});
 
 app.get("/samples/ACS", (req, res) => {
     const entidad_seleccionada = "Algeria"; 
