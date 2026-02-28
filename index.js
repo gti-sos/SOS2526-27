@@ -153,7 +153,7 @@ app.put("/api/v1/drinking-water-services", (req, res) => res.sendStatus(405));
 
 // 1. Datos iniciales APS
 
-const datos_aps = [
+const plants = [
     {country:"Afghanistan", name: "Kajaki Hydroelectric Power Plant Afghanistan", year: 1975, river: "Helmand", plant_type: "STO", capacity_mw: 151, head_m: 90, dam_name: "Kajakai", res_vol_km3: 2.68},
     {country:"Afghanistan", name: "Mahipar Hydroelectric Power Plant Afghanistan", year: 1967, river: "Kabul", plant_type: "STO", capacity_mw: 66, head_m: 334, dam_name: "Mahipar dam", res_vol_km3: 0.0002},
     {country:"Afghanistan", name: "Naghlu Dam Hydroelectric Power Plant Afghanistan", year: 1967, river: "Kabul", plant_type: "ROR", capacity_mw: 100, head_m: 61, dam_name: "Naghlu", res_vol_km3: 0.5},
@@ -171,7 +171,7 @@ const datos_aps = [
 app.get("/samples/APS", (req,res) => {
     const pais = "Afghanistan";
 
-    let filtrar_por_pais = datos_aps.filter(d => 
+    let filtrar_por_pais = plants.filter(d => 
     d.country===pais && d.capacity_mw!=null);
 
     let media = filtrar_por_pais.reduce((a,d) =>
@@ -179,6 +179,114 @@ app.get("/samples/APS", (req,res) => {
 
     res.send("La media de capacity_mw en " + pais + " es: " + media);
 })
+
+const BASE_API_URL = "/api/v1";
+let world_hydroelectric_plants = [];
+
+// Carga de datos iniciales
+app.get(BASE_API_URL + "/world-hydroelectric-plants/loadInitialData", (req, res) => {
+    if (world_hydroelectric_plants.length === 0) {
+        world_hydroelectric_plants = [...plants];
+        res.sendStatus(201); // 201 Created
+    } else {
+        res.status(400).send("Bad Request: El array ya tiene datos."); // 400 Bad Request
+    }
+});
+
+// GET Colección y Búsquedas (from/to, country, year) -> Retorna ARRAY
+app.get(BASE_API_URL + "/world-hydroelectric-plants", (req, res) => {
+    
+    const apikey = req.query.apikey;
+
+    // Si no envían la clave '?apikey=secret', devolvemos 401
+    if (!apikey || apikey !== "secret") {
+        return res.sendStatus(401); // 401 Unauthorized
+    }
+    
+    let filtrados = [...world_hydroelectric_plants];
+    const { country, year, from, to } = req.query;
+
+    if (country) filtrados = filtrados.filter(d => d.country.toLowerCase() === country.toLowerCase());
+    if (year) filtrados = filtrados.filter(d => d.year == year);
+    if (from && to) filtrados = filtrados.filter(d => d.year >= from && d.year <= to);
+
+    res.status(200).json(filtrados); // 200 OK
+});
+
+// GET Búsqueda por país con periodo -> Retorna ARRAY
+app.get(BASE_API_URL + "/world-hydroelectric-plants/:country", (req, res) => {
+    const { country } = req.params;
+    const { from, to } = req.query;
+    let filtrados = world_hydroelectric_plants.filter(d => d.country.toLowerCase() === country.toLowerCase());
+
+    if (from && to) filtrados = filtrados.filter(d => d.year >= from && d.year <= to);
+
+    res.status(200).json(filtrados); // 200 OK
+});
+
+// GET Recurso concreto -> Retorna OBJECT
+app.get(BASE_API_URL + "/world-hydroelectric-plants/:country/:year", (req, res) => {
+    const { country, year } = req.params;
+    const recurso = world_hydroelectric_plants.find(d => d.country.toLowerCase() === country.toLowerCase() && d.year == year);
+    if (recurso) {
+        res.status(200).json(recurso); // 200 OOK
+    } else {
+        res.sendStatus(404); // 404 NOT FOUND
+    }
+});
+
+// POST Colección
+app.post(BASE_API_URL + "/world-hydroelectric-plants", (req, res) => {
+    const newData = req.body;
+    if (!newData || !newData.country || !newData.year || !newData.name) {
+        return res.sendStatus(400); // Bad Request
+    }
+    const existe = world_hydroelectric_plants.some(d => d.country === newData.country && d.year === newData.year && d.name === newData.name);
+    if (existe) {
+        res.sendStatus(409); // Conflict 
+    } else {
+        world_hydroelectric_plants.push(newData);
+        res.sendStatus(201); // Created
+    }
+});
+
+// PUT Recurso concreto
+app.put(BASE_API_URL + "/world-hydroelectric-plants/:country/:year", (req, res) => {
+    const { country, year } = req.params;
+    const updatedData = req.body;
+    if (updatedData.country !== country || updatedData.year !== Number(year)) {
+        return res.sendStatus(400); // 400 Bad Request
+    }
+    const index = world_hydroelectric_plants.findIndex(d => d.country.toLowerCase() === country.toLowerCase() && d.year == year);
+    if (index !== -1) {
+        world_hydroelectric_plants[index] = updatedData;
+        res.sendStatus(200); // 200 OK
+    } else {
+        res.sendStatus(404); // 404 Not Found
+    }
+});
+
+// DELETE Recurso concreto
+app.delete(BASE_API_URL + "/world-hydroelectric-plants/:country/:year", (req, res) => {
+    const { country, year } = req.params;
+    const longitud = world_hydroelectric_plants.length;
+    world_hydroelectric_plants = world_hydroelectric_plants.filter(d => !(d.country.toLowerCase() === country.toLowerCase() && d.year == year));
+    if (world_hydroelectric_plants.length < longitud) {
+        res.sendStatus(200); // 200 OK
+    } else {
+        res.sendStatus(404); // 404 Not Found
+    }
+});
+
+// DELETE Colección completa
+app.delete(BASE_API_URL + "/world-hydroelectric-plants", (req, res) => {
+    world_hydroelectric_plants = [];
+    res.sendStatus(200); // 200 OK
+});
+
+// MÉTODOS PROHIBIDOS (405)
+app.put(BASE_API_URL + "/world-hydroelectric-plants", (req, res) => res.sendStatus(405)); // 405 Method not Allowed
+app.post(BASE_API_URL + "/world-hydroelectric-plants/:country/:year", (req, res) => res.sendStatus(405)); // 405 Method not Allowed
 
 // FIN BLOQUE APS
 
