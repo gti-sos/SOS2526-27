@@ -1,14 +1,14 @@
 {
   "name": "sos2526-27",
   "version": "0.0.0",
-  "description": "",
+  "description": "- **Team**\r   - Alejandro Campos Sánchez-Cruzado (https://github.com/alecamsan1)\r   - Alejandro Catalán Noviembre (https://github.com/alecn-us)\r   - Adrián Pérez Sánchez  (https://github.com/adrianperez17)\r - **Project description**: Our project analyzes global hydraulic infrastructure (dams, reservoirs, and related works) to study its geographical distribution, temporal evolution, and primary use (e.g., hydroelectric generation, irrigation, water supply, and flood control). The goal is to understand how this infrastructure has expanded and specialized across different regions and the structural characteristics (dam height, storage capacity, reservoir area, installed power, etc.) associated with each use.\r - **Repository**: [gti-sos/SOS2526-27](https://github.com/gti-sos/SOS2526-27)",
   "homepage": "https://github.com/gti-sos/SOS2526-27",
   "bugs": {
     "url": "https://github.com/gti-sos/SOS2526-27/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gti-sos/SOS2526-27"
+    "url": "git+https://github.com/gti-sos/SOS2526-27.git"
   },
   "license": "ISC",
   "author": "Grupo 27",
@@ -21,5 +21,6 @@
   "dependencies": {
     "cool-ascii-faces": "^1.3.4",
     "express": "^5.2.1"
-  }
+  },
+  "keywords": []
 }
