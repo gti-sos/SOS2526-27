@@ -196,13 +196,6 @@ app.get(BASE_API_URL + "/world-hydroelectric-plants/loadInitialData", (req, res)
 // GET Colección y Búsquedas (from/to, country, year) -> Retorna ARRAY
 app.get(BASE_API_URL + "/world-hydroelectric-plants", (req, res) => {
     
-    const apikey = req.query.apikey;
-
-    // Si no envían la clave '?apikey=secret', devolvemos 401
-    if (!apikey || apikey !== "secret") {
-        return res.sendStatus(401); // 401 Unauthorized
-    }
-    
     let filtrados = [...world_hydroelectric_plants];
     const { country, year, from, to } = req.query;
 
