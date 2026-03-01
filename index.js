@@ -290,14 +290,7 @@ app.post(BASE_API_URL + "/world-hydroelectric-plants/:country/:year", (req, res)
 
 // FIN BLOQUE APS
 
-app.listen(port, () => {
-    console.log(`Servidor funcionando en puerto ${port}`);
-});
 
-app.get("/cool", (req, res) => {
-    console.log("Nueva petición a /cool");
-    res.send(`<html><body><h1>" ${cool()}  "</h1></body></html>`);
-});
 // BLOQUE ACN
 
 // 1. Datos iniciales ACN (Presas)
@@ -411,3 +404,12 @@ app.put(ACN_API_URL, (req, res) => res.sendStatus(405));
 app.post(ACN_API_URL + "/:dam_name/:year", (req, res) => res.sendStatus(405));
 
 // FIN BLOQUE ACN
+
+app.get("/cool", (req, res) => {
+    console.log("Nueva petición a /cool");
+    res.send(`<html><body><h1>" ${cool()}  "</h1></body></html>`);
+});
+
+app.listen(port, () => {
+    console.log(`Servidor funcionando en puerto ${port}`);
+});
