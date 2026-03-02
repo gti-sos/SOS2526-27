@@ -223,7 +223,7 @@ app.get(BASE_API_URL + "/world-hydroelectric-plants/:name/:year", (req, res) => 
     
     // Buscamos por nombre y año para garantizar que sea único
     const recurso = world_hydroelectric_plants.find(d => 
-        d.name.toLowerCase() === name.toLowerCase() && d.year == year
+        d.name.trim().toLowerCase() === name.trim().toLowerCase() && d.year == year
     );
     
     if (recurso) {
@@ -258,7 +258,7 @@ app.put(BASE_API_URL + "/world-hydroelectric-plants/:name/:year", (req, res) => 
         return res.sendStatus(400); // 400 Bad Request
     }
     const index = world_hydroelectric_plants.findIndex(d => 
-        d.name.toLowerCase() === name.toLowerCase() && d.year == year
+        d.name.trim().toLowerCase() === name.trim().toLowerCase() && d.year == year
     );
     if (index !== -1) {
         world_hydroelectric_plants[index] = updatedData;
@@ -273,7 +273,7 @@ app.delete(BASE_API_URL + "/world-hydroelectric-plants/:name/:year", (req, res) 
     const { name, year } = req.params;
     const inicial = world_hydroelectric_plants.length;
     world_hydroelectric_plants = world_hydroelectric_plants.filter(d => 
-        !(d.name.toLowerCase() === name.toLowerCase() && d.year == year)
+        !(d.name.trim().toLowerCase() === name.trim().toLowerCase() && d.year == year)
     );
     if (world_hydroelectric_plants.length < inicial) {
         res.sendStatus(200); // 200 Ok
