@@ -9,3 +9,7 @@
 - **Project description**: Our project analyzes global hydraulic infrastructure (dams, reservoirs, and related works) to study its geographical distribution, temporal evolution, and primary use (e.g., hydroelectric generation, irrigation, water supply, and flood control). The goal is to understand how this infrastructure has expanded and specialized across different regions and the structural characteristics (dam height, storage capacity, reservoir area, installed power, etc.) associated with each use.
 - **Repository**: [gti-sos/SOS2526-27](https://github.com/gti-sos/SOS2526-27)
 - **Live URL**: [https://sos2526-27.onrender.com/](https://sos2526-27.onrender.com/)
+- **APIs:**
+  - Alejandro Campos Sánchez-Cruzado (https://sos2526-27.onrender.com/api/v1/drinking-water-services)
+  - Alejandro Catalán Noviembre (https://sos2526-27.onrender.com/api/v1/water-dams)
+  - Adrián Pérez Sánchez  (https://sos2526-27.onrender.com/api/v1/world-hydroelectric-plants)
