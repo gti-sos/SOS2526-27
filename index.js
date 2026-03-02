@@ -9,6 +9,10 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, "public")));
 
+app.get("/cool", (req, res) => {
+    console.log("Nueva petición a /cool");
+    res.send(`<html><body><h1>" ${cool()}  "</h1></body></html>`);
+});
 
 app.get("/about", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "about.html"));
@@ -192,6 +196,7 @@ app.get(BASE_API_URL + "/world-hydroelectric-plants/loadInitialData", (req, res)
         res.status(400).send("Bad Request: El array ya tiene datos."); // 400 Bad Request
     }
 });
+
 
 // GET Colección y Búsquedas (from/to, country, year) -> Retorna ARRAY
 app.get(BASE_API_URL + "/world-hydroelectric-plants", (req, res) => {
@@ -419,3 +424,4 @@ app.get("/cool", (req, res) => {
 app.listen(port, () => {
     console.log(`Servidor funcionando en puerto ${port}`);
 });
+
