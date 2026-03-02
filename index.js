@@ -219,9 +219,9 @@ app.get(BASE_API_URL + "/world-hydroelectric-plants/:country", (req, res) => {
 
 // GET Recurso concreto -> Retorna OBJECT
 app.get(BASE_API_URL + "/world-hydroelectric-plants/:name/:year", (req, res) => {
-    const { name, year } = req.params;
+    const name = decodeURIComponent(req.params.name); // Decodifica los %20
+    const year = req.params.year;
     
-    // Buscamos por nombre y año para garantizar que sea único
     const recurso = world_hydroelectric_plants.find(d => 
         d.name.trim().toLowerCase() === name.trim().toLowerCase() && d.year == year
     );
@@ -250,13 +250,15 @@ app.post(BASE_API_URL + "/world-hydroelectric-plants", (req, res) => {
 
 // PUT Recurso concreto
 app.put(BASE_API_URL + "/world-hydroelectric-plants/:name/:year", (req, res) => {
-    const { name, year } = req.params;
+    const name = decodeURIComponent(req.params.name);
+    const year = Number(req.params.year);
     const updatedData = req.body;
 
-    // Validación: El nombre y año de la URL deben coincidir con el Body
-    if (updatedData.name !== name || updatedData.year !== Number(year)) {
-        return res.sendStatus(400); // 400 Bad Request
+    // Validación corregida: usamos trim y minúsculas para comparar
+    if (updatedData.name.trim().toLowerCase() !== name.trim().toLowerCase() || updatedData.year !== year) {
+        return res.sendStatus(400);
     }
+
     const index = world_hydroelectric_plants.findIndex(d => 
         d.name.trim().toLowerCase() === name.trim().toLowerCase() && d.year == year
     );
