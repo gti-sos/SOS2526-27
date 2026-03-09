@@ -189,7 +189,7 @@ app.get(BASE_API_URL + "/world-hydroelectric-plants/loadInitialData", (req, res)
         world_hydroelectric_plants = [...plants];
         res.sendStatus(201); // 201 Created
     } else {
-        res.status(400).send("Bad Request: El array ya tiene datos."); // 400 Bad Request
+        res.status(409).send("Conflict: El array ya tiene datos."); // 409 Conflict
     }
 });
 
@@ -236,10 +236,20 @@ app.get(BASE_API_URL + "/world-hydroelectric-plants/:name/:year", (req, res) => 
 // POST Colección
 app.post(BASE_API_URL + "/world-hydroelectric-plants", (req, res) => {
     const newData = req.body;
-    if (!newData || !newData.country || !newData.year || !newData.name) {
-        return res.sendStatus(400); // Bad Request
+    // 1. Campos obligatorios
+    const camposObligatorios = ["country", "name", "year", "river", "plant_type", "capacity_mw", "head_m", "dam_name", "res_vol_km3"];
+    
+    // 2. Comprobar si falta alguno
+    const faltanCampos = camposObligatorios.some(campo => !newData.hasOwnProperty(campo));
+    
+    // 3. Comprobar si sobran campos extra
+    const llavesRecibidas = Object.keys(newData);
+    const tieneCamposExtra = llavesRecibidas.some(llave => !camposObligatorios.includes(llave));
+
+    if (faltanCampos || tieneCamposExtra) {
+        return res.sendStatus(400); // 400 Bad Request
     }
-    const existe = world_hydroelectric_plants.some(d => d.country === newData.country && d.year === newData.year && d.name === newData.name);
+    const existe = world_hydroelectric_plants.some(d => d.year === newData.year && d.name === newData.name);
     if (existe) {
         res.sendStatus(409); // Conflict 
     } else {
@@ -254,14 +264,24 @@ app.put(BASE_API_URL + "/world-hydroelectric-plants/:name/:year", (req, res) => 
     const year = Number(req.params.year);
     const updatedData = req.body;
 
-    // Validación corregida: usamos trim y minúsculas para comparar
-    if (updatedData.name.trim().toLowerCase() !== name.trim().toLowerCase() || updatedData.year !== year) {
-        return res.sendStatus(400);
+    // FILTRO 1: ¿Están todos los campos esperados? (Regla del 400 por campos)
+    const camposEsperados = ["country", "name", "year", "river", "plant_type", "capacity_mw", "head_m", "dam_name", "res_vol_km3"];
+    const faltanCampos = camposEsperados.some(campo => !updatedData.hasOwnProperty(campo));
+    
+    if (faltanCampos) {
+        return res.sendStatus(400); // 400 Bad Request
     }
 
+    // FILTRO 2: ¿Coincide el ID de la URL con el del Body? (Regla del 400 por ID)
+    if (updatedData.name.trim().toLowerCase() !== name.trim().toLowerCase() || updatedData.year !== year) {
+        return res.sendStatus(400); // 400 Bad Request
+    }
+
+    // FILTRO 3: ¿Existe el recurso en mi lista? (Regla del 404)
     const index = world_hydroelectric_plants.findIndex(d => 
         d.name.trim().toLowerCase() === name.trim().toLowerCase() && d.year == year
     );
+
     if (index !== -1) {
         world_hydroelectric_plants[index] = updatedData;
         res.sendStatus(200); // 200 Ok
