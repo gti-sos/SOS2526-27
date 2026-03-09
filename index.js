@@ -17,8 +17,10 @@ app.get("/cool", (req, res) => {
 app.get("/about", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "about.html"));
 });
+// BLOQUE ACS
+
 // 1. Datos iniciales ACS
-let drinking_water_services = [
+const water_services = [
     { entity: "Afghanistan", code: "AFG", year: 2000, wat_bas_pop_residence_urban: 1564933.9 },
     { entity: "Afghanistan", code: "AFG", year: 2001, wat_bas_pop_residence_urban: 1583404 },
     { entity: "Americas (WHO)", code: "WHO_AMR", year: 2003, wat_bas_pop_residence_urban: 72906260 },
@@ -31,128 +33,213 @@ let drinking_water_services = [
     { entity: "Antigua and Barbuda", code: "ATG", year: 2021, wat_bas_pop_residence_urban: null },
     { entity: "Antigua and Barbuda", code: "ATG", year: 2022, wat_bas_pop_residence_urban: null }
 ];
-app.use("/", express.static("public"));
 
-
+// Ruta sample
 app.get("/samples/ACS", (req, res) => {
-    const entidad_seleccionada = "Algeria"; 
-    const filtrada = drinking_water_services.filter(d => 
-        d.entity === entidad_seleccionada && d.wat_bas_pop_residence_urban !== null 
+
+    const pais = "Algeria";
+
+    let filtrados = water_services.filter(d =>
+        d.entity === pais && d.wat_bas_pop_residence_urban != null
     );
-    const media = filtrada.reduce((acumulador, d) => acumulador + d.wat_bas_pop_residence_urban, 0) / filtrada.length;
-    
-    res.send(`La media de wat_bas_pop_residence_urban en Algeria es ${media}`);
+
+    let media = filtrados.reduce((a, d) =>
+        a + d.wat_bas_pop_residence_urban, 0) / filtrados.length;
+
+    res.send("La media de wat_bas_pop_residence_urban en " + pais + " es: " + media);
 });
 
-//Aqui empiezan los get
+const ACS_API = "/api/v1/drinking-water-services";
+let drinking_water_services = [];
 
-app.get("/api/v1/drinking-water-services", (req, res) => {
+
+// LOAD INITIAL DATA
+app.get(ACS_API + "/loadInitialData", (req, res) => {
+
+    if (drinking_water_services.length === 0) {
+
+        drinking_water_services = [...water_services];
+
+        res.sendStatus(201); // Created
+
+    } else {
+
+        res.status(409).send("Conflict: El array ya tiene datos.");
+
+    }
+
+});
+
+
+// GET COLECCIÓN
+app.get(ACS_API, (req, res) => {
+
     let filtrados = [...drinking_water_services];
-    //otra forma posible 
-    // let filtrados= drinking_water_services.slice();
+
     const { entity, year, from, to } = req.query;
-    //Es lo mismo que hacer const entity=req.query.entity; etc
 
+    if (entity)
+        filtrados = filtrados.filter(d =>
+            d.entity.toLowerCase() === entity.toLowerCase()
+        );
 
-    if (entity) filtrados = filtrados.filter(d => d.entity.toLocaleLowerCase()===entity.toLocaleLowerCase());
-    if (year) filtrados = filtrados.filter(d => d.year == year);
-    if (from && to) filtrados = filtrados.filter(d => d.year >= from && d.year <= to);
+    if (year)
+        filtrados = filtrados.filter(d => d.year == year);
 
-    res.status(200).json(filtrados); 
-});
+    if (from && to)
+        filtrados = filtrados.filter(d => d.year >= from && d.year <= to);
 
-app.get("/api/v1/drinking-water-services/loadInitialData", (req, res) => {
-    if (drinking_water_services.length === 0) //Es decir no hay ningun elemento
-    {
-        drinking_water_services = [
-            { entity: "Afghanistan", code: "AFG", year: 2000, wat_bas_pop_residence_urban: 1564933.9 },
-            { entity: "Afghanistan", code: "AFG", year: 2001, wat_bas_pop_residence_urban: 1583404 },
-            { entity: "Americas (WHO)", code: "WHO_AMR", year: 2003, wat_bas_pop_residence_urban: 72906260 },
-            { entity: "Americas (WHO)", code: "WHO_AMR", year: 2004, wat_bas_pop_residence_urban: 74281944 },
-            { entity: "Angola", code: "AGO", year: 2007, wat_bas_pop_residence_urban: null },
-            { entity: "Angola", code: "AGO", year: 2008, wat_bas_pop_residence_urban: null },
-            { entity: "Algeria", code: "DZA", year: 2019, wat_bas_pop_residence_urban: 6242828 },
-            { entity: "Algeria", code: "DZA", year: 2020, wat_bas_pop_residence_urban: 6882381.5 },
-            { entity: "Antigua and Barbuda", code: "ATG", year: 2020, wat_bas_pop_residence_urban: null },
-            { entity: "Antigua and Barbuda", code: "ATG", year: 2021, wat_bas_pop_residence_urban: null }
-        ];
-        res.sendStatus(201); 
-    } else {
-        res.status(400).send("Bad Request: El array ya tiene datos.");
-    }
-});
+    res.status(200).json(filtrados);
 
-app.post("/api/v1/drinking-water-services", (req, res) => {
-    const newData = req.body;
-    //Comprueba si falta un campo
-    if (!newData || !newData.entity || !newData.year || !newData.code) {
-        res.status(400).send("Bad Request: Faltan campos.");
-    } else {
-        //Si no falta un campo 
-        const existe = drinking_water_services.some(d => d.entity === newData.entity && d.year === newData.year);
-        if (existe) {
-            //Si ya existe evita duplicados
-            res.status(409).send("Conflicto: El recurso ya existe.");
-        } else {
-            //Si no existe lo añade
-            drinking_water_services.push(newData);
-            res.sendStatus(201); 
-        }
-    }
-});
-
-app.delete("/api/v1/drinking-water-services", (req, res) => {
-    drinking_water_services = [];//Array vacio 
-    res.sendStatus(200); 
 });
 
 
-app.get("/api/v1/drinking-water-services/:entity/:year", (req, res) => {
+// GET RECURSO CONCRETO
+app.get(ACS_API + "/:entity/:year", (req, res) => {
+
     const { entity, year } = req.params;
-    const recurso = drinking_water_services.find(d => d.entity.toLowerCase() === entity.toLowerCase() && d.year == year);
+
+    const recurso = drinking_water_services.find(d =>
+        d.entity.toLowerCase() === entity.toLowerCase() && d.year == year
+    );
+
     if (recurso) {
-        res.status(200).json(recurso); // Devuelve objeto {}
+
+        res.status(200).json(recurso);
+
     } else {
-        res.status(404).send("Not Found");
+
+        res.sendStatus(404);
+
     }
+
 });
 
-app.put("/api/v1/drinking-water-services/:entity/:year", (req, res) => {
+
+// POST COLECCIÓN
+app.post(ACS_API, (req, res) => {
+
+    const newData = req.body;
+
+    const camposObligatorios = ["entity", "code", "year", "wat_bas_pop_residence_urban"];
+
+    const faltanCampos = camposObligatorios.some(campo =>
+        !newData.hasOwnProperty(campo)
+    );
+
+    const llavesRecibidas = Object.keys(newData);
+
+    const tieneCamposExtra = llavesRecibidas.some(llave =>
+        !camposObligatorios.includes(llave)
+    );
+
+    if (faltanCampos || tieneCamposExtra) {
+
+        return res.sendStatus(400);
+
+    }
+
+    const existe = drinking_water_services.some(d =>
+        d.entity === newData.entity && d.year === newData.year
+    );
+
+    if (existe) {
+
+        res.sendStatus(409);
+
+    } else {
+
+        drinking_water_services.push(newData);
+
+        res.sendStatus(201);
+
+    }
+
+});
+
+
+// PUT RECURSO
+app.put(ACS_API + "/:entity/:year", (req, res) => {
+
     const { entity, year } = req.params;
+
     const updatedData = req.body;
-    
+
+    const camposEsperados = ["entity", "code", "year", "wat_bas_pop_residence_urban"];
+
+    const faltanCampos = camposEsperados.some(campo =>
+        !updatedData.hasOwnProperty(campo)
+    );
+
+    if (faltanCampos) {
+
+        return res.sendStatus(400);
+
+    }
+
     if (updatedData.entity !== entity || updatedData.year !== Number(year)) {
-        //Si los datos no coinciden con los actuales
-        return res.status(400).send("Bad Request: Los datos no coinciden.");
+
+        return res.sendStatus(400);
+
     }
 
-    const index = drinking_water_services.findIndex(d => d.entity.toLowerCase() === entity.toLowerCase() && d.year == year);
-   //Si existe el elemento
+    const index = drinking_water_services.findIndex(d =>
+        d.entity.toLowerCase() === entity.toLowerCase() && d.year == year
+    );
+
     if (index !== -1) {
+
         drinking_water_services[index] = updatedData;
+
         res.sendStatus(200);
+
     } else {
-        res.status(404).send("Not Found");
+
+        res.sendStatus(404);
+
     }
+
 });
 
-app.delete("/api/v1/drinking-water-services/:entity/:year", (req, res) => {
+
+// DELETE RECURSO
+app.delete(ACS_API + "/:entity/:year", (req, res) => {
+
     const { entity, year } = req.params;
-    const initialLength = drinking_water_services.length;
-    drinking_water_services = drinking_water_services.filter(d => !(d.entity.toLowerCase() === entity.toLowerCase() && d.year == year));
-    
-    //Si el tamaño es distinto que el inicial significa que filtró
-    if (drinking_water_services.length < initialLength) {
+
+    const inicial = drinking_water_services.length;
+
+    drinking_water_services = drinking_water_services.filter(d =>
+        !(d.entity.toLowerCase() === entity.toLowerCase() && d.year == year)
+    );
+
+    if (drinking_water_services.length < inicial) {
+
         res.sendStatus(200);
+
     } else {
-        res.status(404).send("Not Found");
+
+        res.sendStatus(404);
+
     }
+
 });
 
 
-app.post("/api/v1/drinking-water-services/:entity/:year", (req, res) => res.sendStatus(405));
-app.put("/api/v1/drinking-water-services", (req, res) => res.sendStatus(405));
+// DELETE COLECCIÓN
+app.delete(ACS_API, (req, res) => {
 
+    drinking_water_services = [];
+
+    res.sendStatus(200);
+
+});
+
+
+// MÉTODOS PROHIBIDOS
+app.put(ACS_API, (req, res) => res.sendStatus(405));
+
+app.post(ACS_API + "/:entity/:year", (req, res) => res.sendStatus(405));
 // BLOQUE APS
 
 // 1. Datos iniciales APS
