@@ -119,20 +119,19 @@ app.get(ACS_API + "/:entity/:year", (req, res) => {
 // POST COLECCIÓN
 app.post(ACS_API, (req, res) => {
 
+    if (!req.body) return res.sendStatus(400);
+
     const newData = req.body;
 
-    // Campos obligatorios
     const camposObligatorios = ["entity", "code", "year", "wat_bas_pop_residence_urban"];
 
-    // Comprobar si falta alguno
     const faltanCampos = camposObligatorios.some(campo => !newData.hasOwnProperty(campo));
 
-    // Comprobar si hay campos extra
     const llavesRecibidas = Object.keys(newData);
     const tieneCamposExtra = llavesRecibidas.some(llave => !camposObligatorios.includes(llave));
 
     if (faltanCampos || tieneCamposExtra) {
-        return res.sendStatus(400); // Bad Request
+        return res.sendStatus(400);
     }
 
     const existe = drinking_water_services.some(d =>
@@ -140,13 +139,13 @@ app.post(ACS_API, (req, res) => {
     );
 
     if (existe) {
-        res.sendStatus(409); // Conflict
+        res.sendStatus(409);
     } else {
         drinking_water_services.push(newData);
-        res.sendStatus(201); // Created
+        res.sendStatus(201);
     }
-});
 
+});
 // PUT RECURSO
 app.put(ACS_API + "/:entity/:year", (req, res) => {
 
