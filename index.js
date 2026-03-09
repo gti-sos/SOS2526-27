@@ -121,7 +121,11 @@ app.post(ACS_API, (req, res) => {
 
     const newData = req.body;
 
-    const camposObligatorios = ["entity", "code", "year", "wat_bas_pop_residence_urban"];
+    if (!newData) {
+        return res.sendStatus(400);
+    }
+
+    const camposObligatorios = ["entity","code","year","wat_bas_pop_residence_urban"];
 
     const faltanCampos = camposObligatorios.some(campo =>
         !newData.hasOwnProperty(campo)
@@ -134,9 +138,7 @@ app.post(ACS_API, (req, res) => {
     );
 
     if (faltanCampos || tieneCamposExtra) {
-
         return res.sendStatus(400);
-
     }
 
     const existe = drinking_water_services.some(d =>
@@ -144,19 +146,13 @@ app.post(ACS_API, (req, res) => {
     );
 
     if (existe) {
-
         res.sendStatus(409);
-
     } else {
-
         drinking_water_services.push(newData);
-
         res.sendStatus(201);
-
     }
 
 });
-
 
 // PUT RECURSO
 app.put(ACS_API + "/:entity/:year", (req, res) => {
