@@ -121,7 +121,7 @@ app.post(ACS_API, (req, res) => {
 
     const newData = req.body;
 
-    if (!newData) {
+    if (Object.keys(newData).length === 0) {
         return res.sendStatus(400);
     }
 
