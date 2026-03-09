@@ -434,13 +434,14 @@ app.get("/samples/ACN", (req, res) => {
 });
 const ACN_API_URL = "/api/v1/water-dams";
 
-// Load Initial Data
+// Load Initial Data ACN
 app.get(ACN_API_URL + "/loadInitialData", (req, res) => {
     if (water_dams.length === 0) {
         water_dams = [...initial_dams];
-        res.sendStatus(201);
+        res.sendStatus(201); // 201 Created
     } else {
-        res.status(400).send("El array ya tiene datos.");
+        // Cambiamos el 400 por el 409 para ser coherentes con el grupo
+        res.status(409).send("Conflict: El array ya tiene datos."); 
     }
 });
 
