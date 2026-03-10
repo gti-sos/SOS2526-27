@@ -2,17 +2,14 @@ const express = require("express");
 const path = require("path"); 
 const app = express();
 const port = process.env.PORT || 10000;
-const cool = require("cool-ascii-faces");
+
 
 app.use(express.json());
 
 
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/cool", (req, res) => {
-    console.log("Nueva petición a /cool");
-    res.send(`<html><body><h1>" ${cool()}  "</h1></body></html>`);
-});
+
 
 app.get("/about", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "about.html"));
@@ -569,10 +566,7 @@ app.post(ACN_API_URL + "/:dam_name/:year", (req, res) => res.sendStatus(405));
 
 // FIN BLOQUE ACN
 
-app.get("/cool", (req, res) => {
-    console.log("Nueva petición a /cool");
-    res.send(`<html><body><h1>" ${cool()}  "</h1></body></html>`);
-});
+
 
 app.listen(port, () => {
     console.log(`Servidor funcionando en puerto ${port}`);
