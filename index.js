@@ -17,9 +17,20 @@ app.get("/cool", (req, res) => {
 app.get("/about", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "about.html"));
 });
-// BLOQUE ACS
+// BLOQUE ACS F06
 
-// 1. Datos iniciales ACS
+const Datastore = require("nedb");
+
+const ACS_API = "/api/v1/drinking-water-services";
+
+const db = new Datastore({
+    filename: "./drinking-water-services.db",
+    autoload: true
+});
+
+
+// DATOS INICIALES
+
 const water_services = [
     { entity: "Afghanistan", code: "AFG", year: 2000, wat_bas_pop_residence_urban: 1564933.9 },
     { entity: "Afghanistan", code: "AFG", year: 2001, wat_bas_pop_residence_urban: 1583404 },
@@ -34,200 +45,246 @@ const water_services = [
     { entity: "Antigua and Barbuda", code: "ATG", year: 2022, wat_bas_pop_residence_urban: null }
 ];
 
-// Ruta sample
-app.get("/samples/ACS", (req, res) => {
-
-    const pais = "Algeria";
-
-    let filtrados = water_services.filter(d =>
-        d.entity === pais && d.wat_bas_pop_residence_urban != null
-    );
-
-    let media = filtrados.reduce((a, d) =>
-        a + d.wat_bas_pop_residence_urban, 0) / filtrados.length;
-
-    res.send("La media de wat_bas_pop_residence_urban en " + pais + " es: " + media);
-});
-
-const ACS_API = "/api/v1/drinking-water-services";
-let drinking_water_services = [];
-
 
 // LOAD INITIAL DATA
-app.get(ACS_API + "/loadInitialData", (req, res) => {
 
-    if (drinking_water_services.length === 0) {
+app.get(ACS_API + "/loadInitialData", (req,res)=>{
 
-        drinking_water_services = [...water_services];
+    db.count({}, (err,count)=>{
 
-        res.sendStatus(201); // Created
+        if(count===0){
 
-    } else {
+            db.insert(water_services);
 
-        res.status(409).send("Conflict: El array ya tiene datos.");
+            res.sendStatus(201);
 
-    }
+        }else{
+
+            res.sendStatus(409);
+
+        }
+
+    });
 
 });
 
 
-// GET COLECCIÓN
-app.get(ACS_API, (req, res) => {
+// GET COLECCIÓN + FILTROS + PAGINACIÓN
 
-    let filtrados = [...drinking_water_services];
+app.get(ACS_API,(req,res)=>{
 
-    const { entity, year, from, to } = req.query;
+    let query={};
 
-    if (entity)
-        filtrados = filtrados.filter(d =>
-            d.entity.toLowerCase() === entity.toLowerCase()
-        );
+    if(req.query.entity)
+        query.entity=req.query.entity;
 
-    if (year)
-        filtrados = filtrados.filter(d => d.year == year);
+    if(req.query.code)
+        query.code=req.query.code;
 
-    if (from && to)
-        filtrados = filtrados.filter(d => d.year >= from && d.year <= to);
+    if(req.query.year)
+        query.year=Number(req.query.year);
 
-    res.status(200).json(filtrados);
+    if(req.query.wat_bas_pop_residence_urban)
+        query.wat_bas_pop_residence_urban=Number(req.query.wat_bas_pop_residence_urban);
+
+
+    const limit=Number(req.query.limit);
+    const offset=Number(req.query.offset);
+
+    let cursor=db.find(query,{_id:0});
+
+    if(limit)
+        cursor=cursor.limit(limit);
+
+    if(offset)
+        cursor=cursor.skip(offset);
+
+    cursor.exec((err,docs)=>{
+
+        res.status(200).json(docs);
+
+    });
 
 });
 
 
 // GET RECURSO CONCRETO
-app.get(ACS_API + "/:entity/:year", (req, res) => {
 
-    const { entity, year } = req.params;
+app.get(ACS_API + "/:entity/:year",(req,res)=>{
 
-    const recurso = drinking_water_services.find(d =>
-        d.entity.toLowerCase() === entity.toLowerCase() && d.year == year
+    const entity=req.params.entity;
+    const year=Number(req.params.year);
+
+    db.findOne(
+        {entity:entity,year:year},
+        {_id:0},
+        (err,doc)=>{
+
+            if(doc)
+
+                res.status(200).json(doc);
+
+            else
+
+                res.sendStatus(404);
+
+        }
     );
-
-    if (recurso) {
-
-        res.status(200).json(recurso);
-
-    } else {
-
-        res.sendStatus(404);
-
-    }
 
 });
 
 
 // POST COLECCIÓN
-app.post(ACS_API, (req, res) => {
 
-    if (!req.body) return res.sendStatus(400);
+app.post(ACS_API,(req,res)=>{
 
-    const newData = req.body;
+    const newData=req.body;
 
-    const camposObligatorios = ["entity", "code", "year", "wat_bas_pop_residence_urban"];
+    const campos=[
+        "entity",
+        "code",
+        "year",
+        "wat_bas_pop_residence_urban"
+    ];
 
-    const faltanCampos = camposObligatorios.some(campo => !newData.hasOwnProperty(campo));
-
-    const llavesRecibidas = Object.keys(newData);
-    const tieneCamposExtra = llavesRecibidas.some(llave => !camposObligatorios.includes(llave));
-
-    if (faltanCampos || tieneCamposExtra) {
+    if(!newData)
         return res.sendStatus(400);
-    }
 
-    const existe = drinking_water_services.some(d =>
-        d.entity === newData.entity && d.year === newData.year
+    const faltan=campos.some(c=>!newData.hasOwnProperty(c));
+
+    const extra=Object.keys(newData).some(c=>!campos.includes(c));
+
+    if(faltan||extra)
+        return res.sendStatus(400);
+
+
+    db.findOne(
+        {entity:newData.entity,year:newData.year},
+        (err,doc)=>{
+
+            if(doc)
+
+                res.sendStatus(409);
+
+            else{
+
+                db.insert(newData);
+
+                res.sendStatus(201);
+
+            }
+
+        }
     );
-
-    if (existe) {
-        res.sendStatus(409);
-    } else {
-        drinking_water_services.push(newData);
-        res.sendStatus(201);
-    }
 
 });
+
+
 // PUT RECURSO
-app.put(ACS_API + "/:entity/:year", (req, res) => {
 
-    const { entity, year } = req.params;
+app.put(ACS_API + "/:entity/:year",(req,res)=>{
 
-    const updatedData = req.body;
+    const entity=req.params.entity;
 
-    const camposEsperados = ["entity", "code", "year", "wat_bas_pop_residence_urban"];
+    const year=Number(req.params.year);
 
-    const faltanCampos = camposEsperados.some(campo =>
-        !updatedData.hasOwnProperty(campo)
-    );
+    const updated=req.body;
 
-    if (faltanCampos) {
+    const campos=[
+        "entity",
+        "code",
+        "year",
+        "wat_bas_pop_residence_urban"
+    ];
+
+    const faltan=campos.some(c=>!updated.hasOwnProperty(c));
+
+    if(faltan)
+        return res.sendStatus(400);
+
+
+    if(updated.entity!==entity || updated.year!==year)
 
         return res.sendStatus(400);
 
-    }
 
-    if (updatedData.entity !== entity || updatedData.year !== Number(year)) {
+    db.update(
+        {entity:entity,year:year},
+        updated,
+        {},
+        (err,numUpdated)=>{
 
-        return res.sendStatus(400);
+            if(numUpdated===0)
 
-    }
+                res.sendStatus(404);
 
-    const index = drinking_water_services.findIndex(d =>
-        d.entity.toLowerCase() === entity.toLowerCase() && d.year == year
+            else
+
+                res.sendStatus(200);
+
+        }
     );
-
-    if (index !== -1) {
-
-        drinking_water_services[index] = updatedData;
-
-        res.sendStatus(200);
-
-    } else {
-
-        res.sendStatus(404);
-
-    }
 
 });
 
 
 // DELETE RECURSO
-app.delete(ACS_API + "/:entity/:year", (req, res) => {
 
-    const { entity, year } = req.params;
+app.delete(ACS_API + "/:entity/:year",(req,res)=>{
 
-    const inicial = drinking_water_services.length;
+    const entity=req.params.entity;
 
-    drinking_water_services = drinking_water_services.filter(d =>
-        !(d.entity.toLowerCase() === entity.toLowerCase() && d.year == year)
+    const year=Number(req.params.year);
+
+    db.remove(
+        {entity:entity,year:year},
+        {},
+        (err,numRemoved)=>{
+
+            if(numRemoved===0)
+
+                res.sendStatus(404);
+
+            else
+
+                res.sendStatus(200);
+
+        }
     );
-
-    if (drinking_water_services.length < inicial) {
-
-        res.sendStatus(200);
-
-    } else {
-
-        res.sendStatus(404);
-
-    }
 
 });
 
 
 // DELETE COLECCIÓN
-app.delete(ACS_API, (req, res) => {
 
-    drinking_water_services = [];
+app.delete(ACS_API,(req,res)=>{
 
-    res.sendStatus(200);
+    db.remove({}, {multi:true}, ()=>{
+
+        res.sendStatus(200);
+
+    });
 
 });
 
 
 // MÉTODOS PROHIBIDOS
-app.put(ACS_API, (req, res) => res.sendStatus(405));
 
-app.post(ACS_API + "/:entity/:year", (req, res) => res.sendStatus(405));
+app.put(ACS_API,(req,res)=>res.sendStatus(405));
+
+app.post(ACS_API + "/:entity/:year",(req,res)=>res.sendStatus(405));
+
+
+// DOCS
+
+app.get(ACS_API + "/docs",(req,res)=>{
+
+    res.redirect("https://documenter.getpostman.com/view/52242576/2sBXieqtPa");
+
+});
+
+// FIN BLOQUE ACS
+
 // BLOQUE APS
 
 // 1. Datos iniciales APS
