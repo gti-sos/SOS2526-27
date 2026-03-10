@@ -17,7 +17,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "test-drinking-water-services": "newman run ACS.postman_collection.json"
+    "test-drinking-water-services": "newman run drinking-water-services.postman_collection.json"
   },
   "dependencies": {
     "express": "^5.2.1",
