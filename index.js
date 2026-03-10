@@ -16,9 +16,9 @@ app.get("/about", (req, res) => {
 });
 
 //BLOQUE ACS
-const drinkingWaterServices = require("./apis/drinking-water-services");
+const drinkingWaterServices = require("./api/drinking-water-services");
 
-app.use("/apis/v1/drinking-water-services", drinkingWaterServices);
+app.use("/api/v1/drinking-water-services", drinkingWaterServices);
 
 //FIN BLOQUE ACS
 
