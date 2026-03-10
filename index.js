@@ -84,7 +84,12 @@ app.get(ACS_API,(req,res)=>{
     if(req.query.wat_bas_pop_residence_urban)
         query.wat_bas_pop_residence_urban=Number(req.query.wat_bas_pop_residence_urban);
 
-
+    if(req.query.from && req.query.to){
+    query.year = {
+        $gte:Number(req.query.from),
+        $lte:Number(req.query.to)
+    };
+}
     const limit=Number(req.query.limit);
     const offset=Number(req.query.offset);
 
