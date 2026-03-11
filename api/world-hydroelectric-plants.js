@@ -1,3 +1,5 @@
+const express = require("express");
+const router = express.Router();
 const Datastore = require("nedb");
 
 // 1. Datos iniciales
@@ -17,23 +19,10 @@ const plants = [
     
 ];
 
-app.get("/samples/APS", (req,res) => {
-    const pais = "Afghanistan";
-
-    let filtrar_por_pais = plants.filter(d => 
-    d.country===pais && d.capacity_mw!=null);
-
-    let media = filtrar_por_pais.reduce((a,d) =>
-    a+d.capacity_mw,0)/filtrar_por_pais.length;
-
-    res.send("La media de capacity_mw en " + pais + " es: " + media);
-})
-
-const BASE_API_URL = "/api/v1";
 let world_hydroelectric_plants = [];
 
 // Carga de datos iniciales
-app.get(BASE_API_URL + "/world-hydroelectric-plants/loadInitialData", (req, res) => {
+router.get("/loadInitialData", (req, res) => {
     if (world_hydroelectric_plants.length === 0) {
         world_hydroelectric_plants = [...plants];
         res.sendStatus(201); // 201 Created
@@ -44,7 +33,7 @@ app.get(BASE_API_URL + "/world-hydroelectric-plants/loadInitialData", (req, res)
 
 
 // GET Colección y Búsquedas (from/to, country, year) -> Retorna ARRAY
-app.get(BASE_API_URL + "/world-hydroelectric-plants", (req, res) => {
+router.get("/", (req, res) => {
     
     let filtrados = [...world_hydroelectric_plants];
     const { country, year, from, to } = req.query;
@@ -57,7 +46,7 @@ app.get(BASE_API_URL + "/world-hydroelectric-plants", (req, res) => {
 });
 
 // GET Búsqueda por país con periodo -> Retorna ARRAY
-app.get(BASE_API_URL + "/world-hydroelectric-plants/:country", (req, res) => {
+router.get("/:country", (req, res) => {
     const { country } = req.params;
     const { from, to } = req.query;
     let filtrados = world_hydroelectric_plants.filter(d => d.country.toLowerCase() === country.toLowerCase());
@@ -68,7 +57,7 @@ app.get(BASE_API_URL + "/world-hydroelectric-plants/:country", (req, res) => {
 });
 
 // GET Recurso concreto -> Retorna OBJECT
-app.get(BASE_API_URL + "/world-hydroelectric-plants/:name/:year", (req, res) => {
+router.get("/:name/:year", (req, res) => {
     const name = decodeURIComponent(req.params.name); // Decodifica los %20
     const year = req.params.year;
     
@@ -84,7 +73,7 @@ app.get(BASE_API_URL + "/world-hydroelectric-plants/:name/:year", (req, res) => 
 });
 
 // POST Colección
-app.post(BASE_API_URL + "/world-hydroelectric-plants", (req, res) => {
+router.post("/", (req, res) => {
     const newData = req.body;
     // 1. Campos obligatorios
     const camposObligatorios = ["country", "name", "year", "river", "plant_type", "capacity_mw", "head_m", "dam_name", "res_vol_km3"];
@@ -109,7 +98,7 @@ app.post(BASE_API_URL + "/world-hydroelectric-plants", (req, res) => {
 });
 
 // PUT Recurso concreto
-app.put(BASE_API_URL + "/world-hydroelectric-plants/:name/:year", (req, res) => {
+router.put("/:name/:year", (req, res) => {
     const name = decodeURIComponent(req.params.name);
     const year = Number(req.params.year);
     const updatedData = req.body;
@@ -141,7 +130,7 @@ app.put(BASE_API_URL + "/world-hydroelectric-plants/:name/:year", (req, res) => 
 });
 
 // DELETE Recurso concreto
-app.delete(BASE_API_URL + "/world-hydroelectric-plants/:name/:year", (req, res) => {
+router.delete("/:name/:year", (req, res) => {
     const { name, year } = req.params;
     const inicial = world_hydroelectric_plants.length;
     world_hydroelectric_plants = world_hydroelectric_plants.filter(d => 
@@ -155,11 +144,15 @@ app.delete(BASE_API_URL + "/world-hydroelectric-plants/:name/:year", (req, res) 
 });
 
 // DELETE Colección completa
-app.delete(BASE_API_URL + "/world-hydroelectric-plants", (req, res) => {
+router.delete("/", (req, res) => {
     world_hydroelectric_plants = [];
     res.sendStatus(200); // 200 OK
 });
 
 // MÉTODOS PROHIBIDOS (405)
-app.put(BASE_API_URL + "/world-hydroelectric-plants", (req, res) => res.sendStatus(405)); // 405 Method not Allowed
-app.post(BASE_API_URL + "/world-hydroelectric-plants/:name/:year", (req, res) => res.sendStatus(405)); // 405 Method not Allowed
+router.put("/", (req, res) => res.sendStatus(405)); // 405 Method not Allowed
+router.post("/:name/:year", (req, res) => res.sendStatus(405)); // 405 Method not Allowed
+
+// Exportar modulo
+
+module.exports = router;
