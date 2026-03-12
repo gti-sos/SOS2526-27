@@ -29,7 +29,7 @@ let world_hydroelectric_plants = [];
 router.get("/loadInitialData", (req, res) => {
     db.count({}, (err,count) => {
         if(count===0){
-            db.insert(initial_plants, (err, newDocs) => {
+            db.insert(plants, (err, newDocs) => {
                 res.sendStatus(201); // 201 Created
             }); 
         }  else {
@@ -43,7 +43,9 @@ router.get("/loadInitialData", (req, res) => {
 router.get("/", (req, res) => {
     
     let query = {};
-    const { country, year, from, to, limit, offset } = req.query;
+    let limit = parseInt(req.query.limit);
+    let offset = parseInt(req.query.offset);
+    const { country, year, from, to} = req.query;
 
     if (country) query.country = country;
     if (year) query.year = Number(year);
@@ -54,7 +56,7 @@ router.get("/", (req, res) => {
     });
 });
 
-// GET Búsqueda por país con periodo -> Retorna ARRAY
+/*  GET Búsqueda por país con periodo -> Retorna ARRAY
 router.get("/:country", (req, res) => {
     const { country } = req.params;
     const { from, to } = req.query;
@@ -63,22 +65,20 @@ router.get("/:country", (req, res) => {
     if (from && to) filtrados = filtrados.filter(d => d.year >= from && d.year <= to);
 
     res.status(200).json(filtrados); // 200 OK
-});
+});*/
 
 // GET Recurso concreto -> Retorna OBJECT
 router.get("/:name/:year", (req, res) => {
-    const name = decodeURIComponent(req.params.name); // Decodifica los %20
-    const year = req.params.year;
+    const name = decodeURIComponent(req.params.name);
+    const year = Number(req.params.year);
     
-    const recurso = world_hydroelectric_plants.find(d => 
-        d.name.trim().toLowerCase() === name.trim().toLowerCase() && d.year == year
-    );
-    
-    if (recurso) {
-        res.status(200).json(recurso); // 200 Ok
-    } else {
-        res.sendStatus(404); // 404 Not Found si no existe
-    }
+    db.findOne({ name: name, year: year }, { _id: 0 }, (err, plant) => {
+        if (plant) {
+            res.status(200).json(plant); // 200 OK
+        } else {
+            res.sendStatus(404); // 404 Not Found 
+        }
+    });
 });
 
 // POST Colección
@@ -97,13 +97,16 @@ router.post("/", (req, res) => {
     if (faltanCampos || tieneCamposExtra) {
         return res.sendStatus(400); // 400 Bad Request
     }
-    const existe = world_hydroelectric_plants.some(d => d.year === newData.year && d.name === newData.name);
-    if (existe) {
-        res.sendStatus(409); // Conflict 
-    } else {
-        world_hydroelectric_plants.push(newData);
-        res.sendStatus(201); // Created
-    }
+    
+    db.findOne({ name: newData.name, year: newData.year }, (err, exist) => {
+        if (exist) {
+            res.sendStatus(409); // 209 Conflict
+        } else {
+            db.insert(newData, (err, doc) => {
+                res.sendStatus(201); // 201 Created 
+            });
+        }
+    });
 });
 
 // PUT Recurso concreto
@@ -115,47 +118,45 @@ router.put("/:name/:year", (req, res) => {
     // FILTRO 1: ¿Están todos los campos esperados? (Regla del 400 por campos)
     const camposEsperados = ["country", "name", "year", "river", "plant_type", "capacity_mw", "head_m", "dam_name", "res_vol_km3"];
     const faltanCampos = camposEsperados.some(campo => !updatedData.hasOwnProperty(campo));
-    
-    if (faltanCampos) {
-        return res.sendStatus(400); // 400 Bad Request
+    const llavesRecibidas = Object.keys(updatedData);
+    const tieneCamposExtra = llavesRecibidas.some(llave => !camposEsperados.includes(llave));
+
+    if (faltanCampos || tieneCamposExtra) {
+        return res.status(400).send("Bad Request: El JSON no tiene la estructura exacta esperada."); // 400 Bad Request
     }
 
     // FILTRO 2: ¿Coincide el ID de la URL con el del Body? (Regla del 400 por ID)
     if (updatedData.name.trim().toLowerCase() !== name.trim().toLowerCase() || updatedData.year !== year) {
-        return res.sendStatus(400); // 400 Bad Request
+        return res.status(400).send("Bad Request: El ID del recurso no coincide con los datos del cuerpo."); // 400 Bad Request
     }
 
     // FILTRO 3: ¿Existe el recurso en mi lista? (Regla del 404)
-    const index = world_hydroelectric_plants.findIndex(d => 
-        d.name.trim().toLowerCase() === name.trim().toLowerCase() && d.year == year
-    );
-
-    if (index !== -1) {
-        world_hydroelectric_plants[index] = updatedData;
-        res.sendStatus(200); // 200 Ok
-    } else {
-        res.sendStatus(404); // 404 Not Found
-    }
+    db.update({ name: name, year: year }, { $set: updatedData }, {}, (err, numReplaced) => {
+        if (numReplaced === 0) {
+            res.sendStatus(404); // 404 Not Found 
+        } else {
+            res.sendStatus(200); // 200 OK 
+        }
+    });
 });
 
 // DELETE Recurso concreto
 router.delete("/:name/:year", (req, res) => {
     const { name, year } = req.params;
-    const inicial = world_hydroelectric_plants.length;
-    world_hydroelectric_plants = world_hydroelectric_plants.filter(d => 
-        !(d.name.trim().toLowerCase() === name.trim().toLowerCase() && d.year == year)
-    );
-    if (world_hydroelectric_plants.length < inicial) {
-        res.sendStatus(200); // 200 Ok
-    } else {
-        res.sendStatus(404); // 404 Not Found
-    }
+    db.remove({ name: name, year: year }, {}, (err, numRemoved) => {
+        if (numRemoved === 0) {
+            res.sendStatus(404); // 404 Not Found 
+        } else {
+            res.sendStatus(200); // 200 OK 
+        }
+    });
 });
 
 // DELETE Colección completa
 router.delete("/", (req, res) => {
-    world_hydroelectric_plants = [];
-    res.sendStatus(200); // 200 OK
+    db.remove({}, { multi: true }, (err, numRemoved) => {
+        res.sendStatus(200); // 200 OK 
+    });
 });
 
 // MÉTODOS PROHIBIDOS (405)
