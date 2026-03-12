@@ -142,7 +142,8 @@ router.put("/:name/:year", (req, res) => {
 
 // DELETE Recurso concreto
 router.delete("/:name/:year", (req, res) => {
-    const { name, year } = req.params;
+    const name = decodeURIComponent(req.params.name);
+    const year = Number(req.params.year);
     db.remove({ name: name, year: year }, {}, (err, numRemoved) => {
         if (numRemoved === 0) {
             res.sendStatus(404); // 404 Not Found 
