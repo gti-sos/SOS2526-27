@@ -2,6 +2,10 @@ const express = require("express");
 const router = express.Router();
 const Datastore = require("nedb");
 
+const db = new Datastore({ 
+    filename: "./world-hydroelectric-plants.db", 
+    autoload: true });
+
 // 1. Datos iniciales
 
 const plants = [
@@ -23,26 +27,31 @@ let world_hydroelectric_plants = [];
 
 // Carga de datos iniciales
 router.get("/loadInitialData", (req, res) => {
-    if (world_hydroelectric_plants.length === 0) {
-        world_hydroelectric_plants = [...plants];
-        res.sendStatus(201); // 201 Created
-    } else {
+    db.count({}, (err,count) => {
+        if(count===0){
+            db.insert(initial_plants, (err, newDocs) => {
+                res.sendStatus(201); // 201 Created
+            }); 
+        }  else {
         res.status(409).send("Conflict: El array ya tiene datos."); // 409 Conflict
-    }
+        }
+    });
 });
 
 
 // GET Colección y Búsquedas (from/to, country, year) -> Retorna ARRAY
 router.get("/", (req, res) => {
     
-    let filtrados = [...world_hydroelectric_plants];
-    const { country, year, from, to } = req.query;
+    let query = {};
+    const { country, year, from, to, limit, offset } = req.query;
 
-    if (country) filtrados = filtrados.filter(d => d.country.toLowerCase() === country.toLowerCase());
-    if (year) filtrados = filtrados.filter(d => d.year == year);
-    if (from && to) filtrados = filtrados.filter(d => d.year >= from && d.year <= to);
+    if (country) query.country = country;
+    if (year) query.year = Number(year);
+    if (from && to) query.year = { $gte: Number(from), $lte: Number(to) };
 
-    res.status(200).json(filtrados); // 200 OK
+    db.find(query, { _id: 0 }).skip(offset).limit(limit).exec((err, plants) => {
+        res.status(200).json(plants); // 200 OK
+    });
 });
 
 // GET Búsqueda por país con periodo -> Retorna ARRAY
