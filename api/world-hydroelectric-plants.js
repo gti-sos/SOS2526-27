@@ -39,19 +39,31 @@ router.get("/loadInitialData", (req, res) => {
 });
 
 
-// GET Colección y Búsquedas (from/to, country, year) -> Retorna ARRAY
+// GET Colección y Búsquedas 
 router.get("/", (req, res) => {
     
     let query = {};
     let limit = parseInt(req.query.limit);
     let offset = parseInt(req.query.offset);
-    const { country, year, from, to} = req.query;
+    const { country, name, year, river, plant_type, 
+        capacity_mw, head_m, dam_name, res_vol_km3, from, to} = req.query;
 
     if (country) query.country = country;
+    if (name) query.name = name;
+    if (river) query.river = river;
+    if (plant_type) query.plant_type = plant_type;
+    if (dam_name) query.dam_name = dam_name;
+     
     if (year) query.year = Number(year);
+    if (capacity_mw) query.capacity_mw = Number(capacity_mw);
+    if (head_m) query.head_m = Number(head_m);
+    if (res_vol_km3) query.res_vol_km3 = Number(res_vol_km3);
     if (from && to) query.year = { $gte: Number(from), $lte: Number(to) };
 
-    db.find(query, { _id: 0 }).skip(offset).limit(limit).exec((err, plants) => {
+    let limitValue = parseInt(limit) || 100; // Por defecto 100 si no se envía
+    let offsetValue = parseInt(offset) || 0;
+
+    db.find(query, { _id: 0 }).skip(offsetValue).limit(limitValue).exec((err, plants) => {
         res.status(200).json(plants); // 200 OK
     });
 });
