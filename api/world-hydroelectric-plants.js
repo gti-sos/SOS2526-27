@@ -176,6 +176,11 @@ router.delete("/", (req, res) => {
 router.put("/", (req, res) => res.sendStatus(405)); // 405 Method not Allowed
 router.post("/:name/:year", (req, res) => res.sendStatus(405)); // 405 Method not Allowed
 
+// DOCS
+router.get("/docs",(req,res)=>{
+    res.redirect("https://documenter.getpostman.com/view/52298948/2sBXigMDpo");
+});
+
 // Exportar modulo
 
 module.exports = router;
