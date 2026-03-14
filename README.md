@@ -10,6 +10,6 @@
 - **Repository**: [gti-sos/SOS2526-27](https://github.com/gti-sos/SOS2526-27)
 - **Live URL**: [https://sos2526-27.onrender.com/](https://sos2526-27.onrender.com/)
 - **APIs:**
-  - Alejandro Campos Sánchez-Cruzado (https://sos2526-27.onrender.com/api/v1/drinking-water-services)
-  - Alejandro Catalán Noviembre (https://sos2526-27.onrender.com/api/v1/water-dams)
-  - Adrián Pérez Sánchez  (https://sos2526-27.onrender.com/api/v1/world-hydroelectric-plants)
+  - https://sos2526-27.onrender.com/api/v1/drinking-water-services/docs (developed by Alejandro Campos Sánchez-Cruzado)
+  - https://sos2526-27.onrender.com/api/v1/water-dams/docs (developed by Alejandro Catalán Noviembre)
+  - https://sos2526-27.onrender.com/api/v1/world-hydroelectric-plants/docs (developed by Adrián Pérez Sánchez)
