@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOS2526-27 | Data Analytics Hub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>SOS2526-27 | Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #2563eb;
-            --primary-hover: #1d4ed8;
             --bg: #f8fafc;
             --text-main: #1e293b;
             --text-muted: #64748b;
             --card-bg: #ffffff;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         }
 
         body {
@@ -21,127 +19,112 @@
             background-color: var(--bg);
             color: var(--text-main);
             margin: 0;
-            line-height: 1.6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh; /* Centra todo verticalmente */
+            overflow: hidden; /* Evita el scroll si el contenido cabe */
         }
 
         .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 40px 20px;
+            width: 95%;
+            max-width: 900px;
+            padding: 20px;
         }
 
         header {
             text-align: center;
-            margin-bottom: 60px;
+            margin-bottom: 25px;
         }
 
         h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: var(--text-main);
-            letter-spacing: -1px;
+            font-size: 1.8rem;
+            margin: 0 0 5px 0;
+            letter-spacing: -0.5px;
         }
 
         .presentation {
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             color: var(--text-muted);
-            max-width: 600px;
             margin: 0 auto;
         }
 
-        /* Sección About */
         .about-section {
             background: #eff6ff;
-            padding: 20px;
-            border-radius: 12px;
+            padding: 12px;
+            border-radius: 10px;
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 25px;
             border: 1px solid #dbeafe;
         }
 
-        .about-section h3 { margin-top: 0; color: var(--primary); }
+        .about-section h3 { font-size: 1rem; margin: 0 0 5px 0; color: var(--primary); }
+        .about-section p { font-size: 0.85rem; margin: 0 0 5px 0; }
 
-        /* Grid de APIs */
         .api-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
         }
 
         .api-card {
             background: var(--card-bg);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: var(--shadow);
-            transition: transform 0.2s, box-shadow 0.2s;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
             display: flex;
             flex-direction: column;
-            border: 1px solid #e2e8f0;
-        }
-
-        .api-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            text-align: center;
         }
 
         .api-card h3 {
-            margin: 0 0 10px 0;
-            font-size: 1.25rem;
-            color: var(--text-main);
+            margin: 0 0 8px 0;
+            font-size: 1rem;
+            height: 2.4em; /* Mantiene alineación si el título rompe en 2 líneas */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .developer {
-            font-size: 0.9rem;
+            font-size: 0.75rem;
             color: var(--text-muted);
-            margin-bottom: 25px;
-            font-style: italic;
+            margin-bottom: 15px;
+            line-height: 1.2;
         }
 
         .btn-group {
-            margin-top: auto;
             display: flex;
-            gap: 10px;
+            flex-direction: column;
+            gap: 6px;
         }
 
         .btn {
-            flex: 1;
-            text-align: center;
-            padding: 10px;
-            border-radius: 8px;
+            padding: 6px;
+            border-radius: 6px;
             text-decoration: none;
             font-weight: 600;
-            font-size: 0.85rem;
-            transition: all 0.2s;
+            font-size: 0.75rem;
+            transition: 0.2s;
         }
 
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover { background-color: var(--primary-hover); }
-
-        .btn-secondary {
-            background-color: #f1f5f9;
-            color: var(--text-main);
-        }
-
-        .btn-secondary:hover { background-color: #e2e8f0; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-secondary { background: #f1f5f9; color: var(--text-main); }
+        .btn-secondary:hover { background: #e2e8f0; }
 
         footer {
-            margin-top: 80px;
+            margin-top: 30px;
             text-align: center;
-            font-size: 0.9rem;
+            font-size: 0.75rem;
             color: var(--text-muted);
-            border-top: 1px solid #e2e8f0;
-            padding-top: 20px;
         }
 
-        a.main-link {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
+        /* Responsive para móviles */
+        @media (max-width: 768px) {
+            body { overflow-y: auto; align-items: flex-start; }
+            .api-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -150,45 +133,40 @@
 <div class="container">
     <header>
         <h1>SOS2526-27</h1>
-        <p class="presentation">
-            Plataforma de análisis de recursos hídricos y energía hidroeléctrica a nivel global. 
-            Desarrollado para la asignatura de Sistemas Orientados a Servicios.
-        </p>
+        <p class="presentation">Análisis de recursos hídricos y energía hidroeléctrica global.</p>
     </header>
 
     <div class="about-section">
-        <h3>Información del Proyecto</h3>
-        <p>Conoce más sobre nuestro equipo y el desarrollo del proyecto aquí:</p>
-        <a href="/about" class="main-link">Ver Sección About &rarr;</a>
+        <h3>Proyecto</h3>
+        <p>Equipo y detalles del desarrollo:</p>
+        <a href="/about" style="color: var(--primary); font-size: 0.85rem; font-weight: 600; text-decoration: none;">Acceder a Sección About &rarr;</a>
     </div>
-
-    <h2 style="margin-bottom: 30px; text-align: center;">Nuestras APIs</h2>
 
     <div class="api-grid">
         <div class="api-card">
             <h3>Drinking Water Services</h3>
-            <p class="developer">Developed by Alejandro Campos Sánchez-Cruzado</p>
+            <p class="developer">A. Campos Sánchez-Cruzado</p>
             <div class="btn-group">
                 <a href="/api/v1/drinking-water-services" class="btn btn-secondary">JSON API</a>
-                <a href="/api/v1/drinking-water-services/docs" class="btn btn-primary">Documentación</a>
+                <a href="/api/v1/drinking-water-services/docs" class="btn btn-primary">Docs</a>
             </div>
         </div>
 
         <div class="api-card">
             <h3>Water Dams</h3>
-            <p class="developer">Developed by Alejandro Catalán Noviembre</p>
+            <p class="developer">A. Catalán Noviembre</p>
             <div class="btn-group">
                 <a href="/api/v1/water-dams" class="btn btn-secondary">JSON API</a>
-                <a href="/api/v1/water-dams/docs" class="btn btn-primary">Documentación</a>
+                <a href="/api/v1/water-dams/docs" class="btn btn-primary">Docs</a>
             </div>
         </div>
 
         <div class="api-card">
-            <h3>World Hydroelectric Plants</h3>
-            <p class="developer">Developed by Adrián Pérez Sánchez</p>
+            <h3>Hydroelectric Plants</h3>
+            <p class="developer">Adrián Pérez Sánchez</p>
             <div class="btn-group">
                 <a href="/api/v1/world-hydroelectric-plants" class="btn btn-secondary">JSON API</a>
-                <a href="/api/v1/world-hydroelectric-plants/docs" class="btn btn-primary">Documentación</a>
+                <a href="/api/v1/world-hydroelectric-plants/docs" class="btn btn-primary">Docs</a>
             </div>
         </div>
     </div>
