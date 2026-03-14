@@ -1,36 +1,170 @@
-
-HTML
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About SOS2526-27</title>
+    <title>About | SOS2526-27</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        header {
+            border-bottom: 2px solid var(--primary);
+            margin-bottom: 40px;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        h1 { margin: 0; font-size: 2rem; letter-spacing: -1px; }
+
+        .back-link {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            color: var(--text-main);
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Estilo para las secciones */
+        .section-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        p { margin: 0; font-size: 1rem; color: var(--text-main); }
+
+        ul { list-style: none; padding: 0; margin: 0; }
+
+        li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        li:last-child { border-bottom: none; }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        a:hover { opacity: 0.7; text-decoration: underline; }
+
+        /* Etiquetas para las APIs */
+        .api-link {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .github-tag {
+            background: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #334155;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+    </style>
 </head>
 <body>
-    <h1>SOS2526-27</h1>
 
-    <h2>Team</h2>
-    <ul>
-        <li>Alejandro Campos Sánchez-Cruzado (<a href="https://github.com/alecamsan1">alecamsan1</a>)</li>
-        <li>Alejandro Catalán Noviembre (<a href="https://github.com/alecn-us">alecn-us</a>)</li>
-        <li>Adrián Pérez Sánchez (<a href="https://github.com/adrianperez17">adrianperez17</a>)</li>
-    </ul>
+<div class="container">
+    <header>
+        <h1>SOS2526-27</h1>
+        <a href="/" class="back-link">&larr; Volver al inicio</a>
+    </header>
 
-    <h2>Project Description</h2>
-    <p>Our project analyzes global hydraulic infrastructure (dams, reservoirs, and related works) to study its geographical distribution, temporal evolution, and primary use (e.g., hydroelectric generation, irrigation, water supply, and flood control). The goal is to understand how this infrastructure has expanded and specialized across different regions and the structural characteristics (dam height, storage capacity, reservoir area, installed power, etc.) associated with each use.</p>
+    <div class="section-card">
+        <h2>Project Description</h2>
+        <p>Our project analyzes global hydraulic infrastructure (dams, reservoirs, and related works) to study its geographical distribution, temporal evolution, and primary use (e.g., hydroelectric generation, irrigation, water supply, and flood control). The goal is to understand how this infrastructure has expanded and specialized across different regions and the structural characteristics (dam height, storage capacity, reservoir area, installed power, etc.) associated with each use.</p>
+    </div>
 
-    <h2>Repository</h2>
-    <p><a href="https://github.com/gti-sos/SOS2526-27">gti-sos/SOS2526-27</a></p>
+    <div class="section-card">
+        <h2>Team Members</h2>
+        <ul>
+            <li>
+                Alejandro Campos Sánchez-Cruzado 
+                <a href="https://github.com/alecamsan1" class="github-tag">@alecamsan1</a>
+            </li>
+            <li>
+                Alejandro Catalán Noviembre 
+                <a href="https://github.com/alecn-us" class="github-tag">@alecn-us</a>
+            </li>
+            <li>
+                Adrián Pérez Sánchez 
+                <a href="https://github.com/adrianperez17" class="github-tag">@adrianperez17</a>
+            </li>
+        </ul>
+    </div>
 
-    <h2>URL</h2>
-    <p><a href="https://sos2526-27.onrender.com">https://sos2526-27.onrender.com</a></p>
+    <div class="section-card">
+        <h2>Access Links</h2>
+        <ul>
+            <li><strong>Repository:</strong> <a href="https://github.com/gti-sos/SOS2526-27">gti-sos/SOS2526-27</a></li>
+            <li><strong>Live URL:</strong> <a href="https://sos2526-27.onrender.com">sos2526-27.onrender.com</a></li>
+        </ul>
+    </div>
 
-    <h2>APIs</h2>
-    <ul>
-        <li><a href="/api/v1/drinking-water-services">Drinking Water Services API (Alejandro Campos)</a></li>
-        <li><a href="/api/v1/water-dams">Water Dams API (Alejandro Catalán)</a></li>
-        <li><a href="/api/v1/world-hydroelectric-plants">World Hydroelectric Plants API (Adrián Pérez)</a></li>
-    </ul>
+    <div class="section-card">
+        <h2>Developed APIs</h2>
+        <ul>
+            <li><a href="/api/v1/drinking-water-services" class="api-link">Drinking Water Services API</a></li>
+            <li><a href="/api/v1/water-dams" class="api-link">Water Dams API</a></li>
+            <li><a href="/api/v1/world-hydroelectric-plants" class="api-link">World Hydroelectric Plants API</a></li>
+        </ul>
+    </div>
+
+    <footer>
+        Sistemas Orientados a Servicios | 2026
+    </footer>
+</div>
+
 </body>
 </html>
