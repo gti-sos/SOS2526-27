@@ -12,5 +12,4 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Run all tests
-        # Ahora este comando enciende el server, testea y apaga solo
         run: npm test
