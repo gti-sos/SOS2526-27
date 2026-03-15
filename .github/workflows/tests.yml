@@ -11,5 +11,8 @@ jobs:
           node-version: '18'
       - name: Install dependencies
         run: npm install
-      - name: Run all tests
-        run: npm test
+      - name: Run tests
+        run: |
+          node index.js & 
+          npx wait-on http://localhost:10000
+          npm test
