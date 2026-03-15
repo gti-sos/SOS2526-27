@@ -41,6 +41,18 @@ router.get("/loadInitialData", (req, res) => {
 
 // GET Colección y Búsquedas 
 router.get("/", (req, res) => {
+
+    const allowedParams = [
+        "country", "name", "year", "river", "plant_type", 
+        "capacity_mw", "head_m", "dam_name", "res_vol_km3", 
+        "from", "to", "limit", "offset"
+    ];
+
+    // Si algún parámetro de la URL no está en nuestra lista, devolvemos []
+    const hasInvalidParam = Object.keys(req.query).some(p => !allowedParams.includes(p));
+    if (hasInvalidParam) {
+        return res.status(200).json([]);  // Si algun campo no existe 200 OK + Array Vacio
+    }
     
     let query = {};
     let limit = parseInt(req.query.limit);
