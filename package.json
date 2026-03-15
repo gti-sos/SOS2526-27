@@ -17,8 +17,8 @@
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "test-drinking-water-services": "newman run drinking-water-services.postman_collection.json",
-    "test-world-hydroelectric-plants": "newman run world-hydroelectric-plants.postman_collection.json"
+    "test-drinking-water-services": "newman run ./test/drinking-water-services.postman_collection.json -e ./test/local.postman_environment.json",
+    "test-world-hydroelectric-plants": "newman run ./test/world-hydroelectric-plants.postman_collection.json -e ./test/local.postman_environment.json"
   },
   "dependencies": {
     "express": "^5.2.1",
