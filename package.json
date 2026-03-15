@@ -14,13 +14,18 @@
   "author": "Grupo 27",
   "type": "commonjs",
   "main": "index.js",
-  "scripts": {
+ "scripts": {
     "start": "node index.js",
     "test-water-dams": "newman run ./test/water-dams.json -e ./test/local-ev.json",
     "test-drinking-water": "newman run ./test/drinking-water-services.json -e ./test/local-ev.json",
     "test-hydroelectric": "newman run ./test/world-hydroelectric-plants.json -e ./test/local-ev.json",
-    "test": "npm run test-water-dams && npm run test-drinking-water && npm run test-hydroelectric"
-  },
+    
+    
+    "test-all": "npm run test-water-dams && npm run test-drinking-water && npm run test-hydroelectric",
+    
+    
+    "test": "start-server-and-test start http://localhost:10000 test-all"
+},
   "dependencies": {
     "express": "^5.2.1",
     "nedb": "^1.8.0",
