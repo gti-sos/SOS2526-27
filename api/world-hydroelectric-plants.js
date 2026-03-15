@@ -80,17 +80,6 @@ router.get("/", (req, res) => {
     });
 });
 
-/*  GET Búsqueda por país con periodo -> Retorna ARRAY
-router.get("/:country", (req, res) => {
-    const { country } = req.params;
-    const { from, to } = req.query;
-    let filtrados = world_hydroelectric_plants.filter(d => d.country.toLowerCase() === country.toLowerCase());
-
-    if (from && to) filtrados = filtrados.filter(d => d.year >= from && d.year <= to);
-
-    res.status(200).json(filtrados); // 200 OK
-});*/
-
 // GET Recurso concreto -> Retorna OBJECT
 router.get("/:name/:year", (req, res) => {
     const name = decodeURIComponent(req.params.name);
@@ -124,7 +113,7 @@ router.post("/", (req, res) => {
     
     db.findOne({ name: newData.name, year: newData.year }, (err, exist) => {
         if (exist) {
-            res.sendStatus(409); // 209 Conflict
+            res.sendStatus(409); // 409 Conflict
         } else {
             db.insert(newData, (err, doc) => {
                 res.sendStatus(201); // 201 Created 
