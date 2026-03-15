@@ -25,5 +25,8 @@
     "nedb": "^1.8.0",
     "newman": "^6.2.2"
   },
-  "keywords": []
+  "keywords": [],
+  "devDependencies": {
+    "start-server-and-test": "^2.1.5"
+  }
 }
