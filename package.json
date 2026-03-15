@@ -18,7 +18,8 @@
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "test-drinking-water-services": "newman run ./test/drinking-water-services.json -e ./test/local-ev.json",
-    "test-world-hydroelectric-plants": "newman run ./test/world-hydroelectric-plants.json -e ./test/local-ev.json"
+    "test-world-hydroelectric-plants": "newman run ./test/world-hydroelectric-plants.json -e ./test/local-ev.json",
+    "test-water-dams": "newman run ./test/water-dams.json -e ./test/local-ev.json"
   },
   "dependencies": {
     "express": "^5.2.1",

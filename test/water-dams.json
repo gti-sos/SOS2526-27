@@ -1,0 +1,587 @@
+{
+  "info": {
+    "_postman_id": "87162e18-1763-4e4b-810c-8929c77b04a3",
+    "name": "pruebas ACN",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52243900",
+    "_collection_link": "https://go.postman.co/collection/52243900-87162e18-1763-4e4b-810c-8929c77b04a3?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "DELETE a coleccion (200 OK)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/water-dams",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "water-dams"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "LoadInitialData (201 Created)-pulsar otra vez: 409 conflict",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status is 201 or 409\", function () {\r",
+              "    pm.expect(pm.response.code).to.be.oneOf([201,409]);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/water-dams/loadInitialData",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "water-dams",
+            "loadInitialData"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listado Completo (200 OK + Array)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"La respuesta es un array con 10 elementos\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData).to.be.an('array');\r",
+              "    pm.expect(jsonData.length).to.eql(10);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/water-dams",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "water-dams"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Búsqueda sin resultados (200 OK + Array Vacío)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/water-dams?country=pais-inventado",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "water-dams"
+          ],
+          "query": [
+            {
+              "key": "country",
+              "value": "pais-inventado"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Recurso Único (200 OK + Objeto)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"El objeto tiene los campos correctos y NO tiene _id\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData).to.have.property(\"dam_name\");\r",
+              "    pm.expect(jsonData.dam_name).to.eql(\"Terror-Lake\");\r",
+              "    pm.expect(jsonData).to.not.have.property(\"_id\"); // Muy importante para el F06\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/water-dams/Terror-Lake/1984",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "water-dams",
+            "Terror-Lake",
+            "1984"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Recurso único que no existe(404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is \" + pm.response.code, function () {\r",
+              "    // Cambia el número según la prueba (404 para no encontrado, 400 para error de campos)\r",
+              "    pm.response.to.have.status(404); \r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/water-dams/no-existe/2026",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "water-dams",
+            "no-existe",
+            "2026"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Crear recurso (201 Created) - pulsar otra vez: 409 conflict",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status is 201 or 409\", function () {\r",
+              "    pm.expect(pm.response.code).to.be.oneOf([201,409]);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"grand_id\": 11,\r\n    \"dam_name\": \"Nueva-Presa\",\r\n    \"river\": \"Guadalquivir\",\r\n    \"country\": \"Spain\",\r\n    \"year\": 2026,\r\n    \"dam_hgt\": 50,\r\n    \"dam_len\": 100,\r\n    \"area_skm\": 10,\r\n    \"cap_mcm\": 20,\r\n    \"depth_m\": 15,\r\n    \"dis_avg_ls\": 500\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/water-dams",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "water-dams"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Campos no esperados (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is \" + pm.response.code, function () {\r",
+              "    // Cambia el número según la prueba (404 para no encontrado, 400 para error de campos)\r",
+              "    pm.response.to.have.status(400); \r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"nombre\": \"test\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/water-dams",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "water-dams"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Actualizar (200 OK)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n        \"grand_id\": 1,\r\n        \"dam_name\": \"Terror-Lake\",\r\n        \"river\": \"Terror river\",\r\n        \"country\": \"United States\",\r\n        \"year\": 1984,\r\n        \"dam_hgt\": 59,\r\n        \"dam_len\": 747,\r\n        \"area_skm\": 4,\r\n        \"cap_mcm\": 121,\r\n        \"depth_m\": 33.2,\r\n        \"dis_avg_ls\": 2600\r\n    }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/water-dams/Terror-Lake/1984",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "water-dams",
+            "Terror-Lake",
+            "1984"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Actualizar (400 Bad Request)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is \" + pm.response.code, function () {\r",
+              "    // Cambia el número según la prueba (404 para no encontrado, 400 para error de campos)\r",
+              "    pm.response.to.have.status(400); \r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"grand_id\": 11,\r\n    \"dam_name\": \"Nueva-Presa\",\r\n    \"river\": \"Guadalquivir\",\r\n    \"country\": \"Spain\",\r\n    \"year\": 2026,\r\n    \"dam_hgt\": 50,\r\n    \"dam_len\": 100,\r\n    \"area_skm\": 10,\r\n    \"cap_mcm\": 20,\r\n    \"depth_m\": 15,\r\n    \"dis_avg_ls\": 500\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/water-dams/Terror-Lake/1984",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "water-dams",
+            "Terror-Lake",
+            "1984"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PUT a coleccion (405 Method Not Allowed)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 405 Method Not Allowed\", function () {\r",
+              "    pm.response.to.have.status(405);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/water-dams",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "water-dams"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST a recurso único (405 Method Not Allowed)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 405 Method Not Allowed\", function () {\r",
+              "    pm.response.to.have.status(405);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/water-dams/Terror-Lake/1984",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "water-dams",
+            "Terror-Lake",
+            "1984"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE a recurso (200 OK)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/water-dams/Terror-Lake/1984",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "water-dams",
+            "Terror-Lake",
+            "1984"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listado con paginación",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"La paginación funciona: devuelve solo 2 elementos\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.length).to.eql(2);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"nombre\": \"test\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/water-dams?limit=2&offset=0",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "water-dams"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "2"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
