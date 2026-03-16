@@ -16,14 +16,15 @@
   "main": "index.js",
  "scripts": {
     "start": "node index.js",
-    "test-water-dams": "newman run ./test/water-dams.json -e ./test/local-ev.json",
-    "test-drinking-water": "newman run ./test/drinking-water-services.json -e ./test/local-ev.json",
-    "test-hydroelectric": "newman run ./test/world-hydroelectric-plants.json -e ./test/local-ev.json",
+    "test-ACN": "newman run ./test/water-dams.json -e ./test/local-ev.json",
+    "test-ACS": "newman run ./test/drinking-water-services.json -e ./test/local-ev.json",
+    "test-APS": "newman run ./test/world-hydroelectric-plants.json -e ./test/local-ev.json",
+
+    "test-water-dams": "start-server-and-test start http://localhost:10000 test-ACN",
+    "test-drinking-water-services": "start-server-and-test start http://localhost:10000 test-ACS",
+    "test-world-hydroelectric-plants": "start-server-and-test start http://localhost:10000 test-APS",
     
-    
-    "test-all": "npm run test-water-dams && npm run test-drinking-water && npm run test-hydroelectric",
-    
-    
+    "test-all": "npm run test-ACN && npm run test-ACS && npm run test-APS",
     "test": "start-server-and-test start http://localhost:10000 test-all"
 },
   "dependencies": {
