@@ -14,19 +14,17 @@
   "author": "Grupo 27",
   "type": "commonjs",
   "main": "index.js",
- "scripts": {
+  "scripts": {
     "start": "node index.js",
     "test-ACN": "newman run ./test/water-dams.json -e ./test/local-ev.json",
     "test-ACS": "newman run ./test/drinking-water-services.json -e ./test/local-ev.json",
     "test-APS": "newman run ./test/world-hydroelectric-plants.json -e ./test/local-ev.json",
-
     "test-water-dams": "start-server-and-test start http://localhost:10000 test-ACN",
     "test-drinking-water-services": "start-server-and-test start http://localhost:10000 test-ACS",
     "test-world-hydroelectric-plants": "start-server-and-test start http://localhost:10000 test-APS",
-    
     "test-all": "npm run test-ACN && npm run test-ACS && npm run test-APS",
     "test": "start-server-and-test start http://localhost:10000 test-all"
-},
+  },
   "dependencies": {
     "express": "^5.2.1",
     "nedb": "^1.8.0",

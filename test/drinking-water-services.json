@@ -28,12 +28,9 @@
         "method": "DELETE",
         "header": [],
         "url": {
-          "raw": "https://sos2526-27.onrender.com/api/v1/drinking-water-services",
-          "protocol": "https",
+          "raw": "{{baseUrl}}/api/v1/drinking-water-services",
           "host": [
-            "sos2526-27",
-            "onrender",
-            "com"
+            "{{baseUrl}}"
           ],
           "path": [
             "api",
@@ -65,12 +62,9 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "https://sos2526-27.onrender.com/api/v1/drinking-water-services/loadInitialData",
-          "protocol": "https",
+          "raw": "{{baseUrl}}/api/v1/drinking-water-services/loadInitialData",
           "host": [
-            "sos2526-27",
-            "onrender",
-            "com"
+            "{{baseUrl}}"
           ],
           "path": [
             "api",
@@ -115,12 +109,9 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "https://sos2526-27.onrender.com/api/v1/drinking-water-services",
-          "protocol": "https",
+          "raw": "{{baseUrl}}/api/v1/drinking-water-services",
           "host": [
-            "sos2526-27",
-            "onrender",
-            "com"
+            "{{baseUrl}}"
           ],
           "path": [
             "api",
@@ -162,12 +153,9 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "https://sos2526-27.onrender.com/api/v1/drinking-water-services?from=2025&to=2030",
-          "protocol": "https",
+          "raw": "{{baseUrl}}/api/v1/drinking-water-services?from=2025&to=2030",
           "host": [
-            "sos2526-27",
-            "onrender",
-            "com"
+            "{{baseUrl}}"
           ],
           "path": [
             "api",
@@ -220,12 +208,9 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "https://sos2526-27.onrender.com/api/v1/drinking-water-services/Afghanistan/2000",
-          "protocol": "https",
+          "raw": "{{baseUrl}}/api/v1/drinking-water-services/Afghanistan/2000",
           "host": [
-            "sos2526-27",
-            "onrender",
-            "com"
+            "{{baseUrl}}"
           ],
           "path": [
             "api",
@@ -259,12 +244,9 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "https://sos2526-27.onrender.com/api/v1/drinking-water-services/Angola/3000",
-          "protocol": "https",
+          "raw": "{{baseUrl}}/api/v1/drinking-water-services/Angola/3000",
           "host": [
-            "sos2526-27",
-            "onrender",
-            "com"
+            "{{baseUrl}}"
           ],
           "path": [
             "api",
@@ -307,12 +289,9 @@
           }
         },
         "url": {
-          "raw": "https://sos2526-27.onrender.com/api/v1/drinking-water-services",
-          "protocol": "https",
+          "raw": "{{baseUrl}}/api/v1/drinking-water-services",
           "host": [
-            "sos2526-27",
-            "onrender",
-            "com"
+            "{{baseUrl}}"
           ],
           "path": [
             "api",
@@ -353,12 +332,9 @@
           }
         },
         "url": {
-          "raw": "https://sos2526-27.onrender.com/api/v1/drinking-water-services",
-          "protocol": "https",
+          "raw": "{{baseUrl}}/api/v1/drinking-water-services",
           "host": [
-            "sos2526-27",
-            "onrender",
-            "com"
+            "{{baseUrl}}"
           ],
           "path": [
             "api",
@@ -399,12 +375,9 @@
           }
         },
         "url": {
-          "raw": "https://sos2526-27.onrender.com/api/v1/drinking-water-services",
-          "protocol": "https",
+          "raw": "{{baseUrl}}/api/v1/drinking-water-services",
           "host": [
-            "sos2526-27",
-            "onrender",
-            "com"
+            "{{baseUrl}}"
           ],
           "path": [
             "api",
@@ -436,12 +409,9 @@
         "method": "POST",
         "header": [],
         "url": {
-          "raw": "https://sos2526-27.onrender.com/api/v1/drinking-water-services/Angola/2007",
-          "protocol": "https",
+          "raw": "{{baseUrl}}/api/v1/drinking-water-services/Angola/2007",
           "host": [
-            "sos2526-27",
-            "onrender",
-            "com"
+            "{{baseUrl}}"
           ],
           "path": [
             "api",
@@ -484,12 +454,9 @@
           }
         },
         "url": {
-          "raw": "https://sos2526-27.onrender.com/api/v1/drinking-water-services/Algeria/2020",
-          "protocol": "https",
+          "raw": "{{baseUrl}}/api/v1/drinking-water-services/Algeria/2020",
           "host": [
-            "sos2526-27",
-            "onrender",
-            "com"
+            "{{baseUrl}}"
           ],
           "path": [
             "api",
@@ -532,12 +499,9 @@
           }
         },
         "url": {
-          "raw": "https://sos2526-27.onrender.com/api/v1/drinking-water-services/Algeria/2020",
-          "protocol": "https",
+          "raw": "{{baseUrl}}/api/v1/drinking-water-services/Algeria/2020",
           "host": [
-            "sos2526-27",
-            "onrender",
-            "com"
+            "{{baseUrl}}"
           ],
           "path": [
             "api",
@@ -580,12 +544,9 @@
           }
         },
         "url": {
-          "raw": "https://sos2526-27.onrender.com/api/v1/drinking-water-services/Algeria/2020",
-          "protocol": "https",
+          "raw": "{{baseUrl}}/api/v1/drinking-water-services/Algeria/2020",
           "host": [
-            "sos2526-27",
-            "onrender",
-            "com"
+            "{{baseUrl}}"
           ],
           "path": [
             "api",
@@ -628,12 +589,9 @@
           }
         },
         "url": {
-          "raw": "https://sos2526-27.onrender.com/api/v1/drinking-water-services",
-          "protocol": "https",
+          "raw": "{{baseUrl}}/api/v1/drinking-water-services",
           "host": [
-            "sos2526-27",
-            "onrender",
-            "com"
+            "{{baseUrl}}"
           ],
           "path": [
             "api",
@@ -665,12 +623,9 @@
         "method": "DELETE",
         "header": [],
         "url": {
-          "raw": "https://sos2526-27.onrender.com/api/v1/drinking-water-services/Algeria/2020",
-          "protocol": "https",
+          "raw": "{{baseUrl}}/api/v1/drinking-water-services/Algeria/2020",
           "host": [
-            "sos2526-27",
-            "onrender",
-            "com"
+            "{{baseUrl}}"
           ],
           "path": [
             "api",
@@ -682,6 +637,36 @@
         }
       },
       "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseURL",
+      "value": ""
     }
   ]
 }
