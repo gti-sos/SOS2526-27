@@ -179,7 +179,7 @@ router.post("/:dam_name/:year", (req, res) => res.sendStatus(405));
 
 // DOCS (Debes poner aquí tu URL pública de Postman)
 router.get("/docs", (req, res) => {
-    res.redirect("https://alecamsan-2184820.postman.co/workspace/7ab012a8-1c1d-4f9e-8bd7-af0bfec1f825/collection/52243900-87162e18-1763-4e4b-810c-8929c77b04a3?action=share&source=copy-link&creator=52243900");
+    res.redirect("https://documenter.getpostman.com/view/52243900/2sBXigNZbh");
 });
 
 // EXPORTAR MÓDULO
