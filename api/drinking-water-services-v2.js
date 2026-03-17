@@ -44,12 +44,6 @@ router.get("/loadInitialData",(req,res)=>{
 
 });
 
-// DOCS
-
-router.get("/docs",(req,res)=>{
-    res.redirect("https://documenter.getpostman.com/view/52242576/2sBXieqtPa");
-});
-
 // GET COLECCIÓN + FILTROS + PAGINACIÓN
 
 router.get("/",(req,res)=>{

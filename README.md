@@ -11,5 +11,6 @@
 - **Live URL**: [https://sos2526-27.onrender.com/](https://sos2526-27.onrender.com/)
 - **APIs:**
   - https://sos2526-27.onrender.com/api/v1/drinking-water-services/docs (developed by Alejandro Campos Sánchez-Cruzado)
+  -https://sos2526-27.onrender.com/api/v2/drinking-water-services/docs (developed by Alejandro Campos Sánchez-Cruzado)
   - https://sos2526-27.onrender.com/api/v1/water-dams/docs (developed by Alejandro Catalán Noviembre)
   - https://sos2526-27.onrender.com/api/v1/world-hydroelectric-plants/docs (developed by Adrián Pérez Sánchez)
