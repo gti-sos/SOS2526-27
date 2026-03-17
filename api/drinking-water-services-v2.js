@@ -232,6 +232,13 @@ router.delete("/",(req,res)=>{
 router.put("/",(req,res)=>res.sendStatus(405));
 router.post("/:entity/:year",(req,res)=>res.sendStatus(405));
 
+// DOCS
+
+router.get("/docs",(req,res)=>{
+    res.redirect("https://documenter.getpostman.com/view/52242576/2sBXihpCMe");
+});
+
+
 // EXPORTAR MÓDULO
 
 module.exports = router;
