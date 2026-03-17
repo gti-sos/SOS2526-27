@@ -3,7 +3,7 @@ const router = express.Router();
 const Datastore = require("nedb");
 
 const db = new Datastore({
-    filename: "./drinking-water-services.db",
+    filename: "./drinking-water-services-v1.db",
     autoload: true
 });
 
