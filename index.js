@@ -1,9 +1,12 @@
+const cors=require("cors");
 const express = require("express");
 const path = require("path"); 
 const app = express();
 const port = process.env.PORT || 10000;
 
 
+
+app.use(cors());
 app.use(express.json());
 
 
@@ -18,10 +21,10 @@ app.get("/about", (req, res) => {
 });
 
 //BLOQUE ACS
-const drinkingWaterServicesV1 = require("./api/drinking-water-services-v1");
+const drinkingWaterServicesV1 = require("./src/back/drinking-water-services-v1.js");
 
 app.use("/api/v1/drinking-water-services", drinkingWaterServicesV1);
-const drinkingWaterServicesV2 = require("./api/drinking-water-services-v2");
+const drinkingWaterServicesV2 = require("./src/back/drinking-water-services-v2.js");
 
 app.use("/api/v2/drinking-water-services", drinkingWaterServicesV2);
 
@@ -29,7 +32,7 @@ app.use("/api/v2/drinking-water-services", drinkingWaterServicesV2);
 
 // BLOQUE APS
 
-const worldHydroelectricPlants = require("./api/world-hydroelectric-plants");
+const worldHydroelectricPlants = require("./src/back/world-hydroelectric-plants.js");
 
 app.use("/api/v1/world-hydroelectric-plants", worldHydroelectricPlants);
 
@@ -37,9 +40,10 @@ app.use("/api/v1/world-hydroelectric-plants", worldHydroelectricPlants);
 
 
 // BLOQUE ACN
-const waterDams = require("./api/water-dams"); 
+const waterDams = require("./src/back/water-dams.js"); 
 app.use("/api/v1/water-dams", waterDams);
 // FIN BLOQUE ACN
+
 
 
 
