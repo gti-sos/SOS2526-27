@@ -1,6 +1,7 @@
-const express = require("express");
+import express from 'express';
+import Datastore from 'nedb';
+
 const router = express.Router();
-const Datastore = require("nedb");
 
 const db = new Datastore({ 
     filename: "./world-hydroelectric-plants.db", 
@@ -184,4 +185,4 @@ router.get("/docs",(req,res)=>{
 
 // Exportar modulo
 
-module.exports = router;
+export default router;

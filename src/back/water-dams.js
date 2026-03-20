@@ -1,16 +1,17 @@
 // 1. PARCHE DE COMPATIBILIDAD (Añade esto arriba)
-const util = require('util');
+import util from 'util';
 if (!util.isDate) {
     util.isDate = (obj) => Object.prototype.toString.call(obj) === '[object Date]';
 }
 if (!util.isRegExp) {
     util.isRegExp = (obj) => Object.prototype.toString.call(obj) === '[object RegExp]';
 }
+
 //fff
-const express = require("express");
+import express from 'express';
+import Datastore from 'nedb';
+
 const router = express.Router();
-const Datastore = require("nedb");
-const path = require("path");
 
 // Configuración de la Base de Datos NeDB
 const db = new Datastore({ 
@@ -183,4 +184,4 @@ router.get("/docs", (req, res) => {
 });
 
 // EXPORTAR MÓDULO
-module.exports = router;
+export default router;

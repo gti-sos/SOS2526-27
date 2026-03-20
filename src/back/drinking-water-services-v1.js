@@ -1,6 +1,7 @@
-const express = require("express");
+import express from 'express';
+import Datastore from 'nedb';
+
 const router = express.Router();
-const Datastore = require("nedb");
 
 const db = new Datastore({
     filename: "./drinking-water-services-v1.db",
@@ -243,4 +244,4 @@ router.get("/docs",(req,res)=>{
 
 // EXPORTAR MÓDULO
 
-module.exports = router;
+export default router;
