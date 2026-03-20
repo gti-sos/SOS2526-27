@@ -27,7 +27,7 @@
     "test-drinking-water-services-V2": "start-server-and-test start http://localhost:10000 test-ACS-V2",
     "test-world-hydroelectric-plants": "start-server-and-test start http://localhost:10000 test-APS",
     "test-all": "npm run test-ACN && npm run test-ACS && npm run test-APS",
-    "test": "start-server-and-test start http://localhost:10000 test-all"
+    "test": "npm run build && start-server-and-test start http://localhost:10000 test-all"
   },
   "dependencies": {
     "cors": "^2.8.6",
