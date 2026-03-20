@@ -1,12 +1,16 @@
-const cors=require("cors");
-const express = require("express");
-const path = require("path"); 
+import cors from 'cors';
+import express from 'express';
+import path from 'path';
+import {handler} from './src/front/build/handler.js';
+
+
 const app = express();
 const port = process.env.PORT || 10000;
 
 
 
 app.use(cors());
+
 app.use(express.json());
 
 
@@ -45,7 +49,7 @@ app.use("/api/v1/water-dams", waterDams);
 // FIN BLOQUE ACN
 
 
-
+app.use(handler);
 
 app.listen(port, () => {
     console.log(`Servidor funcionando en puerto ${port}`);
