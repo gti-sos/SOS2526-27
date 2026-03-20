@@ -3,7 +3,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url'; 
 import { dirname } from 'path';  
-import {handler} from './src2/front/build/handler.js';
+import {handler} from './src/front/build/handler.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
