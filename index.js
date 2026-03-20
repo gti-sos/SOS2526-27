@@ -25,10 +25,10 @@ app.get("/about", (req, res) => {
 });
 
 //BLOQUE ACS
-const drinkingWaterServicesV1 = require("./src/back/drinking-water-services-v1.js");
+import drinkingWaterServicesV1 from './src/back/drinking-water-services-v1.js';
 
 app.use("/api/v1/drinking-water-services", drinkingWaterServicesV1);
-const drinkingWaterServicesV2 = require("./src/back/drinking-water-services-v2.js");
+import drinkingWaterServicesV2 from './src/back/drinking-water-services-v2.js';
 
 app.use("/api/v2/drinking-water-services", drinkingWaterServicesV2);
 
@@ -36,7 +36,7 @@ app.use("/api/v2/drinking-water-services", drinkingWaterServicesV2);
 
 // BLOQUE APS
 
-const worldHydroelectricPlants = require("./src/back/world-hydroelectric-plants.js");
+import worldHydroelectricPlants from './src/back/world-hydroelectric-plants.js';
 
 app.use("/api/v1/world-hydroelectric-plants", worldHydroelectricPlants);
 
@@ -44,7 +44,7 @@ app.use("/api/v1/world-hydroelectric-plants", worldHydroelectricPlants);
 
 
 // BLOQUE ACN
-const waterDams = require("./src/back/water-dams.js"); 
+import waterDams from './src/back/water-dams.js'; 
 app.use("/api/v1/water-dams", waterDams);
 // FIN BLOQUE ACN
 
