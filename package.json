@@ -17,7 +17,7 @@
   "scripts": {
     "start": "node index.js",
     "dev-front": "cd src/front && npm run dev -- --open",
-    "build": "cd src/front && npm run build ",
+    "build": "cd src2/front && npm run build ",
     "test-ACN": "newman run ./test/water-dams.json -e ./test/local-ev.json",
     "test-ACS": "newman run ./test/drinking-water-services.json -e ./test/local-ev.json",
     "test-ACS-V2": "newman run ./test/drinking-water-services-V2.json -e ./test/local-ev.json",
