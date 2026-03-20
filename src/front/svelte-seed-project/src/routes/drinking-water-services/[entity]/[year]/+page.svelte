@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 
-	const API = '/api/v1/drinking-water-services';
+	const API = 'http://localhost:10000/api/v1/drinking-water-services';
 
 	let cargando = $state(false);
 	let mensaje = $state('');

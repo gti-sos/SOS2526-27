@@ -4,7 +4,7 @@
 			nombre: 'Alejandro Campos Sánchez-Cruzado',
 			recurso: 'drinking-water-services',
 			frontend: '/drinking-water-services',
-			api: '/api/v1/drinking-water-services',
+			api: 'http://localhost:10000/api/v1/drinking-water-services',
 			docs: 'https://documenter.getpostman.com/view/52242576/2sBXieqtPa',
 			github: 'https://github.com/alecamsan1'
 		},
@@ -12,7 +12,7 @@
 			nombre: 'Alejandro Catalán Noviembre',
 			recurso: 'water-dams',
 			frontend: '/water-dams',
-			api: '/api/v1/water-dams',
+			api: 'http://localhost:10000/api/v1/water-dams',
 			docs: "https://documenter.getpostman.com/view/52243900/2sBXigNZbh",
 			github: 'https://github.com/alecn-us'
 		},
@@ -20,7 +20,7 @@
 			nombre: 'Adrián Pérez Sánchez',
 			recurso: 'world-hydroelectric-plants',
 			frontend: '/world-hydroelectric-plants',
-			api: '/api/v1/world-hydroelectric-plants',
+			api: 'http://localhost:10000/api/v1/world-hydroelectric-plants',
 			docs: "https://documenter.getpostman.com/view/52298948/2sBXigMDpo",
 			github: 'https://github.com/adrianperez17'
 		}
@@ -38,7 +38,7 @@
 		window.open(url, '_blank', 'noopener,noreferrer');
 	}
     function irAAbout() {
-		window.location.href = '/about', '_self';
+		window.location.href = 'http://localhost:10000/about', '_self';
 	}
 </script>
 
