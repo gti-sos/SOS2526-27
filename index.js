@@ -43,6 +43,10 @@ import worldHydroelectricPlants from './src/back/world-hydroelectric-plants.js';
 
 app.use("/api/v1/world-hydroelectric-plants", worldHydroelectricPlants);
 
+import worldHydroelectricPlantsV2 from './src/back/world-hydroelectric-plants-v2.js';
+
+app.use("/api/v2/world-hydroelectric-plants", worldHydroelectricPlantsV2);
+
 // FIN BLOQUE APS
 
 
