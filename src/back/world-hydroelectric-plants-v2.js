@@ -4,7 +4,7 @@ import Datastore from 'nedb';
 const router = express.Router();
 
 const db = new Datastore({ 
-    filename: "./world-hydroelectric-plants.db", 
+    filename: "./world-hydroelectric-plants-v2.db", 
     autoload: true });
 
 // 1. Datos iniciales
