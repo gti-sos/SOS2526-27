@@ -22,12 +22,11 @@
     // Función para listar todos los recursos
     async function loadPlants() {
         cargando = true;
-        // mensaje = '';
         try {
             const res = await fetch(API);
             if (!res.ok) throw new Error();
             plants = await res.json();
-            if (plants.length === 0) mostrarError('La lista está vacía. Pulsa "Cargar datos iniciales".');
+            if (plants.length === 0 && mensaje === '') mostrarError('La lista está vacía. Pulsa "Cargar datos iniciales".');
         } catch {
             mostrarError('Error al conectar con el servidor.');
         } finally {
