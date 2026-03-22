@@ -1,144 +1,132 @@
 <script>
 	import { onMount } from 'svelte';
-
+    
 	const API = 'http://localhost:10000/api/v1/world-hydroelectric-plants';
 
-	let plants = $state([]); 
-	let cargando = $state(false);
-	let mensaje = $state('');
-	let tipoMensaje = $state('');
+	let cargando = $state(false); // 
+	let mensaje = $state(''); // [cite: 2]
+	let tipoMensaje = $state(''); // 
 
+	let nameParam = $state('');
+	let yearParam = $state('');
+
+	// Formulario con los 9 campos de tu API
 	let form = $state({
-		country: '', name: '', year: '', river: '', 
-		plant_type: '', capacity_mw: '', head_m: '', 
-		dam_name: '', res_vol_km3: ''
+		country: '',
+		name: '',
+		year: '',
+		river: '',
+		plant_type: '',
+		capacity_mw: '',
+		head_m: '',
+		dam_name: '',
+		res_vol_km3: ''
 	});
 
-	function mostrarExito(texto) { mensaje = texto; tipoMensaje = 'exito'; setTimeout(limpiarMensaje, 3000); }
-	function mostrarError(texto) { mensaje = texto; tipoMensaje = 'error'; setTimeout(limpiarMensaje, 3000); }
-	function limpiarMensaje() { mensaje = ''; tipoMensaje = ''; }
+	function mostrarExito(texto) { mensaje = texto; tipoMensaje = 'exito'; } // [cite: 4]
+	function mostrarError(texto) { mensaje = texto; tipoMensaje = 'error'; } // [cite: 5]
 
-	async function loadPlants() {
-		cargando = true;
-		limpiarMensaje();
+	function getParamsFromUrl() {
+		const parts = window.location.pathname.split('/');
+		yearParam = parts[parts.length - 1];
+		nameParam = decodeURIComponent(parts[parts.length - 2]);
+	}
+
+	async function loadResource() {
+		cargando = true; // [cite: 7]
 		try {
-			const res = await fetch(API);
+			getParamsFromUrl(); // [cite: 7]
+			const res = await fetch(`${API}/${encodeURIComponent(nameParam)}/${yearParam}`);
 			if (!res.ok) throw new Error();
-			plants = await res.json();
-		} catch {
-			mostrarError('No se pudieron cargar los datos de la base de datos.');
-		} finally {
-			cargando = false;
-		}
-	}
-
-	async function createPlant() {
-		limpiarMensaje();
-		const newPlant = { 
-			...form, 
-			year: Number(form.year), 
-			capacity_mw: form.capacity_mw === '' ? null : Number(form.capacity_mw) 
-		};
-		try {
-			const res = await fetch(API, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(newPlant)
-			});
-			if (res.status === 409) return mostrarError('Error: Ya existe una central con ese nombre y año.');
-			if (!res.ok) return mostrarError('Error: Compruebe que todos los campos son correctos.');
+			const data = await res.json();
 			
-			mostrarExito('¡Central añadida correctamente!');
-			form = { country: '', name: '', year: '', river: '', plant_type: '', capacity_mw: '', head_m: '', dam_name: '', res_vol_km3: '' };
-			await loadPlants();
+			// Cargamos todos los campos asegurando que los números sean strings para el input
+			form = {
+				...data,
+				year: String(data.year),
+				capacity_mw: data.capacity_mw === null ? '' : String(data.capacity_mw),
+				head_m: data.head_m === null ? '' : String(data.head_m),
+				res_vol_km3: data.res_vol_km3 === null ? '' : String(data.res_vol_km3)
+			};
 		} catch {
-			mostrarError('Error de conexión con el servidor.');
+			mostrarError('No se pudo cargar la información de la central.'); // [cite: 11]
+		} finally {
+			cargando = false; // [cite: 11]
 		}
 	}
 
-	async function deleteOne(name, year) {
-		if(!confirm(`¿Seguro que quiere eliminar ${name}?`)) return;
+	async function updateResource() {
 		try {
-			const res = await fetch(`${API}/${encodeURIComponent(name)}/${year}`, { method: 'DELETE' });
-			if (res.ok) {
-				mostrarExito('Central eliminada con éxito.');
-				await loadPlants();
-			}
-		} catch { mostrarError('No se pudo eliminar la central.'); }
+			const updated = {
+				...form,
+				year: Number(form.year),
+				capacity_mw: form.capacity_mw === '' ? null : Number(form.capacity_mw),
+				head_m: form.head_m === '' ? null : Number(form.head_m),
+				res_vol_km3: form.res_vol_km3 === '' ? null : Number(form.res_vol_km3)
+			};
+
+			const res = await fetch(`${API}/${encodeURIComponent(nameParam)}/${yearParam}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(updated)
+			});
+			
+			if (!res.ok) throw new Error();
+			mostrarExito('¡Central actualizada con éxito!'); // [cite: 16]
+		} catch {
+			mostrarError('Error al guardar los cambios.'); // [cite: 17]
+		}
 	}
 
-	function goToEdit(name, year) {
-		window.location.href = `/world-hydroelectric-plants/${encodeURIComponent(name)}/${year}`;
-	}
-
-	onMount(loadPlants);
+	onMount(loadResource); // [cite: 18]
 </script>
 
 <main class="container">
-	<h1>Gestión de Centrales Hidroeléctricas</h1>
+	<h1>Editar Central Hidroeléctrica</h1>
+	
+	<button class="btn-back" onclick={() => window.location.href = '/world-hydroelectric-plants'}>
+		Volver al listado
+	</button>
 
 	{#if cargando}
-		<p class="loading">Cargando datos...</p>
+		<p class="loading">Obteniendo datos de la central...</p>
 	{/if}
 
 	{#if mensaje}
 		<div class="alert {tipoMensaje}">{mensaje}</div>
 	{/if}
 
-	<section class="form-box">
-		<h3>Añadir Nueva Central</h3>
-		<form onsubmit={(e) => { e.preventDefault(); createPlant(); }}>
-			<div class="input-group">
-				<input bind:value={form.country} placeholder="País" required />
-				<input bind:value={form.name} placeholder="Nombre de la central" required />
-				<input bind:value={form.year} type="number" placeholder="Año" required />
+	{#if form.name && !cargando}
+		<form onsubmit={(e) => { e.preventDefault(); updateResource(); }} class="edit-form">
+			<div class="form-grid">
+				<label>Nombre (ID): <input bind:value={form.name} disabled /></label>
+				<label>Año (ID): <input bind:value={form.year} disabled /></label>
+				<label>País: <input bind:value={form.country} required /></label>
+				<label>Río: <input bind:value={form.river} /></label>
+				<label>Tipo: <input bind:value={form.plant_type} /></label>
+				<label>Capacidad (MW): <input bind:value={form.capacity_mw} type="number" step="any" /></label>
+				<label>Salto (m): <input bind:value={form.head_m} type="number" step="any" /></label>
+				<label>Presa: <input bind:value={form.dam_name} /></label>
+				<label>Volumen (km3): <input bind:value={form.res_vol_km3} type="number" step="any" /></label>
 			</div>
-			<button type="submit" class="btn-add">Añadir Central</button>
+			<button type="submit" class="btn-save">Guardar Cambios</button>
 		</form>
-	</section>
-
-	<table class="styled-table">
-		<thead>
-			<tr>
-				<th>Nombre de la Central</th>
-				<th>Año</th>
-				<th>País</th>
-				<th>Acciones</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each plants as p (p.name + '-' + p.year)}
-				<tr>
-					<td>{p.name}</td>
-					<td>{p.year}</td>
-					<td>{p.country}</td>
-					<td class="actions">
-						<button class="btn-edit" onclick={() => goToEdit(p.name, p.year)}>Editar</button>
-						<button class="btn-delete" onclick={() => deleteOne(p.name, p.year)}>Borrar</button>
-					</td>
-				</tr>
-			{/each}
-		</tbody>
-	</table>
+	{/if}
 </main>
 
 <style>
-	.container { max-width: 900px; margin: 0 auto; font-family: sans-serif; padding: 20px; }
-	.loading { color: #666; font-style: italic; }
-	.alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; font-weight: bold; }
-	.exito { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-	.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+	.container { max-width: 800px; margin: 0 auto; font-family: sans-serif; padding: 20px; }
+	.btn-back { margin-bottom: 20px; padding: 8px 15px; cursor: pointer; }
+	.loading { color: #007bff; font-weight: bold; }
+	.alert { padding: 15px; margin: 10px 0; border-radius: 4px; }
+	.exito { background: #d4edda; color: #155724; }
+	.error { background: #f8d7da; color: #721c24; }
 	
-	.form-box { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #dee2e6; }
-	.input-group { display: flex; gap: 10px; margin-bottom: 10px; }
-	input { padding: 8px; border: 1px solid #ced4da; border-radius: 4px; flex: 1; }
+	.edit-form { background: #fdfdfd; padding: 25px; border: 1px solid #eee; border-radius: 8px; }
+	.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+	label { display: flex; flex-direction: column; font-weight: bold; font-size: 0.9em; }
+	input { padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
+	input:disabled { background: #e9ecef; cursor: not-allowed; }
 	
-	.btn-add { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; width: 100%; }
-	.btn-edit { background: #ffc107; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-	.btn-delete { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-	
-	.styled-table { width: 100%; border-collapse: collapse; margin-top: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-	.styled-table th { background-color: #343a40; color: white; padding: 12px; text-align: left; }
-	.styled-table td { padding: 12px; border-bottom: 1px solid #ddd; }
-	.actions { display: flex; gap: 5px; }
+	.btn-save { background: #28a745; color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; cursor: pointer; font-size: 1.1em; }
 </style>
