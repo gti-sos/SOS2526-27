@@ -155,8 +155,15 @@
         <table class="styled-table">
             <thead>
                 <tr>
-                    <th>País</th><th>Nombre</th><th>Año</th><th>Río</th>
-                    <th>Altura</th><th>Capacidad</th><th>Prof.</th><th>Acciones</th>
+                    <th>País</th>
+                    <th>Nombre</th>
+                    <th>Año</th>
+                    <th>Río</th>
+                    <th>ID</th>
+                    <th>Altura</th>
+                    <th>Capacidad</th>
+                    <th>Profundidad</th>
+                    <th>Descarga (l/s)</th> <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -166,10 +173,11 @@
                         <td><strong>{d.dam_name}</strong></td>
                         <td>{d.year}</td>
                         <td>{d.river || '-'}</td>
-                        <td>{d.dam_hgt || '-'}m</td>
-                        <td>{d.cap_mcm || '-'} mcm</td>
-                        <td>{d.depth_m || '-'}m</td>
-                        <td class="actions">
+                        <td>{d.grand_id}</td>
+                        <td>{d.dam_hgt ? d.dam_hgt + 'm' : '-'}</td>
+                        <td>{d.cap_mcm ? d.cap_mcm + ' mcm' : '-'}</td>
+                        <td>{d.depth_m ? d.depth_m + 'm' : '-'}</td>
+                        <td>{d.dis_avg_ls ? d.dis_avg_ls + ' l/s' : '-'}</td> <td class="actions">
                             <button class="btn-edit" onclick={() => window.location.href = `/water-dams/${encodeURIComponent(d.dam_name)}/${d.year}`}>Editar</button>
                             <button class="btn-delete" onclick={() => deleteOne(d.dam_name, d.year)}>Borrar</button>
                         </td>
@@ -181,27 +189,26 @@
 </main>
 
 <style>
-    .container { max-width: 1200px; margin: 0 auto; font-family: 'Inter', sans-serif; padding: 20px; }
+    .container { max-width: 1400px; margin: 0 auto; font-family: sans-serif; padding: 20px; }
     .toolbar { display: flex; gap: 10px; margin-bottom: 20px; }
     .btn-refresh { background: #6c757d; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; flex: 1; }
     .btn-load { background: #17a2b8; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; flex: 1; }
     .btn-danger-all { background: #343a40; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; flex: 1; }
     
-    .loading-msg { color: #007bff; font-weight: bold; text-align: center; }
     .alert { padding: 12px; margin-bottom: 20px; border-radius: 4px; font-weight: bold; text-align: center; }
     .exito { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
     .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
     
     .form-box { background: #f8f9fa; padding: 20px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 30px; }
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 15px; }
-    input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 15px; }
+    input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
     .btn-add { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
     .table-container { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .styled-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
-    .styled-table th { background: #2563eb; color: white; padding: 12px; text-align: left; }
-    .styled-table td { padding: 10px; border-bottom: 1px solid #eee; }
-    .actions { display: flex; gap: 5px; }
-    .btn-edit { background: #ffc107; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; font-weight: bold; }
-    .btn-delete { background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
+    .styled-table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+    .styled-table th { background: #2563eb; color: white; padding: 12px 8px; text-align: center; }
+    .styled-table td { padding: 10px 8px; border-bottom: 1px solid #eee; text-align: center; }
+    .actions { display: flex; gap: 5px; justify-content: center; }
+    .btn-edit { background: #ffc107; border: none; padding: 5px 8px; cursor: pointer; border-radius: 3px; font-weight: bold; }
+    .btn-delete { background: #dc3545; color: white; border: none; padding: 5px 8px; cursor: pointer; border-radius: 3px; }
 </style>
