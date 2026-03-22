@@ -35,8 +35,7 @@
     "express": "^5.2.1",
     "nedb": "^1.8.0",
     "newman": "^6.2.2",
-    "svelte-spa-router": "^5.0.0",
-    "sveltestrap": "^5.11.3"
+    "svelte-spa-router": "^5.0.0"
   },
   "keywords": [],
   "devDependencies": {

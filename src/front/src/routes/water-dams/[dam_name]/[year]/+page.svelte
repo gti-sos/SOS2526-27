@@ -1,18 +1,18 @@
 <script>
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	
+	import { goto } from '$app/navigation'; // Usamos goto para navegar mejor
+
 	const API = '/api/v1/water-dams';
 
-	// Obtenemos los parámetros de la URL (el nombre de la presa y el año)
+	// Parámetros de la URL
 	let nameParam = $page.params.dam_name;
 	let yearParam = $page.params.year;
 
-	// Variables para mensajes de estado con la sintaxis de Svelte 5
+	// Estados de Svelte 5
 	let mensaje = $state('');
 	let tipoMensaje = $state('');
 
-	// Objeto con tus 11 campos
 	let form = $state({
 		grand_id: '', dam_name: '', river: '', country: '', 
 		year: '', dam_hgt: '', dam_len: '', area_skm: '', 
@@ -20,123 +20,154 @@
 	});
 
 	async function loadResource() {
-		const res = await fetch(`${API}/${encodeURIComponent(nameParam)}/${yearParam}`);
-		if (res.ok) {
-			const data = await res.json();
-			// Rellenamos el formulario y nos aseguramos de que los nulos sean strings vacíos para los inputs
-			form = { 
-				...data, 
-				year: String(data.year),
-				grand_id: String(data.grand_id),
-				dam_hgt: data.dam_hgt ?? '',
-				dam_len: data.dam_len ?? '',
-				area_skm: data.area_skm ?? '',
-				cap_mcm: data.cap_mcm ?? '',
-				depth_m: data.depth_m ?? '',
-				dis_avg_ls: data.dis_avg_ls ?? ''
-			};
-		} else {
-			mensaje = `Error: No se ha podido cargar la presa "${nameParam}".`;
-			tipoMensaje = 'error';
+		try {
+			const res = await fetch(`${API}/${encodeURIComponent(nameParam)}/${yearParam}`);
+			if (res.ok) {
+				const data = await res.json();
+				// Mapeamos los datos asegurando que los nulos sean strings vacíos para el input
+				form = { 
+					...data, 
+					year: String(data.year),
+					grand_id: String(data.grand_id),
+					dam_hgt: data.dam_hgt ?? '',
+					dam_len: data.dam_len ?? '',
+					area_skm: data.area_skm ?? '',
+					cap_mcm: data.cap_mcm ?? '',
+					depth_m: data.depth_m ?? '',
+					dis_avg_ls: data.dis_avg_ls ?? ''
+				};
+			} else if (res.status === 404) {
+				mensaje = `No existe ninguna presa registrada con el nombre "${nameParam}" en el año ${yearParam}.`;
+				tipoMensaje = 'danger';
+			}
+		} catch (e) {
+			mensaje = "Error de conexión al cargar la presa.";
+			tipoMensaje = 'danger';
 		}
 	}
 
 	async function updateResource() {
-		const res = await fetch(`${API}/${encodeURIComponent(nameParam)}/${yearParam}`, {
-			method: 'PUT',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				...form,
-				// Convertimos de nuevo a número antes de enviar a la API
-				grand_id: Number(form.grand_id),
-				year: Number(form.year),
-				dam_hgt: form.dam_hgt === '' ? null : Number(form.dam_hgt),
-				dam_len: form.dam_len === '' ? null : Number(form.dam_len),
-				area_skm: form.area_skm === '' ? null : Number(form.area_skm),
-				cap_mcm: form.cap_mcm === '' ? null : Number(form.cap_mcm),
-				depth_m: form.depth_m === '' ? null : Number(form.depth_m),
-				dis_avg_ls: form.dis_avg_ls === '' ? null : Number(form.dis_avg_ls)
-			})
-		});
+		try {
+			const res = await fetch(`${API}/${encodeURIComponent(nameParam)}/${yearParam}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					...form,
+					grand_id: Number(form.grand_id),
+					year: Number(form.year),
+					dam_hgt: form.dam_hgt === '' ? null : Number(form.dam_hgt),
+					dam_len: form.dam_len === '' ? null : Number(form.dam_len),
+					area_skm: form.area_skm === '' ? null : Number(form.area_skm),
+					cap_mcm: form.cap_mcm === '' ? null : Number(form.cap_mcm),
+					depth_m: form.depth_m === '' ? null : Number(form.depth_m),
+					dis_avg_ls: form.dis_avg_ls === '' ? null : Number(form.dis_avg_ls)
+				})
+			});
 
-		// Gestión de respuestas "para humanos" como pide el enunciado
-		if (res.status === 200) {
-			mensaje = "¡Operación exitosa! Los cambios se han guardado correctamente.";
-			tipoMensaje = 'exito';
-		} else if (res.status === 400) {
-			mensaje = "Error: Los datos introducidos no son válidos o están incompletos.";
-			tipoMensaje = 'error';
-		} else if (res.status === 404) {
-			mensaje = `Error: No se encuentra la presa "${nameParam}" para actualizar.`;
-			tipoMensaje = 'error';
-		} else {
-			mensaje = "Ha ocurrido un error inesperado al intentar actualizar.";
-			tipoMensaje = 'error';
+			if (res.status === 200) {
+				mensaje = "¡Operación exitosa! Los cambios se han guardado correctamente.";
+				tipoMensaje = 'success';
+				setTimeout(() => goto('/water-dams'), 1500); // Redirigir tras éxito
+			} else if (res.status === 400) {
+				mensaje = "Error: Los datos introducidos no son válidos o están incompletos.";
+				tipoMensaje = 'danger';
+			} else {
+				mensaje = "Ha ocurrido un error inesperado al intentar actualizar.";
+				tipoMensaje = 'danger';
+			}
+		} catch (e) {
+			mensaje = "Error de red al intentar actualizar.";
+			tipoMensaje = 'danger';
 		}
 		
-		// Desplazamos hacia arriba para que el usuario vea el mensaje
 		window.scrollTo(0, 0);
-		setTimeout(() => mensaje = '', 3000);
 	}
 
 	onMount(loadResource);
 </script>
 
-<main class="container">
-	<h1>Editar Presa</h1>
-	
-	{#if mensaje}
-		<div class="alert {tipoMensaje}">{mensaje}</div>
-	{/if}
-	
-	<button class="btn-back" onclick={() => window.location.href = '/water-dams'}>
-		Volver al listado
-	</button>
+<main class="container mt-5">
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<h1>Editar Presa</h1>
+		<button class="btn btn-outline-secondary" onclick={() => goto('/water-dams')}>
+			Volver al listado
+		</button>
+	</div>
 
-	<form onsubmit={(e) => { e.preventDefault(); updateResource(); }} class="edit-form">
-		<div class="form-grid">
-			<label>Nombre de la presa: <input bind:value={form.dam_name} disabled /></label>
-			<label>Año: <input bind:value={form.year} disabled /></label>
-			
-			<label>País: <input bind:value={form.country} required /></label>
-			<label>Río: <input bind:value={form.river} /></label>
-			<label>Grand ID: <input bind:value={form.grand_id} type="number" /></label>
-			
-			<label>Altura (m): <input bind:value={form.dam_hgt} type="number" step="any" /></label>
-			<label>Longitud (m): <input bind:value={form.dam_len} type="number" step="any" /></label>
-			<label>Área (km2): <input bind:value={form.area_skm} type="number" step="any" /></label>
-			
-			<label>Capacidad (mcm): <input bind:value={form.cap_mcm} type="number" step="any" /></label>
-			<label>Profundidad (m): <input bind:value={form.depth_m} type="number" step="any" /></label>
-			<label>Descarga (l/s): <input bind:value={form.dis_avg_ls} type="number" step="any" /></label>
+	{#if mensaje}
+		<div class="alert alert-{tipoMensaje} alert-dismissible fade show" role="alert">
+			{mensaje}
+			<button type="button" class="btn-close" onclick={() => mensaje = ''}></button>
 		</div>
-		<button type="submit" class="btn-save">Guardar cambios</button>
-	</form>
+	{/if}
+
+	<div class="card shadow-sm">
+		<div class="card-body">
+			<form onsubmit={(e) => { e.preventDefault(); updateResource(); }}>
+				<div class="row g-3">
+					<div class="col-md-6">
+						<label class="form-label fw-bold">Nombre de la presa</label>
+						<input class="form-control bg-light" bind:value={form.dam_name} disabled />
+					</div>
+					<div class="col-md-6">
+						<label class="form-label fw-bold">Año</label>
+						<input class="form-control bg-light" bind:value={form.year} disabled />
+					</div>
+
+					<div class="col-md-6">
+						<label class="form-label fw-bold">País</label>
+						<input class="form-control" bind:value={form.country} required />
+					</div>
+					<div class="col-md-6">
+						<label class="form-label fw-bold">Río</label>
+						<input class="form-control" bind:value={form.river} />
+					</div>
+					<div class="col-md-4">
+						<label class="form-label fw-bold">Grand ID</label>
+						<input class="form-control" type="number" bind:value={form.grand_id} required />
+					</div>
+					<div class="col-md-4">
+						<label class="form-label fw-bold">Altura (m)</label>
+						<input class="form-control" type="number" step="any" bind:value={form.dam_hgt} />
+					</div>
+					<div class="col-md-4">
+						<label class="form-label fw-bold">Longitud (m)</label>
+						<input class="form-control" type="number" step="any" bind:value={form.dam_len} />
+					</div>
+					<div class="col-md-4">
+						<label class="form-label fw-bold">Área (km2)</label>
+						<input class="form-control" type="number" step="any" bind:value={form.area_skm} />
+					</div>
+					<div class="col-md-4">
+						<label class="form-label fw-bold">Capacidad (mcm)</label>
+						<input class="form-control" type="number" step="any" bind:value={form.cap_mcm} />
+					</div>
+					<div class="col-md-4">
+						<label class="form-label fw-bold">Profundidad (m)</label>
+						<input class="form-control" type="number" step="any" bind:value={form.depth_m} />
+					</div>
+					<div class="col-md-12">
+						<label class="form-label fw-bold">Descarga promedio (l/s)</label>
+						<input class="form-control" type="number" step="any" bind:value={form.dis_avg_ls} />
+					</div>
+
+					<div class="col-12 mt-4">
+						<button type="submit" class="btn btn-success btn-lg w-100">
+							Guardar cambios
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
 </main>
 
 <style>
-	.container { max-width: 850px; margin: 0 auto; padding: 20px; font-family: sans-serif; }
-	
-	.alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; text-align: center; font-weight: bold; }
-	.exito { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-	.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-
-	.edit-form { background: white; padding: 20px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-	
-	/* Formulario en dos columnas para que quepan mejor los 11 campos */
-	.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-	
-	label { display: flex; flex-direction: column; font-weight: bold; font-size: 0.9em; }
-	input { padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
-	input:disabled { background: #f0f0f0; color: #666; cursor: not-allowed; }
-	
-	.btn-save { width: 100%; padding: 14px; background: #28a745; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 1.1em; }
-	.btn-save:hover { background: #218838; }
-	
-	.btn-back { margin-bottom: 15px; padding: 8px 15px; cursor: pointer; border-radius: 4px; border: 1px solid #ccc; background: #f8f9fa; }
-	.btn-back:hover { background: #e2e6ea; }
-
-	@media (max-width: 600px) {
-		.form-grid { grid-template-columns: 1fr; }
+	/* Eliminamos los estilos personalizados pesados para usar los de Bootstrap */
+	main {
+		max-width: 900px;
+	}
+	.form-label {
+		color: #495057;
 	}
 </style>
