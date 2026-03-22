@@ -17,16 +17,6 @@ app.use(cors());
 app.use(express.json());
 
 
-/*app.use(express.static(path.join(__dirname, "public")));
-
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-app.get("/about", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "about.html"));
-});
-*/
 //BLOQUE ACS
 import drinkingWaterServicesV1 from './src/back/drinking-water-services-v1.js';
 
@@ -43,9 +33,6 @@ import worldHydroelectricPlants from './src/back/world-hydroelectric-plants.js';
 
 app.use("/api/v1/world-hydroelectric-plants", worldHydroelectricPlants);
 
-import worldHydroelectricPlantsV2 from './src/back/world-hydroelectric-plants-v2.js';
-
-app.use("/api/v2/world-hydroelectric-plants", worldHydroelectricPlantsV2);
 
 // FIN BLOQUE APS
 
