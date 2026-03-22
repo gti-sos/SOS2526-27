@@ -1,7 +1,11 @@
 <script>
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
-	const API = 'http://localhost:10000/api/v1/drinking-water-services';
+	let { params } = $props();
+
+	const API = '/api/v1/drinking-water-services';
 
 	let cargando = $state(false);
 	let mensaje = $state('');
@@ -16,12 +20,14 @@
 		year: '',
 		wat_bas_pop_residence_urban: ''
 	});
-    /** @param {string} texto */
+
+	/** @param {string} texto */
 	function mostrarExito(texto) {
 		mensaje = texto;
 		tipoMensaje = 'exito';
 	}
-    /** @param {string} texto */
+
+	/** @param {string} texto */
 	function mostrarError(texto) {
 		mensaje = texto;
 		tipoMensaje = 'error';
@@ -32,21 +38,19 @@
 		tipoMensaje = '';
 	}
 
-	function getParamsFromUrl() {
-		const parts = window.location.pathname.split('/');
-		yearParam = parts[parts.length - 1];
-		entityParam = decodeURIComponent(parts[parts.length - 2]);
+	function cargarParametros() {
+		entityParam = params.entity;
+		yearParam = params.year;
 	}
 
 	async function loadResource() {
 		cargando = true;
 		limpiarMensaje();
+		cargarParametros();
 
 		try {
-			getParamsFromUrl();
-
 			const res = await fetch(
-				`${API}/${encodeURIComponent(entityParam)}/${yearParam}`
+				resolve(`${API}/${encodeURIComponent(entityParam)}/${yearParam}`)
 			);
 
 			if (res.status === 404) {
@@ -70,7 +74,7 @@
 						? ''
 						: String(data.wat_bas_pop_residence_urban)
 			};
-		} catch  {
+		} catch {
 			mostrarError('Ha ocurrido un error al cargar el recurso.');
 		} finally {
 			cargando = false;
@@ -92,7 +96,7 @@
 
 		try {
 			const res = await fetch(
-				`${API}/${encodeURIComponent(entityParam)}/${yearParam}`,
+				resolve(`${API}/${encodeURIComponent(entityParam)}/${yearParam}`),
 				{
 					method: 'PUT',
 					headers: {
@@ -118,13 +122,13 @@
 			}
 
 			mostrarExito('El recurso se ha actualizado correctamente.');
-		} catch  {
+		} catch {
 			mostrarError('Ha ocurrido un error al actualizar el recurso.');
 		}
 	}
 
 	function backToList() {
-		window.location.href = '/drinking-water-services';
+		goto(resolve('/drinking-water-services'));
 	}
 
 	/** @param {SubmitEvent} event */

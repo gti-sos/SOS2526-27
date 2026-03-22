@@ -1,10 +1,13 @@
 <script>
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+
 	const equipo = [
 		{
 			nombre: 'Alejandro Campos Sánchez-Cruzado',
 			recurso: 'drinking-water-services',
 			frontend: '/drinking-water-services',
-			api: 'http://localhost:10000/api/v1/drinking-water-services',
+			api: '/api/v1/drinking-water-services',
 			docs: 'https://documenter.getpostman.com/view/52242576/2sBXieqtPa',
 			github: 'https://github.com/alecamsan1'
 		},
@@ -12,33 +15,36 @@
 			nombre: 'Alejandro Catalán Noviembre',
 			recurso: 'water-dams',
 			frontend: '/water-dams',
-			api: 'http://localhost:10000/api/v1/water-dams',
-			docs: "https://documenter.getpostman.com/view/52243900/2sBXigNZbh",
+			api: '/api/v1/water-dams',
+			docs: 'https://documenter.getpostman.com/view/52243900/2sBXigNZbh',
 			github: 'https://github.com/alecn-us'
 		},
 		{
 			nombre: 'Adrián Pérez Sánchez',
 			recurso: 'world-hydroelectric-plants',
 			frontend: '/world-hydroelectric-plants',
-			api: 'http://localhost:10000/api/v1/world-hydroelectric-plants',
-			docs: "https://documenter.getpostman.com/view/52298948/2sBXigMDpo",
+			api: '/api/v1/world-hydroelectric-plants',
+			docs: 'https://documenter.getpostman.com/view/52298948/2sBXigMDpo',
 			github: 'https://github.com/adrianperez17'
 		}
 	];
 
 	const repositorioEquipo = 'https://github.com/gti-sos/SOS2526-27';
 
-	/** @param {string} ruta */
 	function irA(ruta) {
-		window.location.href = ruta;
+		goto(resolve(ruta));
 	}
 
-	/** @param {string} url */
 	function abrirExterno(url) {
 		window.open(url, '_blank', 'noopener,noreferrer');
 	}
-    function irAAbout() {
-		window.location.href = 'http://localhost:10000/about', '_self';
+
+	function abrirApi(ruta) {
+		window.open(resolve(ruta), '_blank', 'noopener,noreferrer');
+	}
+
+	function irAAbout() {
+		goto(resolve('/about'));
 	}
 </script>
 
@@ -91,7 +97,7 @@
 							</button>
 						</td>
 						<td>
-							<button class="link-button" onclick={() => irA(persona.api)}>
+							<button class="link-button" onclick={() => abrirApi(persona.api)}>
 								Abrir API
 							</button>
 						</td>

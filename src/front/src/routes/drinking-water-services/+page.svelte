@@ -1,7 +1,9 @@
 <script>
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
-	const API = 'http://localhost:10000/api/v1/drinking-water-services';
+	const API = '/api/v1/drinking-water-services';
 
 	/** @type {Array<{entity:string, code:string, year:number, wat_bas_pop_residence_urban:number|null}>} */
 	let services = $state([]);
@@ -16,12 +18,14 @@
 		year: '',
 		wat_bas_pop_residence_urban: ''
 	});
-    /** @param {string} texto */
+
+	/** @param {string} texto */
 	function mostrarExito(texto) {
 		mensaje = texto;
 		tipoMensaje = 'exito';
 	}
-    /** @param {string} texto */
+
+	/** @param {string} texto */
 	function mostrarError(texto) {
 		mensaje = texto;
 		tipoMensaje = 'error';
@@ -37,7 +41,7 @@
 		limpiarMensaje();
 
 		try {
-			const res = await fetch(API);
+			const res = await fetch(resolve(API));
 
 			if (!res.ok) {
 				throw new Error('No se pudieron cargar los datos');
@@ -65,7 +69,7 @@
 		};
 
 		try {
-			const res = await fetch(API, {
+			const res = await fetch(resolve(API), {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(newService)
@@ -77,9 +81,7 @@
 			}
 
 			if (res.status === 409) {
-				mostrarError(
-					`Ya existe un recurso para "${form.entity}" en el año ${form.year}.`
-				);
+				mostrarError(`Ya existe un recurso para "${form.entity}" en el año ${form.year}.`);
 				return;
 			}
 
@@ -95,10 +97,9 @@
 				wat_bas_pop_residence_urban: ''
 			};
 
-			mostrarExito('Recurso creado correctamente.');
 			await loadServices();
 			mostrarExito('Recurso creado correctamente.');
-		} catch  {
+		} catch {
 			mostrarError('Ha ocurrido un error al crear el recurso.');
 		}
 	}
@@ -107,7 +108,7 @@
 		limpiarMensaje();
 
 		try {
-			const res = await fetch(API, { method: 'DELETE' });
+			const res = await fetch(resolve(API), { method: 'DELETE' });
 
 			if (!res.ok) {
 				mostrarError('No se pudieron borrar todos los recursos.');
@@ -129,9 +130,12 @@
 		limpiarMensaje();
 
 		try {
-			const res = await fetch(`${API}/${encodeURIComponent(entity)}/${year}`, {
-				method: 'DELETE'
-			});
+			const res = await fetch(
+				resolve(`${API}/${encodeURIComponent(entity)}/${year}`),
+				{
+					method: 'DELETE'
+				}
+			);
 
 			if (res.status === 404) {
 				mostrarError(`No existe un recurso para "${entity}" en el año ${year}.`);
@@ -145,7 +149,7 @@
 
 			await loadServices();
 			mostrarExito(`El recurso de "${entity}" del año ${year} se ha borrado correctamente.`);
-		} catch  {
+		} catch {
 			mostrarError('Ha ocurrido un error al borrar el recurso.');
 		}
 	}
@@ -154,7 +158,7 @@
 		limpiarMensaje();
 
 		try {
-			const res = await fetch(`${API}/loadInitialData`);
+			const res = await fetch(resolve(`${API}/loadInitialData`));
 
 			if (res.status === 409) {
 				mostrarError('Los datos iniciales ya estaban cargados.');
@@ -178,8 +182,7 @@
 	 * @param {number} year
 	 */
 	function goToEdit(entity, year) {
-		window.location.href =
-			'/drinking-water-services/' + encodeURIComponent(entity) + '/' + year;
+		goto(resolve(`/drinking-water-services/${encodeURIComponent(entity)}/${year}`));
 	}
 
 	/** @param {SubmitEvent} event */
