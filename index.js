@@ -17,7 +17,7 @@ app.use(cors());
 app.use(express.json());
 
 
-app.use(express.static(path.join(__dirname, "public")));
+/*app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
@@ -26,7 +26,7 @@ app.get("/", (req, res) => {
 app.get("/about", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "about.html"));
 });
-
+*/
 //BLOQUE ACS
 import drinkingWaterServicesV1 from './src/back/drinking-water-services-v1.js';
 
