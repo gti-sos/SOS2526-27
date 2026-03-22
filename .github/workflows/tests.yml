@@ -5,11 +5,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-      - name: Install dependencies
-        run: npm install
+
+      - name: Install root dependencies
+        # Forzamos la resolución de conflictos de versiones
+        run: npm install --legacy-peer-deps
+
+      - name: Install frontend dependencies
+        # Entramos en la carpeta del front para instalar sus librerías también
+        run: |
+          cd src/front
+          npm install --legacy-peer-deps
+
       - name: Run all tests
+        # Ejecuta el script que configuramos (start-server-and-test + newman)
         run: npm test
