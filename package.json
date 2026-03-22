@@ -30,10 +30,13 @@
     "test": "npm run build && start-server-and-test start http://localhost:10000 test-all"
   },
   "dependencies": {
+    "bootstrap": "^5.3.8",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "nedb": "^1.8.0",
-    "newman": "^6.2.2"
+    "newman": "^6.2.2",
+    "svelte-spa-router": "^5.0.0",
+    "sveltestrap": "^5.11.3"
   },
   "keywords": [],
   "devDependencies": {
