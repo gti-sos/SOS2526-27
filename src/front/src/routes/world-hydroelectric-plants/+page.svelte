@@ -5,9 +5,14 @@
     const API = '/api/v1/world-hydroelectric-plants';
 
     let plants = $state([]); 
+	// Nueva variable derivada que se mantiene siempre ordenada 
+	let sortedPlants = $derived([...plants].sort((a, b) => 
+		a.country.localeCompare(b.country) || a.name.localeCompare(b.name)
+	));
     let cargando = $state(false); 
     let mensaje = $state('');
     let tipoMensaje = $state('');
+    let primeraCargaPasada = $state(false);
 
     // Objeto con los 9 campos requeridos
     let form = $state({
@@ -26,11 +31,12 @@
             const res = await fetch(API);
             if (!res.ok) throw new Error();
             plants = await res.json();
-            if (plants.length === 0 && mensaje === '') mostrarError('La lista está vacía. Pulsa "Cargar datos iniciales".');
+            if (plants.length === 0 && mensaje === '' && primeraCargaPasada) mostrarError('La lista está vacía. Pulsa "Cargar datos iniciales".');
         } catch {
             mostrarError('Error al conectar con el servidor.');
         } finally {
             cargando = false;
+            primeraCargaPasada = true;
         }
     }
 
@@ -134,11 +140,11 @@
             <thead>
                 <tr>
                     <th>País</th><th>Nombre</th><th>Año</th><th>Río</th><th>Tipo</th>
-                    <th>Potencia</th><th>Salto</th><th>Presa</th><th>Vol.</th><th>Acciones</th>
+                    <th>Capacidad (MW)</th><th>Salto (m)</th><th>Presa</th><th>Vol. (km3)</th><th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                {#each plants as p (p.name + p.year)}
+                {#each sortedPlants as p (p.name + p.year)}
                     <tr>
                         <td>{p.country}</td>
                         <td><strong>{p.name}</strong></td>
