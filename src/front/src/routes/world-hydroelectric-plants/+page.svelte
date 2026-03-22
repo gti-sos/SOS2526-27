@@ -1,111 +1,119 @@
 <script>
-    import { onMount } from "svelte";
-    import { page } from "$app/stores"; // Para leer los parámetros de la URL
+	import { onMount } from 'svelte';
 
-    // Extraemos los parámetros de la ruta dinámica
-    let name = $page.params.name;
-    let year = $page.params.year;
+	const API = 'http://localhost:10000/api/v1/world-hydroelectric-plants';
 
-    let plant = {}; // Objeto donde cargaremos los datos de la API
-    let message = "";
-    let messageType = "";
+	let plants = $state([]); 
+	let cargando = $state(false);
+	let mensaje = $state('');
+	let tipoMensaje = $state('');
 
-    // --- FUNCIÓN: OBTENER DATOS DE UNA CENTRAL CONCRETA (GET) ---
-    async function getPlant() {
-        // Usamos encodeURIComponent porque el nombre puede tener espacios
-        const res = await fetch(`/api/v2/world-hydroelectric-plants/${encodeURIComponent(name)}/${year}`);
-        
-        if (res.ok) {
-            plant = await res.json();
-            console.log("Datos cargados:", plant);
-        } else {
-            message = `No se ha encontrado la central '${name}' para el año ${year}.`;
-            messageType = "danger";
-        }
-    }
+	let form = $state({
+		country: '', name: '', year: '', river: '', 
+		plant_type: '', capacity_mw: '', head_m: '', 
+		dam_name: '', res_vol_km3: ''
+	});
 
-    // --- FUNCIÓN: ACTUALIZAR DATOS (PUT) ---
-    async function updatePlant() {
-        const res = await fetch(`/api/v2/world-hydroelectric-plants/${encodeURIComponent(name)}/${year}`, {
-            method: "PUT",
-            body: JSON.stringify(plant),
-            headers: { "Content-Type": "application/json" }
-        });
+	function mostrarExito(texto) { mensaje = texto; tipoMensaje = 'exito'; }
+	function mostrarError(texto) { mensaje = texto; tipoMensaje = 'error'; }
+	function limpiarMensaje() { mensaje = ''; tipoMensaje = ''; }
 
-        if (res.ok) {
-            message = "¡Los datos se han actualizado correctamente!";
-            messageType = "success";
-        } else if (res.status === 400) {
-            message = "Error: Los datos no coinciden o la estructura es incorrecta.";
-            messageType = "danger";
-        } else {
-            message = "Error inesperado al intentar actualizar la central.";
-            messageType = "danger";
-        }
-    }
+	async function loadPlants() {
+		cargando = true;
+		limpiarMensaje();
+		try {
+			const res = await fetch(API);
+			if (!res.ok) throw new Error();
+			plants = await res.json();
+		} catch {
+			mostrarError('No se pudieron cargar los datos.');
+		} finally {
+			cargando = false;
+		}
+	}
 
-    onMount(getPlant);
+	async function createPlant() {
+		limpiarMensaje();
+		const newPlant = { 
+			...form, 
+			year: Number(form.year), 
+			capacity_mw: form.capacity_mw === '' ? null : Number(form.capacity_mw) 
+		};
+		try {
+			const res = await fetch(API, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(newPlant)
+			});
+			if (res.status === 409) return mostrarError('Ya existe ese recurso.');
+			if (!res.ok) return mostrarError('Error al crear.');
+			
+			mostrarExito('Recurso creado correctamente.');
+			await loadPlants();
+		} catch {
+			mostrarError('Error de conexión.');
+		}
+	}
+
+	async function deleteOne(name, year) {
+		limpiarMensaje();
+		try {
+			const res = await fetch(`${API}/${encodeURIComponent(name)}/${year}`, { method: 'DELETE' });
+			if (res.ok) {
+				mostrarExito('Eliminado con éxito.');
+				await loadPlants();
+			}
+		} catch { mostrarError('Error al borrar.'); }
+	}
+
+	function goToEdit(name, year) {
+		window.location.href = `/world-hydroelectric-plants/${encodeURIComponent(name)}/${year}`;
+	}
+
+	onMount(loadPlants);
 </script>
 
-<main class="container">
-    <h2>Editando: {name} ({year})</h2>
+<h1>Gestión de Centrales Hidroeléctricas</h1>
 
-    {#if message}
-        <div class="alert alert-{messageType}">{message}</div>
-    {/if}
+<h1>Gestión de Centrales Hidroeléctricas</h1>
 
-    {#if plant.name}
-        <section class="edit-card">
-            <div class="field">
-                <label for="country">País:</label>
-                <input id="country" bind:value={plant.country} />
-            </div>
-            <div class="field">
-                <label for="river">Río:</label>
-                <input id="river" bind:value={plant.river} />
-            </div>
-            <div class="field">
-                <label for="type">Tipo de Planta:</label>
-                <input id="type" bind:value={plant.plant_type} />
-            </div>
-            <div class="field">
-                <label for="cap">Capacidad (MW):</label>
-                <input id="cap" type="number" bind:value={plant.capacity_mw} />
-            </div>
-            <div class="field">
-                <label for="head">Salto (m):</label>
-                <input id="head" type="number" bind:value={plant.head_m} />
-            </div>
-            <div class="field">
-                <label for="dam">Nombre de la Presa:</label>
-                <input id="dam" bind:value={plant.dam_name} />
-            </div>
-            <div class="field">
-                <label for="vol">Volumen (km3):</label>
-                <input id="vol" type="number" bind:value={plant.res_vol_km3} />
-            </div>
+{#if cargando}
+	<p>Consultando la base de datos...</p>
+{/if}
 
-            <div class="button-group">
-                <button class="btn-save" on:click={updatePlant}>Guardar Cambios</button>
-                <a href="#/world-hydroelectric-plants" class="btn-back">Volver al Listado</a>
-            </div>
-        </section>
-    {/if}
-</main>
+{#if mensaje}
+	<p style="color: {tipoMensaje === 'error' ? 'red' : 'green'};">{mensaje}</p>
+{/if}
 
-<style>
-    .container { max-width: 600px; margin: 0 auto; padding: 20px; font-family: sans-serif; }
-    .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; font-weight: bold; }
-    .alert-success { background: #d4edda; color: #155724; }
-    .alert-danger { background: #f8d7da; color: #721c24; }
-    
-    .edit-card { background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .field { margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-    label { font-weight: bold; width: 40%; }
-    input { width: 55%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-    
-    .button-group { display: flex; gap: 10px; margin-top: 20px; }
-    button, .btn-back { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; text-align: center; font-size: 1em; flex: 1; }
-    .btn-save { background-color: #28a745; color: white; }
-    .btn-back { background-color: #6c757d; color: white; }
-</style>
+{#if mensaje}
+	<p style="color: {tipoMensaje === 'error' ? 'red' : 'green'};">{mensaje}</p>
+{/if}
+
+<form onsubmit={(e) => { e.preventDefault(); createPlant(); }}>
+	<input bind:value={form.country} placeholder="País" required />
+	<input bind:value={form.name} placeholder="Nombre" required />
+	<input bind:value={form.year} type="number" placeholder="Año" required />
+	<button type="submit">Añadir Central</button>
+</form>
+
+<table border="1">
+	<thead>
+		<tr>
+			<th>Nombre</th>
+			<th>Año</th>
+			<th>Acciones</th>
+		</tr>
+	</thead>
+	<tbody>
+		{#each plants as p (p.name + '-' + p.year)}
+			<tr>
+				<td>{p.name}</td>
+				<td>{p.year}</td>
+				<td>
+					<button onclick={() => goToEdit(p.name, p.year)}>Editar</button>
+					<button onclick={() => deleteOne(p.name, p.year)}>Borrar</button>
+				</td>
+			</tr>
+		{/each}
+	</tbody>
+</table>
