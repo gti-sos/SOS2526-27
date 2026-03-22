@@ -22,7 +22,7 @@
     // Función para listar todos los recursos
     async function loadPlants() {
         cargando = true;
-        mensaje = '';
+        // mensaje = '';
         try {
             const res = await fetch(API);
             if (!res.ok) throw new Error();
