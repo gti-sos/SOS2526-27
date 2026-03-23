@@ -108,18 +108,25 @@ router.post("/", (req, res) => {
 
     if (!newData) return res.sendStatus(400);
 
-    // Verificación de estructura estricta (Requisito F06)
+    // 1. Verificación de estructura
     const faltan = campos.some(c => !newData.hasOwnProperty(c));
     const extra = Object.keys(newData).some(c => !campos.includes(c));
-
     if (faltan || extra) return res.sendStatus(400);
 
+    // 2. Comprobar si ya existe ANTES de insertar
     db.findOne({ dam_name: newData.dam_name, year: newData.year }, (err, doc) => {
+        if (err) return res.sendStatus(500);
+        
         if (doc) {
-            res.sendStatus(409);
+            // Si ya existe, mandamos 409 y PARAMOS aquí
+            return res.sendStatus(409);
         } else {
-            db.insert(newData);
-            res.sendStatus(201);
+            // 3. Si no existe, insertamos y esperamos a que termine
+            db.insert(newData, (err, newDoc) => {
+                if (err) return res.sendStatus(500);
+                // Solo mandamos el 201 si el insert ha tenido éxito
+                return res.sendStatus(201);
+            });
         }
     });
 });

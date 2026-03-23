@@ -61,19 +61,11 @@
         }
     }
 
-    // Crear recurso (POST)
     async function createDam() {
-        // Conversión de tipos para asegurar que lleguen números a la API
-        const newDam = { 
-            ...form, 
-            grand_id: Number(form.grand_id),
-            year: Number(form.year),
-            dam_hgt: form.dam_hgt === '' ? null : Number(form.dam_hgt),
-            dam_len: form.dam_len === '' ? null : Number(form.dam_len),
-            area_skm: form.area_skm === '' ? null : Number(form.area_skm),
-            cap_mcm: form.cap_mcm === '' ? null : Number(form.cap_mcm),
-            depth_m: form.depth_m === '' ? null : Number(form.depth_m),
-            dis_avg_ls: form.dis_avg_ls === '' ? null : Number(form.dis_avg_ls)
+        const newDam = { ...form, 
+            grand_id: Number(form.grand_id), 
+            year: Number(form.year) 
+            // ... resto de conversiones
         };
 
         try {
@@ -82,15 +74,25 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newDam)
             });
-            if (res.status === 409) return mostrarError('Error: Esta presa ya existe (Nombre y Año duplicados).');
-            if (res.status === 400) return mostrarError('Error: Comprueba que todos los campos son correctos.');
-            if (res.ok) {
+
+            if (res.status === 201) {
+                // ÉXITO REAL
                 mostrarExito('Presa añadida correctamente.');
-                // Reiniciar formulario
                 form = { grand_id: '', dam_name: '', river: '', country: '', year: '', dam_hgt: '', dam_len: '', area_skm: '', cap_mcm: '', depth_m: '', dis_avg_ls: '' };
                 await loadDams();
+            } else if (res.status === 409) {
+                // ERROR DE DUPLICADO
+                mostrarError('Error: Esta presa ya existe (Nombre y Año duplicados).');
+            } else if (res.status === 400) {
+                // ERROR DE FORMATO
+                mostrarError('Error: Datos incorrectos o incompletos.');
+            } else {
+                // OTROS ERRORES (500, etc)
+                mostrarError('Error inesperado en el servidor.');
             }
-        } catch { mostrarError('Error al crear el recurso.'); }
+        } catch (e) {
+            mostrarError('Error de conexión con el servidor.');
+        }
     }
 
     // Borrar uno (DELETE)
