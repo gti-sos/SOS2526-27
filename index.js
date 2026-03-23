@@ -21,9 +21,7 @@ app.use(express.json());
 import drinkingWaterServicesV1 from './src/back/drinking-water-services-v1.js';
 
 app.use("/api/v1/drinking-water-services", drinkingWaterServicesV1);
-import drinkingWaterServicesV2 from './src/back/drinking-water-services-v2.js';
 
-app.use("/api/v2/drinking-water-services", drinkingWaterServicesV2);
 
 //FIN BLOQUE ACS
 
