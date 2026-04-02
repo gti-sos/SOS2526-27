@@ -35,11 +35,15 @@
 	// FUNCIÓN ACTUALIZADA: Ahora soporta búsquedas sin romper el listado [cite: 1]
 	async function loadPlants() {
 		cargando = true;
+		mensaje = ''; // LIMPIAMOS el mensaje al empezar para evitar que se "buggee"
+		
 		const queryParams = new SvelteURLSearchParams();
 
-		// Añadimos solo los filtros que tengan contenido [cite: 1]
+		// Añadimos solo los filtros que tengan contenido real (quitando espacios)
 		Object.entries(search).forEach(([key, value]) => {
-			if (value !== '') queryParams.set(key, value);
+			if (value !== null && value !== undefined && String(value).trim() !== '') {
+				queryParams.set(key, String(value).trim());
+			}
 		});
 
 		const queryString = queryParams.toString();
@@ -50,15 +54,21 @@
 			if (!res.ok) throw new Error();
 			plants = await res.json();
 			
-			// Gestión de mensajes (F07) [cite: 1]
+			// Si el usuario ha limpiado los campos manualmente, queryString será ""
 			if (queryString !== "") {
 				if (plants.length === 0) {
 					mostrarError('No se han encontrado resultados para esos filtros.');
 				} else {
 					mostrarExito(`¡Operación exitosa! Encontradas ${plants.length} centrales.`);
 				}
-			} else if (plants.length === 0 && mensaje === '' && primeraCargaPasada) {
-				mostrarError('La lista está vacía. Pulsa "Cargar datos iniciales".');
+			} else {
+				// Caso de carga general (o filtros limpiados manualmente)
+				if (plants.length === 0 && primeraCargaPasada) {
+					mostrarError('La lista está vacía. Pulsa "Cargar datos iniciales".');
+				} else if (primeraCargaPasada) {
+					// Opcional: Avisar que se ha vuelto al listado completo
+					mostrarExito('Listado completo cargado.');
+				}
 			}
 		} catch {
 			mostrarError('Error al conectar con el servidor.');
@@ -164,7 +174,7 @@
 
 		<div class="search-groups-container">
 			<div class="search-subgroup">
-				<label class="group-title">Filtros por campos exactos</label>
+				<span class="group-title">Filtros por campos exactos</span>
 				<div class="form-grid">
 					<input bind:value={search.country} placeholder="País" />
 					<input bind:value={search.name} placeholder="Nombre Central" />
@@ -180,14 +190,14 @@
 
 			<div class="search-inline-groups">
 				<div class="search-subgroup flex-1">
-					<label class="group-title">Rango de años</label>
+					<span class="group-title">Rango de años</span>
 					<div class="grid-2-col">
 						<input bind:value={search.from} type="number" placeholder="Desde (año)" />
 						<input bind:value={search.to} type="number" placeholder="Hasta (año)" />
 					</div>
 				</div>
 				<div class="search-subgroup flex-1">
-					<label class="group-title">Paginación</label>
+					<span class="group-title">Paginación</span>
 					<div class="grid-2-col">
 						<input bind:value={search.limit} type="number" placeholder="Límite (Limit)" />
 						<input bind:value={search.offset} type="number" placeholder="Salto (Offset)" />
