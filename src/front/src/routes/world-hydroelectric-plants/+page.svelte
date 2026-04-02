@@ -1,5 +1,6 @@
 <script>
     import { onMount } from 'svelte';
+    import { SvelteURLSearchParams } from 'svelte/reactivity';
 
     // Usamos ruta relativa para que funcione tanto en local como en Render
     const API = '/api/v1/world-hydroelectric-plants';
@@ -21,23 +22,57 @@
         dam_name: '', res_vol_km3: ''
     });
 
+    let search = $state({
+        country: '',
+        river: '',
+        plant_type: '',
+        from: '',
+        to: ''
+    });
+
     function mostrarExito(texto) { mensaje = texto; tipoMensaje = 'exito'; setTimeout(() => mensaje = '', 3000); }
     function mostrarError(texto) { mensaje = texto; tipoMensaje = 'error'; setTimeout(() => mensaje = '', 3000); }
 
     // Función para listar todos los recursos
+    
     async function loadPlants() {
         cargando = true;
+        
+        let queryParams = new SvelteURLSearchParams();
+        // ... (resto de tus appends de búsqueda)
+
         try {
-            const res = await fetch(API);
+            const res = await fetch(`${API}?${queryParams.toString()}`);
             if (!res.ok) throw new Error();
             plants = await res.json();
-            if (plants.length === 0 && mensaje === '' && primeraCargaPasada) mostrarError('La lista está vacía. Pulsa "Cargar datos iniciales".');
+            
+            // USO DE LA VARIABLE: Solo avisamos de lista vacía si NO es la primera vez que entramos
+            // y si no estamos viendo ya un mensaje de éxito o búsqueda.
+            if (plants.length === 0 && queryParams.toString() === "" && mensaje === "" && primeraCargaPasada) {
+                mostrarError('La lista está vacía. Pulsa "Cargar datos iniciales".');
+            } 
+            
+            // Lógica para mensajes de búsqueda (F07)
+            else if (queryParams.toString() !== "") {
+                if (plants.length === 0) {
+                    mostrarError('No se han encontrado centrales con esos criterios.');
+                } else {
+                    mostrarExito(`¡Operación exitosa! Encontradas ${plants.length} centrales.`);
+                }
+            }
         } catch {
             mostrarError('Error al conectar con el servidor.');
         } finally {
             cargando = false;
-            primeraCargaPasada = true;
+            // ASIGNACIÓN: Aquí es donde le das el valor (esto ya lo tenías)
+            primeraCargaPasada = true; 
         }
+    }
+    
+    // Función para limpiar la búsqueda
+    function resetSearch() {
+        search = { country: '', river: '', plant_type: '', from: '', to: '' };
+        loadPlants();
     }
 
     // FUNCIÓN CLAVE: Cargar datos iniciales desde el backend
@@ -117,6 +152,21 @@
         <p class="loading-msg">Procesando solicitud...</p>
     {/if}
 
+    <section class="form-box search-box">
+        <h3>🔍 Filtrar y Buscar</h3>
+        <div class="form-grid">
+            <input bind:value={search.country} placeholder="País" />
+            <input bind:value={search.river} placeholder="Río" />
+            <input bind:value={search.plant_type} placeholder="Tipo (STO/ROR...)" />
+            <input bind:value={search.from} type="number" placeholder="Año desde" />
+            <input bind:value={search.to} type="number" placeholder="Año hasta" />
+        </div>
+        <div class="toolbar" style="margin-top: 10px;">
+            <button class="btn-load" onclick={loadPlants}>Buscar con filtros</button>
+            <button class="btn-refresh" onclick={resetSearch}>Limpiar búsqueda</button>
+        </div>
+    </section>
+
     <section class="form-box">
         <h3>Añadir Nueva Central</h3>
         <form onsubmit={(e) => { e.preventDefault(); createPlant(); }}>
@@ -190,4 +240,8 @@
     .actions { display: flex; gap: 5px; }
     .btn-edit { background: #ffc107; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
     .btn-delete { background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
+    .search-box {
+        background: #e9ecef; /* Un gris diferente para el buscador */
+        border: 1px dashed #6c757d;
+    }
 </style>
