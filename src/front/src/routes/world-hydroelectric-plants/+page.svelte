@@ -36,39 +36,47 @@
     // Función para listar todos los recursos
     
     async function loadPlants() {
-        cargando = true;
-        
-        let queryParams = new SvelteURLSearchParams();
-        // ... (resto de tus appends de búsqueda)
+		cargando = true;
+		
+		// 1. Construimos los parámetros de búsqueda 
+		const queryParams = new SvelteURLSearchParams();
+		if (search.country) queryParams.set("country", search.country);
+		if (search.river) queryParams.set("river", search.river);
+		if (search.plant_type) queryParams.set("plant_type", search.plant_type);
+		if (search.from) queryParams.set("from", search.from);
+		if (search.to) queryParams.set("to", search.to);
 
-        try {
-            const res = await fetch(`${API}?${queryParams.toString()}`);
-            if (!res.ok) throw new Error();
-            plants = await res.json();
-            
-            // USO DE LA VARIABLE: Solo avisamos de lista vacía si NO es la primera vez que entramos
-            // y si no estamos viendo ya un mensaje de éxito o búsqueda.
-            if (plants.length === 0 && queryParams.toString() === "" && mensaje === "" && primeraCargaPasada) {
-                mostrarError('La lista está vacía. Pulsa "Cargar datos iniciales".');
-            } 
-            
-            // Lógica para mensajes de búsqueda (F07)
-            else if (queryParams.toString() !== "") {
-                if (plants.length === 0) {
-                    mostrarError('No se han encontrado centrales con esos criterios.');
-                } else {
-                    mostrarExito(`¡Operación exitosa! Encontradas ${plants.length} centrales.`);
-                }
-            }
-        } catch {
-            mostrarError('Error al conectar con el servidor.');
-        } finally {
-            cargando = false;
-            // ASIGNACIÓN: Aquí es donde le das el valor (esto ya lo tenías)
-            primeraCargaPasada = true; 
-        }
-    }
-    
+		const queryString = queryParams.toString();
+		const url = queryString ? `${API}?${queryString}` : API;
+
+		try {
+			const res = await fetch(url);
+			if (!res.ok) throw new Error();
+			
+			const data = await res.json();
+			plants = data; // Actualización reactiva de la tabla 
+			
+			// --- USO DE primeraCargaPasada PARA ELIMINAR EL AVISO ---
+			if (plants.length === 0 && queryString === "" && mensaje === "" && primeraCargaPasada) {
+				mostrarError('La lista está vacía. Pulsa "Cargar datos iniciales".');
+			} 
+			// --- LÓGICA DE BÚSQUEDA (F07) ---
+			else if (queryString !== "") {
+				if (plants.length === 0) {
+					mostrarError('No se han encontrado resultados para esta búsqueda.');
+				} else {
+					mostrarExito(`¡Operación exitosa! Se han encontrado ${plants.length} centrales.`);
+				}
+			}
+		} catch { 
+			// FIX: Eliminamos (err) porque no se usa, desaparece el aviso 
+			mostrarError('Error al conectar con el servidor.');
+		} finally {
+			cargando = false;
+			primeraCargaPasada = true; // Se marca como cargada tras el primer intento
+		}
+	}
+
     // Función para limpiar la búsqueda
     function resetSearch() {
         search = { country: '', river: '', plant_type: '', from: '', to: '' };
