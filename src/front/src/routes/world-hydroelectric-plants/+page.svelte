@@ -35,13 +35,11 @@
 	// FUNCIÓN ACTUALIZADA: Ahora soporta búsquedas sin romper el listado [cite: 1]
 	async function loadPlants() {
 		cargando = true;
-		mensaje = ''; // LIMPIAMOS el mensaje al empezar para evitar que se "buggee"
-		
 		const queryParams = new SvelteURLSearchParams();
 
-		// Añadimos solo los filtros que tengan contenido real (quitando espacios)
+		// Filtros (los 13 parámetros)
 		Object.entries(search).forEach(([key, value]) => {
-			if (value !== null && value !== undefined && String(value).trim() !== '') {
+			if (value !== null && String(value).trim() !== '') {
 				queryParams.set(key, String(value).trim());
 			}
 		});
@@ -54,21 +52,17 @@
 			if (!res.ok) throw new Error();
 			plants = await res.json();
 			
-			// Si el usuario ha limpiado los campos manualmente, queryString será ""
+			// Solo mostramos mensaje automático si hay una BÚSQUEDA activa
 			if (queryString !== "") {
 				if (plants.length === 0) {
 					mostrarError('No se han encontrado resultados para esos filtros.');
 				} else {
 					mostrarExito(`¡Operación exitosa! Encontradas ${plants.length} centrales.`);
 				}
-			} else {
-				// Caso de carga general (o filtros limpiados manualmente)
-				if (plants.length === 0 && primeraCargaPasada) {
-					mostrarError('La lista está vacía. Pulsa "Cargar datos iniciales".');
-				} else if (primeraCargaPasada) {
-					// Opcional: Avisar que se ha vuelto al listado completo
-					mostrarExito('Listado completo cargado.');
-				}
+			} 
+			// Si no hay búsqueda y la lista está vacía (Error F07)
+			else if (plants.length === 0 && primeraCargaPasada && mensaje === '') {
+				mostrarError('La lista está vacía. Pulsa "Cargar datos iniciales".');
 			}
 		} catch {
 			mostrarError('Error al conectar con el servidor.');
@@ -92,8 +86,8 @@
 		try {
 			const res = await fetch(`${API}/loadInitialData`);
 			if (res.ok) {
-				mostrarExito('¡Datos de ejemplo cargados con éxito!');
-				await loadPlants(); 
+				await loadPlants(); // Refrescamos tabla
+				mostrarExito('¡Datos de ejemplo cargados con éxito!'); 
 			} else {
 				mostrarError('No se han podido cargar los datos.');
 			}
@@ -120,9 +114,9 @@
 			});
 			if (res.status === 409) return mostrarError('Error: Esta central ya existe.');
 			if (res.ok) {
-				mostrarExito('Central añadida correctamente.');
+				await loadPlants(); // Refrescamos
+				mostrarExito('Central añadida correctamente.'); 
 				form = { country: '', name: '', year: '', river: '', plant_type: '', capacity_mw: '', head_m: '', dam_name: '', res_vol_km3: '' };
-				await loadPlants();
 			}
 		} catch { mostrarError('Error al crear.'); }
 	}
@@ -131,7 +125,10 @@
 		if(!confirm(`¿Eliminar la central ${name}?`)) return;
 		try {
 			const res = await fetch(`${API}/${encodeURIComponent(name)}/${year}`, { method: 'DELETE' });
-			if (res.ok) { mostrarExito('Central eliminada.'); await loadPlants(); }
+			if (res.ok) { 
+				await loadPlants(); // Refrescamos
+				mostrarExito('Dato eliminado correctamente.'); 
+			}
 		} catch { mostrarError('Error al borrar.'); }
 	}
 
@@ -139,7 +136,10 @@
 		if(!confirm("¿Borrar TODOS los recursos?")) return;
 		try {
 			const res = await fetch(API, { method: 'DELETE' });
-			if (res.ok) { mostrarExito('Base de datos vaciada.'); await loadPlants(); }
+			if (res.ok) { 
+				await loadPlants(); // Refrescamos
+				mostrarExito('Base de datos vaciada correctamente.'); 
+			}
 		} catch { mostrarError('Error al vaciar la base de datos.'); }
 	}
 
