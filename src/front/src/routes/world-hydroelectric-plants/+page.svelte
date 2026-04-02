@@ -155,28 +155,50 @@
 		<p class="loading-msg">Procesando solicitud...</p>
 	{/if}
 
-	<section class="form-box search-box">
-		<h3>🔍 Buscador </h3>
-		<div class="form-grid">
-			<input bind:value={search.country} placeholder="País" />
-			<input bind:value={search.name} placeholder="Nombre Central" />
-			<input bind:value={search.river} placeholder="Río" />
-			<input bind:value={search.plant_type} placeholder="Tipo" />
-			<input bind:value={search.dam_name} placeholder="Nombre Presa" />
-			<input bind:value={search.year} type="number" placeholder="Año exacto" />
-			<input bind:value={search.capacity_mw} type="number" step="any" placeholder="Capacidad (MW)" />
-			<input bind:value={search.head_m} type="number" step="any" placeholder="Salto (m)" />
-			<input bind:value={search.res_vol_km3} type="number" step="any" placeholder="Volumen (km3)" />
-			<input bind:value={search.from} type="number" placeholder="Año desde" />
-			<input bind:value={search.to} type="number" placeholder="Año hasta" />
-			<input bind:value={search.limit} type="number" placeholder="Límite (Paginación)" />
-			<input bind:value={search.offset} type="number" placeholder="Salto (Offset)" />
-		</div>
-		<div class="toolbar" style="margin-top: 10px;">
-			<button class="btn-add" style="background: #28a745;" onclick={loadPlants}>Aplicar Filtros</button>
-			<button class="btn-refresh" onclick={resetSearch}>Limpiar Filtros</button>
-		</div>
-	</section>
+	<section class="search-container">
+    <div class="search-top-bar">
+        <h3>🔍 Panel de Búsqueda</h3>
+        <div class="main-actions">
+            <button class="btn-apply" onclick={loadPlants}>Aplicar Filtros</button>
+            <button class="btn-clear" onclick={resetSearch}>Limpiar</button>
+        </div>
+    </div>
+
+    <div class="search-sections-wrapper">
+        <div class="inner-section">
+            <span class="tag">Filtros de datos</span>
+            <div class="grid-fields">
+                <input bind:value={search.country} placeholder="País" />
+                <input bind:value={search.name} placeholder="Nombre Central" />
+                <input bind:value={search.river} placeholder="Río" />
+                <input bind:value={search.plant_type} placeholder="Tipo" />
+                <input bind:value={search.dam_name} placeholder="Nombre Presa" />
+                <input bind:value={search.year} type="number" placeholder="Año exacto" />
+                <input bind:value={search.capacity_mw} type="number" step="any" placeholder="Potencia (MW)" />
+                <input bind:value={search.head_m} type="number" step="any" placeholder="Salto (m)" />
+                <input bind:value={search.res_vol_km3} type="number" step="any" placeholder="Volumen (km3)" />
+            </div>
+        </div>
+
+        <div class="bottom-row">
+            <div class="inner-section half">
+                <span class="tag">Rango de Años (From/To)</span>
+                <div class="grid-2">
+                    <input bind:value={search.from} type="number" placeholder="Desde el año" />
+                    <input bind:value={search.to} type="number" placeholder="Hasta el año" />
+                </div>
+            </div>
+
+            <div class="inner-section half">
+                <span class="tag">Control de Paginación</span>
+                <div class="grid-2">
+                    <input bind:value={search.limit} type="number" placeholder="Límite (Cantidad)" />
+                    <input bind:value={search.offset} type="number" placeholder="Salto (Offset)" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
 	<section class="form-box">
 		<h3>Añadir Nueva Central</h3>
@@ -247,4 +269,65 @@
 	.actions { display: flex; gap: 5px; }
 	.btn-edit { background: #ffc107; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; font-weight: bold; }
 	.btn-delete { background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; font-weight: bold; }
+
+    /* DISEÑO DEL BUSCADOR ORGANIZADO  */
+.search-container {
+    background: #f1f5f9;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.search-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #3b82f6;
+}
+
+.search-top-bar h3 { margin: 0; color: #1e3a8a; font-size: 1.2rem; }
+
+.main-actions { display: flex; gap: 10px; }
+.btn-apply { background: #2563eb; color: white; padding: 8px 16px; border-radius: 6px; }
+.btn-clear { background: #94a3b8; color: white; padding: 8px 16px; border-radius: 6px; }
+
+.inner-section {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    margin-bottom: 15px;
+}
+
+.tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 10px;
+    background: #f8fafc;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.grid-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.bottom-row { display: flex; gap: 15px; flex-wrap: wrap; }
+.half { flex: 1; min-width: 280px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+input {
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    font-size: 0.9rem;
+}
 </style>
