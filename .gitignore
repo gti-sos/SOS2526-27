@@ -140,3 +140,10 @@ vite.config.ts.timestamp-*
 
 *.db
 .vscode/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
