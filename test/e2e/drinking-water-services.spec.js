@@ -6,94 +6,108 @@ test.describe('Pruebas E2E - Servicios de agua potable', () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto(BASE_URL);
 
-		// Aceptar automáticamente los confirm() si aparecen
-		page.on('dialog', async (dialog) => {
-			await dialog.accept();
-		});
+		page.on('dialog', dialog => dialog.accept());
 
-		// Dejamos una base conocida antes de cada test
 		await page.getByRole('button', { name: 'Borrar todos los recursos' }).click();
 		await page.getByRole('button', { name: 'Cargar datos iniciales' }).click();
 
-		// Esperamos a que haya al menos una fila o a que termine la carga
-		await expect(page.locator('table tbody tr').first()).toBeVisible({ timeout: 10000 });
+		await expect(page.locator('.styled-table tbody tr').first()).toBeVisible({ timeout: 10000 });
 	});
 
-	// 1. LISTAR
-	test('Debe listar los recursos iniciales correctamente', async ({ page }) => {
-		const filas = page.locator('table tbody tr');
-		await expect(filas).not.toHaveCount(0);
-		await expect(page.getByRole('heading', { name: 'Servicios de agua potable' })).toBeVisible();
-	});
-
-	// 2. CREAR
+	// 1. CREAR RECURSO
 	test('Debe permitir crear un nuevo recurso', async ({ page }) => {
-		const entidad = `Testland-${Date.now()}`;
+		const uniqueEntity = `Testland_${Date.now()}`;
+		const createBox = page.locator('.form-box').last();
 
-		await page.getByPlaceholder('País o entidad').fill(entidad);
-		await page.getByPlaceholder('Código').fill('TST');
-		await page.getByPlaceholder('Año').fill('2026');
-		await page.getByPlaceholder('Población urbana con servicio básico').fill('88.5');
+		await createBox.getByPlaceholder('País o entidad').fill(uniqueEntity);
+		await createBox.getByPlaceholder('Código').fill('TST');
+		await createBox.getByPlaceholder('Año').fill('2026');
+		await createBox.getByPlaceholder('Población urbana con servicio básico').fill('88.5');
 
 		await page.getByRole('button', { name: 'Crear recurso' }).click();
 
 		const alerta = page.locator('.alert.exito');
-		await expect(alerta).toBeVisible({ timeout: 7000 });
-		await expect(alerta).toContainText('Recurso creado correctamente.');
-
-		await expect(page.locator('table')).toContainText(entidad);
-		await expect(page.locator('table')).toContainText('2026');
+		await expect(alerta).toContainText('Recurso creado correctamente.', { timeout: 7000 });
+		await expect(page.getByText(uniqueEntity)).toBeVisible();
 	});
 
-	// 3. BORRAR UNO
+	// 2. LISTAR TODOS LOS RECURSOS
+	test('Debe listar los recursos iniciales correctamente', async ({ page }) => {
+		const filas = page.locator('.styled-table tbody tr');
+		await expect(filas).not.toHaveCount(0);
+		await expect(page.getByRole('heading', { name: 'Servicios de agua potable' })).toBeVisible();
+	});
+
+	// 3. BORRAR RECURSO
 	test('Debe permitir borrar un recurso concreto', async ({ page }) => {
-		const primeraFila = page.locator('table tbody tr').first();
-		const textoFila = await primeraFila.textContent();
+		const filas = page.locator('.styled-table tbody tr');
+		const filasAntes = await filas.count();
 
-		await primeraFila.locator('.btn-delete').click();
+		await page.locator('.btn-delete').first().click();
 
-		const alerta = page.locator('.alert.exito, .alert.error');
+		const alerta = page.locator('.alert.exito');
 		await expect(alerta).toBeVisible({ timeout: 7000 });
 
-		// Como tu mensaje exacto puede variar según el código final,
-		// comprobamos que la fila original ya no esté
-		if (textoFila) {
-			await expect(page.locator('table')).not.toContainText(textoFila.trim());
-		}
+		await expect(filas).toHaveCount(filasAntes - 1);
 	});
 
 	// 4. BORRAR TODOS
 	test('Debe permitir borrar todos los recursos', async ({ page }) => {
 		await page.getByRole('button', { name: 'Borrar todos los recursos' }).click();
 
+		const alertaExito = page.locator('.alert.exito');
+		await expect(alertaExito).toBeVisible({ timeout: 7000 });
+		await expect(alertaExito).toContainText('Todos los recursos se han borrado correctamente.');
+
+		const filas = page.locator('.styled-table tbody tr');
+		await expect(filas).toHaveCount(0);
+	});
+
+	// 5. EDITAR RECURSO
+	test('Debe editar un recurso y ver los cambios reflejados en la tabla', async ({ page }) => {
+		const btnEdit = page.locator('.btn-edit').first();
+		await expect(btnEdit).toBeVisible({ timeout: 10000 });
+		await btnEdit.click();
+
+		await page.waitForURL(url => url.pathname.includes('/drinking-water-services/'));
+
+		const inputPoblacion = page.getByLabel('Población urbana con servicio básico:');
+		await expect(inputPoblacion).toBeVisible({ timeout: 7000 });
+
+		await inputPoblacion.clear();
+		await inputPoblacion.fill('77.7');
+
+		await page.getByRole('button', { name: 'Guardar cambios' }).click();
+
+		await expect(page.getByText('El recurso se ha actualizado correctamente.')).toBeVisible({ timeout: 7000 });
+
+		await page.getByRole('button', { name: 'Volver al listado' }).click();
+		await page.waitForURL(BASE_URL);
+
+		await expect(page.locator('.styled-table')).toContainText('77.7');
+	});
+
+	// 6. BUSCADOR POR CÓDIGO
+	test('Debe filtrar resultados por código', async ({ page }) => {
+		const searchBox = page.locator('.search-box');
+
+		await searchBox.getByPlaceholder('Código').fill('ESP');
+		await page.getByRole('button', { name: 'Aplicar filtros' }).click();
+
 		const alerta = page.locator('.alert.exito, .alert.error');
 		await expect(alerta).toBeVisible({ timeout: 7000 });
-
-		// Según tu frontend puede quedarse sin filas y mostrar mensaje vacío
-		await expect(page.locator('table tbody tr')).toHaveCount(0);
 	});
 
-	// 5. EDITAR
-	test('Debe navegar a la vista dinámica de edición', async ({ page }) => {
-		await page.locator('.btn-edit').first().click();
-
-		await expect(page).toHaveURL(/\/drinking-water-services\/.+\/\d+$/);
-	});
-
-	// 6. BUSCAR POR AÑO
+	// 7. BUSCADOR POR RANGO DE AÑOS
 	test('Debe permitir buscar recursos por rango de años', async ({ page }) => {
-		await page.getByPlaceholder('Año desde').fill('2000');
-		await page.getByPlaceholder('Año hasta').fill('2010');
+		const searchBox = page.locator('.search-box');
 
-		await page.getByRole('button', { name: 'Buscar' }).click();
+		await searchBox.getByPlaceholder('Desde (año)').fill('2000');
+		await searchBox.getByPlaceholder('Hasta (año)').fill('2010');
 
-		// Verificamos que la tabla sigue visible y que no da error grave
-		await expect(page.locator('table')).toBeVisible();
+		await page.getByRole('button', { name: 'Aplicar filtros' }).click();
 
-		// Si sale un mensaje, al menos debe ser visible de forma controlada
-		const alerta = page.locator('.alert');
-		if (await alerta.count()) {
-			await expect(alerta.first()).toBeVisible();
-		}
+		const alerta = page.locator('.alert.exito, .alert.error');
+		await expect(alerta).toBeVisible({ timeout: 7000 });
 	});
 });
