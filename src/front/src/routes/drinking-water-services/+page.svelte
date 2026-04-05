@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
     import { resolve } from '$app/paths';
+    import { SvelteURLSearchParams } from 'svelte/reactivity';
 
     const API = '/api/v1/drinking-water-services';
 
@@ -11,6 +12,7 @@
     let cargando = $state(false);
     let mensaje = $state('');
     let tipoMensaje = $state('');
+    let primeraCargaPasada = $state(false);
 
     let form = $state({
         entity: '',
@@ -20,8 +22,13 @@
     });
 
     let filtros = $state({
+        entity: '',
+        code: '',
+        year: '',
         from: '',
-        to: ''
+        to: '',
+        limit: '',
+        offset: ''
     });
 
     /** @param {string} texto */
@@ -45,19 +52,54 @@
         cargando = true;
         limpiarMensaje();
 
+        const params = new SvelteURLSearchParams();
+
+        Object.entries(filtros).forEach(([key, value]) => {
+            if (value !== null && String(value).trim() !== '') {
+                params.set(key, String(value).trim());
+            }
+        });
+
+        const queryString = params.toString();
+        const url = queryString ? `${API}?${queryString}` : API;
+
         try {
-            const res = await fetch(resolve(API));
+            const res = await fetch(resolve(url));
 
             if (!res.ok) {
                 throw new Error('No se pudieron cargar los datos');
             }
 
             services = await res.json();
+
+            if (queryString !== '') {
+                if (services.length === 0) {
+                    mostrarError('No se han encontrado resultados para esos filtros.');
+                } else {
+                    mostrarExito(`Se han encontrado ${services.length} recursos.`);
+                }
+            } else if (services.length === 0 && primeraCargaPasada) {
+                mostrarError('No hay recursos disponibles.');
+            }
         } catch {
             mostrarError('No se pudieron cargar los datos de servicios de agua.');
         } finally {
             cargando = false;
+            primeraCargaPasada = true;
         }
+    }
+
+    function resetFiltros() {
+        filtros = {
+            entity: '',
+            code: '',
+            year: '',
+            from: '',
+            to: '',
+            limit: '',
+            offset: ''
+        };
+        loadServices();
     }
 
     async function createService() {
@@ -160,27 +202,28 @@
     }
 
     async function loadInitialData() {
-        limpiarMensaje();
+    limpiarMensaje();
 
-        try {
-            const res = await fetch(resolve(`${API}/loadInitialData`));
+    try {
+        const res = await fetch(resolve(`${API}/loadInitialData`));
 
-            if (res.status === 409) {
-                mostrarError('Los datos iniciales ya estaban cargados.');
-                return;
-            }
-
-            if (!res.ok) {
-                mostrarError('No se pudieron cargar los datos iniciales.');
-                return;
-            }
-
+        if (res.status === 409) {
             await loadServices();
-            mostrarExito('Los datos iniciales se han cargado correctamente.');
-        } catch {
-            mostrarError('Ha ocurrido un error al cargar los datos iniciales.');
+            mostrarError('Los datos iniciales ya estaban cargados.');
+            return;
         }
+
+        if (!res.ok) {
+            mostrarError('No se pudieron cargar los datos iniciales.');
+            return;
+        }
+
+        await loadServices();
+        mostrarExito('Los datos iniciales se han cargado correctamente.');
+    } catch {
+        mostrarError('Ha ocurrido un error al cargar los datos iniciales.');
     }
+}
 
     /**
      * @param {string} entity
@@ -196,33 +239,10 @@
         createService();
     }
 
-    // Búsqueda de servicios con los filtros de año
-    async function searchServices(event) {
+    /** @param {SubmitEvent} event */
+    function searchServices(event) {
         event.preventDefault();
-        cargando = true;
-        limpiarMensaje();
-
-        try {
-            // eslint-disable-next-line svelte/prefer-svelte-reactivity
-            const params = new URLSearchParams();
-
-            if (filtros.from !== '') params.append('from', filtros.from);
-            if (filtros.to !== '') params.append('to', filtros.to);
-
-            const url = `${API}?${params.toString()}`;
-
-            const res = await fetch(resolve(url));
-
-            if (!res.ok) {
-                throw new Error();
-            }
-
-            services = await res.json();
-        } catch {
-            mostrarError('No se pudieron cargar los resultados de la búsqueda.');
-        } finally {
-            cargando = false;
-        }
+        loadServices();
     }
 
     onMount(loadServices);
@@ -249,19 +269,47 @@
         <p class="loading-msg">Cargando datos...</p>
     {/if}
 
-    <section class="form-box">
-        <h2>Buscar recursos por año</h2>
+    <section class="form-box search-box">
+        <div class="search-header-flex">
+            <h2>Buscar recursos</h2>
+            <div class="search-btns">
+                <button class="btn-search-action" onclick={loadServices}>Aplicar filtros</button>
+                <button class="btn-reset-action" onclick={resetFiltros}>Limpiar</button>
+            </div>
+        </div>
 
         <form onsubmit={searchServices}>
-            <div class="form-grid">
-                <input bind:value={filtros.from} type="number" placeholder="Año desde" />
-                <input bind:value={filtros.to} type="number" placeholder="Año hasta" />
+            <div class="search-groups-container">
+                <div class="search-subgroup">
+                    <span class="group-title">Filtros principales</span>
+                    <div class="form-grid">
+                        <input bind:value={filtros.entity} placeholder="País o entidad" />
+                        <input bind:value={filtros.code} placeholder="Código" />
+                        <input bind:value={filtros.year} type="number" placeholder="Año exacto" />
+                    </div>
+                </div>
+
+                <div class="search-inline-groups">
+                    <div class="search-subgroup flex-1">
+                        <span class="group-title">Rango de años</span>
+                        <div class="grid-2-col">
+                            <input bind:value={filtros.from} type="number" placeholder="Desde (año)" />
+                            <input bind:value={filtros.to} type="number" placeholder="Hasta (año)" />
+                        </div>
+                    </div>
+
+                    <div class="search-subgroup flex-1">
+                        <span class="group-title">Paginación</span>
+                        <div class="grid-2-col">
+                            <input bind:value={filtros.limit} type="number" placeholder="Límite" />
+                            <input bind:value={filtros.offset} type="number" placeholder="Salto" />
+                        </div>
+                    </div>
+                </div>
             </div>
-            <button type="submit" class="btn-add">Buscar</button>
         </form>
     </section>
 
-    <!-- Crear nuevo recurso -->
     <section class="form-box">
         <h2>Crear nuevo recurso</h2>
 
@@ -317,7 +365,6 @@
 </main>
 
 <style>
-    /* Contenedor principal de la página */
     .container { 
         max-width: 1200px; 
         margin: 0 auto; 
@@ -325,7 +372,6 @@
         padding: 20px;
     }
 
-    /* Barra de herramientas con botones de acción */
     .toolbar { 
         display: flex; 
         gap: 10px; 
@@ -340,21 +386,13 @@
         text-align: center;
         color: white;
         font-weight: bold;
+        border: none;
     }
 
-    .btn-refresh {
-        background: #6c757d;
-    }
+    .btn-refresh { background: #6c757d; }
+    .btn-load { background: #17a2b8; }
+    .btn-danger-all { background: #343a40; }
 
-    .btn-load {
-        background: #17a2b8;
-    }
-
-    .btn-danger-all {
-        background: #343a40;
-    }
-
-    /* Mensajes de carga y de error */
     .loading-msg { 
         color: #007bff; 
         font-weight: bold; 
@@ -380,7 +418,94 @@
         border: 1px solid #f5c6cb; 
     }
 
-    /* Sección del formulario de agregar una nueva central */
+    .search-box { 
+        background: #e9f5ff !important; 
+        border: 2px solid #007bff !important; 
+        margin-bottom: 20px; 
+    }
+
+    .search-header-flex { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 15px; 
+        border-bottom: 1px solid #b3d7ff; 
+        padding-bottom: 10px; 
+    }
+
+    .search-header-flex h2 { 
+        margin: 0; 
+        color: #0056b3; 
+    }
+
+    .search-btns {
+        display: flex;
+        gap: 10px;
+    }
+
+    .search-groups-container { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 20px; 
+    }
+
+    .search-subgroup { 
+        background: white; 
+        padding: 15px; 
+        border-radius: 6px; 
+        border: 1px solid #ced4da; 
+    }
+
+    .group-title { 
+        display: block; 
+        font-size: 0.75rem; 
+        font-weight: bold; 
+        text-transform: uppercase; 
+        color: #495057; 
+        margin-bottom: 10px; 
+        background: #f8f9fa; 
+        padding: 2px 8px; 
+        width: fit-content; 
+        border-radius: 3px; 
+    }
+
+    .search-inline-groups { 
+        display: flex; 
+        gap: 15px; 
+        flex-wrap: wrap; 
+    }
+
+    .flex-1 { 
+        flex: 1; 
+        min-width: 280px; 
+    }
+
+    .grid-2-col { 
+        display: grid; 
+        grid-template-columns: 1fr 1fr; 
+        gap: 10px; 
+    }
+
+    .btn-search-action { 
+        background: #28a745; 
+        color: white; 
+        border: none; 
+        padding: 8px 15px; 
+        border-radius: 4px; 
+        cursor: pointer; 
+        font-weight: bold; 
+    }
+
+    .btn-reset-action { 
+        background: #6c757d; 
+        color: white; 
+        border: none; 
+        padding: 8px 15px; 
+        border-radius: 4px; 
+        cursor: pointer; 
+        font-weight: bold; 
+    }
+
     .form-box { 
         background: #f8f9fa; 
         padding: 20px; 
@@ -413,7 +538,6 @@
         font-weight: bold; 
     }
 
-    /* Estilos para la tabla */
     .table-container { 
         overflow-x: auto; 
         background: white; 
@@ -450,6 +574,7 @@
         padding: 5px 10px; 
         cursor: pointer; 
         border-radius: 3px; 
+        font-weight: bold;
     }
 
     .btn-delete { 
@@ -459,5 +584,6 @@
         padding: 5px 10px; 
         cursor: pointer; 
         border-radius: 3px; 
+        font-weight: bold;
     }
 </style>
