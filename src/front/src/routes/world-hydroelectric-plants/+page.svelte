@@ -147,7 +147,13 @@
 </script>
 
 <main class="container">
-	<h1>Gestión de Centrales Hidroeléctricas</h1>
+	<header class="main-header">
+    <h1>Gestión de Centrales Hidroeléctricas  <div class="header-buttons">
+        <button class="btn-analytics" onclick={() => window.location.href = '/analytics/world-hydroelectric-plants'}>
+            📊 Ver Gráfica
+        </button>
+    </div></h1>
+	</header>
 
 	<div class="toolbar">
 		<button class="btn-refresh" onclick={loadPlants}>Listar todos</button>
