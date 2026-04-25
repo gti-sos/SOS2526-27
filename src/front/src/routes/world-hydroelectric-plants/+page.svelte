@@ -149,9 +149,12 @@
 <main class="container">
 	<header class="main-header">
     <h1>Gestión de Centrales Hidroeléctricas  <div class="header-buttons">
-        <button class="btn-analytics" onclick={() => window.location.href = '/analytics/world-hydroelectric-plants'}>
-            📊 Ver Gráfica
-        </button>
+        <button class="btn-action btn-analytics" onclick={() => window.location.href = '/analytics/world-hydroelectric-plants'}>
+        <span class="icon">📊</span> Ver Gráfica
+    	</button>
+    	<button class="btn-action btn-map" onclick={() => window.location.href = '/analytics/world-hydroelectric-plants/map'}>
+        <span class="icon">🌍</span> Ver Mapa
+    	</button>
     </div></h1>
 	</header>
 
@@ -299,4 +302,48 @@
 	.actions { display: flex; gap: 5px; }
 	.btn-edit { background: #ffc107; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; font-weight: bold; }
 	.btn-delete { background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; font-weight: bold; }
+
+	.header-buttons {
+        display: flex;
+        gap: 12px;
+        padding: 10px 0;
+    }
+    .btn-action {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 8px; 
+        font-size: 15px;
+        font-weight: 600;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease; 
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+    }
+    .btn-analytics {
+        background-color: #4a90e2;
+    }
+
+    .btn-analytics:hover {
+        background-color: #357abd;
+        transform: translateY(-2px); 
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .btn-map {
+        background-color: #28a745;
+    }
+    .btn-map:hover {
+        background-color: #218838;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .btn-action:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    .icon {
+        font-size: 1.2em;
+    }
 </style>
