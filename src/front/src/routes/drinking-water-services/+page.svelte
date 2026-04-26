@@ -252,8 +252,18 @@
     <title>Servicios de agua potable</title>
 </svelte:head>
 
+
 <main class="container">
     <h1>Servicios de agua potable</h1>
+    <header class="main-header">
+        <h1>Gestión de Servicios de Agua Potable 
+            <div class="header-buttons">
+                <button class="btn-analytics" onclick={() => window.location.href = '/analytics/drinking-water-services'}>
+                    📊 Ver Gráfica
+                </button>
+            </div>
+        </h1>
+    </header>
 
     <div class="toolbar">
         <button class="btn-refresh" onclick={loadServices}>Actualizar listado</button>
