@@ -13,8 +13,8 @@
 
             // 1. Diccionario de mapeo: "Nombre del API" -> "Nombre que reconoce Highcharts"
             const nameMap = {
-                "Americas (WHO)": "United States", // Mapeo solicitado para normalización
-                // Puedes añadir más aquí si detectas nombres que no se pintan
+                "Americas (WHO)": "United States of America", // Mapeo solicitado para normalización
+                
             };
 
             // Lista de entidades a ignorar (no son países físicos)
