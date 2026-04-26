@@ -11,13 +11,28 @@
         if (res.ok) {
             services = await res.json();
 
-            // 1. AGRUPACIÓN: Sumamos los valores por país (entidad)
-            // Usamos Number() || 0 para evitar errores con valores vacíos o guiones "-"
+            // 1. Diccionario de mapeo: "Nombre del API" -> "Nombre que reconoce Highcharts"
+            const nameMap = {
+                "Americas (WHO)": "United States", // Mapeo solicitado para normalización
+                // Puedes añadir más aquí si detectas nombres que no se pintan
+            };
+
+            // Lista de entidades a ignorar (no son países físicos)
+            const invalidEntities = ["Europe", "Asia", "Total", "World"];
+
+            // 2. AGRUPACIÓN:
             const dataByCountry = services.reduce((acc, s) => {
-                const countryName = s.entity;
+                // Obtenemos el nombre mapeado o el original
+                let countryName = nameMap[s.entity] || s.entity;
+
+                // Si está en la lista negra, lo ignoramos
+                if (invalidEntities.includes(countryName)) return acc;
+
                 if (!acc[countryName]) {
                     acc[countryName] = 0;
                 }
+                
+                // Sumamos valor, asegurando que sea número
                 acc[countryName] += Number(s.wat_bas_pop_residence_urban) || 0;
                 return acc;
             }, {});
@@ -40,7 +55,6 @@
                     width: 600, 
                     symbolWidth: 500 
                 },
-                // He ajustado los colores a tonos agua/azules
                 colorAxis: {
                     min: 0,
                     minColor: '#e0f7fa',
@@ -85,7 +99,8 @@
     <div id="map-container"></div>
     
     <p class="footer-text">
-        💧 El mapa muestra la población urbana con acceso a servicios básicos de agua potable, agrupada por país o entidad.
+        💧 El mapa muestra la población urbana con acceso a servicios básicos de agua potable, agrupada por país.<br>
+        <em>Nota: Los datos de 'Americas (WHO)' han sido mapeados a 'United States' para su representación geoespacial.</em>
     </p>
 </main>
 
