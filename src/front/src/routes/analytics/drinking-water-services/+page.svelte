@@ -26,7 +26,7 @@
 
             Highcharts.chart('final-chart', {
                 chart: { 
-                    type: 'column', 
+                    type: 'area', 
                     backgroundColor: '#fdfdfd'
                 },
                 title: { text: 'Análisis de Población Urbana con Agua Potable' },
