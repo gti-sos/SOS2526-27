@@ -32,6 +32,7 @@
     "bootstrap": "^5.3.8",
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "highcharts": "^12.6.0",
     "nedb": "^1.8.0",
     "newman": "^6.2.2",
     "svelte-spa-router": "^5.0.0"

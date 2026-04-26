@@ -151,12 +151,16 @@
 
 <main class="container">
 	<h1>Gestión de Presas (Water Dams)</h1>
-
+	<div class="toolbar analytics-toolbar">
+		<a href="/analytics/water-dams" class="btn-analytics">📊 Gráfico de Barras</a>
+		<a href="/analytics/water-dams/bubble-chart" class="btn-analytics">🫧 Gráfico de Burbujas</a>
+	</div>
 	<div class="toolbar">
 		<button class="btn-refresh" onclick={loadDams}>Actualizar Lista</button>
 		<button class="btn-load" onclick={loadInitialData}>Cargar Datos Iniciales</button>
 		<button class="btn-danger-all" onclick={deleteAll}>Borrar Todo</button>
 	</div>
+	
 
 	{#if mensaje}
 		<div class="alert {tipoMensaje}">{mensaje}</div>
@@ -264,6 +268,25 @@
 <style>
 	.container { max-width: 1400px; margin: 0 auto; font-family: sans-serif; padding: 20px; }
 	.toolbar { display: flex; gap: 10px; margin-bottom: 20px; }
+	.analytics-toolbar { 
+        display: flex; 
+        gap: 10px; 
+        margin-bottom: 20px; 
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+    }
+    .btn-analytics { 
+        background: #6366f1;
+        color: white; 
+        padding: 10px 15px; 
+        text-decoration: none; 
+        border-radius: 4px; 
+        font-weight: bold; 
+        text-align: center;
+        flex: 1;
+        transition: background 0.2s;
+    }
+    .btn-analytics:hover { background: #4f46e5; color: white; }
 	.btn-refresh { background: #6c757d; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; flex: 1; }
 	.btn-load { background: #17a2b8; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; flex: 1; }
 	.btn-danger-all { background: #343a40; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; flex: 1; }
