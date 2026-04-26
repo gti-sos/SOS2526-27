@@ -35,7 +35,7 @@ test.describe('Pruebas E2E - Servicios de agua potable', () => {
 	test('Debe listar los recursos iniciales correctamente', async ({ page }) => {
 		const filas = page.locator('.styled-table tbody tr');
 		await expect(filas).not.toHaveCount(0);
-		await expect(page.getByRole('heading', { name: 'Servicios de agua potable' })).toBeVisible();
+		await expect(page.locator('main').getByRole('heading', { name: 'Servicios de agua potable', exact: true })).toBeVisible();
 	});
 
 	// 3. BORRAR RECURSO
