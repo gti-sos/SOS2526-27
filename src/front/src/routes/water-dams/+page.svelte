@@ -152,7 +152,7 @@
 <main class="container">
 	<h1>Gestión de Presas (Water Dams)</h1>
 	<div class="toolbar analytics-toolbar">
-		<a href="/analytics/water-dams" class="btn-analytics">📊 Gráfico de Barras</a>
+		<a href="/analytics/water-dams/map" class="btn-analytics">📊 Mapa</a>
 		<a href="/analytics/water-dams/bubble-chart" class="btn-analytics">🫧 Gráfico de Burbujas</a>
 	</div>
 	<div class="toolbar">

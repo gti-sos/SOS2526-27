@@ -64,7 +64,6 @@
     <h1>Visualización de Presas</h1>
     
     <div class="nav-links">
-        <a href="/analytics/water-dams" class="btn-primary"> 📊Gráfico de Barras</a>
 
          <a href="/water-dams" class="btn-secondary">
         ⬅ Volver al listado
