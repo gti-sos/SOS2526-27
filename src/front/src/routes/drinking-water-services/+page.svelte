@@ -261,6 +261,9 @@
                 <button class="btn-analytics" onclick={() => window.location.href = '/analytics/drinking-water-services'}>
                     📊 Ver Gráfica
                 </button>
+                <button class="btn-map" onclick={() => window.location.href = '/analytics/drinking-water-services/map'}>
+                    🌍 Ver Mapa
+                </button>
             </div>
         </h1>
     </header>
@@ -402,6 +405,19 @@
     .btn-refresh { background: #6c757d; }
     .btn-load { background: #17a2b8; }
     .btn-danger-all { background: #343a40; }
+
+    .btn-analytics, .btn-map {
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        border: none;
+        color: white;
+        margin-left: 10px;
+    }
+    
+    .btn-analytics { background: #28a745; }
+    .btn-map { background: #007bff; }
 
     .loading-msg { 
         color: #007bff; 
