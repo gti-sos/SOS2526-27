@@ -66,10 +66,18 @@
 	<section class="card">
 		<h2>Repositorio del equipo</h2>
 		<p>
-			<button class="link-button" onclick={() => abrirExterno(repositorioEquipo)}>
+			<button class="primary-button" onclick={() => abrirExterno(repositorioEquipo)}>
 				Ir al repositorio de GitHub
 			</button>
 		</p>
+	</section>
+
+	<section class="card highlight">
+		<h2>Dashboard Grupal</h2>
+		<p>Accede a la visualización integrada de todos los datos del equipo en una única matriz global.</p>
+		<button class="primary-button" onclick={() => irA('/analytics/visual')}>
+			Ir a la integración grupal
+		</button>
 	</section>
 
 	<section class="card">
@@ -142,92 +150,52 @@
 		padding-bottom: 16px;
 	}
 
-	h1 {
-		margin: 0 0 8px 0;
-		font-size: 2rem;
+	/* Sección destacada */
+	.highlight {
+		border-left: 4px solid #2563eb;
+		background-color: #eff6ff;
 	}
 
-	h2 {
-		margin-top: 0;
-		font-size: 1.25rem;
-	}
-
-	.subtitle {
-		margin: 0;
-		color: #64748b;
-	}
-
-	.link-button {
-		background: none;
+	.primary-button {
+		background-color: #2563eb;
+		color: white;
 		border: none;
-		padding: 0;
-		color: #2563eb;
-		font: inherit;
+		padding: 10px 20px;
+		border-radius: 8px;
 		font-weight: 600;
 		cursor: pointer;
+		margin-top: 10px;
+	}
+
+	.primary-button:hover {
+		background-color: #1d4ed8;
+	}
+
+	h1 { margin: 0 0 8px 0; font-size: 2rem; }
+	h2 { margin-top: 0; font-size: 1.25rem; }
+	.subtitle { margin: 0; color: #64748b; }
+	
+	.link-button {
+		background: none; border: none; padding: 0;
+		color: #2563eb; font: inherit; font-weight: 600; cursor: pointer;
 	}
 
 	.card {
-		background: white;
-		border: 1px solid #e2e8f0;
-		border-radius: 12px;
-		padding: 24px;
-		margin-bottom: 20px;
+		background: white; border: 1px solid #e2e8f0;
+		border-radius: 12px; padding: 24px; margin-bottom: 20px;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 	}
 
-	table {
-		width: 100%;
-		border-collapse: collapse;
-		margin-top: 12px;
-	}
-
-	th,
-	td {
-		text-align: left;
-		padding: 12px;
-		border-bottom: 1px solid #e2e8f0;
-		vertical-align: top;
-	}
-
-	th {
-		background: #f8fafc;
-		font-weight: 700;
-	}
-
-	.link-button:hover {
-		text-decoration: underline;
-	}
+	table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+	th, td { text-align: left; padding: 12px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+	th { background: #f8fafc; font-weight: 700; }
+	.link-button:hover { text-decoration: underline; }
 
 	@media (max-width: 900px) {
-		header {
-			flex-direction: column;
-		}
-
-		table,
-		thead,
-		tbody,
-		tr,
-		th,
-		td {
-			display: block;
-		}
-
-		thead {
-			display: none;
-		}
-
-		tr {
-			border: 1px solid #e2e8f0;
-			border-radius: 10px;
-			padding: 10px;
-			margin-bottom: 12px;
-			background: white;
-		}
-
-		td {
-			border-bottom: none;
-			padding: 6px 0;
-		}
+		header { flex-direction: column; }
+		table, thead, tbody, tr, th, td { display: block; }
+		thead { display: none; }
+		tr { border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; margin-bottom: 12px; background: white; }
+		td { border-bottom: none; padding: 6px 0; }
 	}
 </style>
