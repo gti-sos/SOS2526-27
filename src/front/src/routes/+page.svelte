@@ -75,7 +75,7 @@
 	<section class="card highlight">
 		<h2>Dashboard Grupal</h2>
 		<p>Accede a la visualización integrada de todos los datos del equipo en una única matriz global.</p>
-		<button class="primary-button" onclick={() => irA('/analytics/visual')}>
+		<button class="primary-button" onclick={() => irA('/analytics')}>
 			Ir a la integración grupal
 		</button>
 	</section>
