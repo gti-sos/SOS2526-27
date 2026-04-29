@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@highcharts/map-collection": "^2.3.2",
+    "axios": "^1.15.2",
     "bootstrap": "^5.3.8",
     "cors": "^2.8.6",
     "express": "^5.2.1",

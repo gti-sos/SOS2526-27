@@ -90,6 +90,35 @@ router.get("/",(req,res)=>{
 });
 
 
+// PROXY WORLD BANK API
+
+router.get("/proxy/worldbank", async (req, res) => {
+    try {
+        const url = "https://api.worldbank.org/v2/country/all/indicator/ER.H2O.INTR.K3?format=json&per_page=100";
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            return res.status(response.status).json({
+                error: "Error accediendo a World Bank API",
+                status: response.status
+            });
+        }
+
+        const data = await response.json();
+
+        res.status(200).json(data);
+
+    } catch (error) {
+        console.error("Error en proxy World Bank:", error);
+
+        res.status(500).json({
+            error: "Error interno en el proxy World Bank"
+        });
+    }
+});
+
+
 // GET RECURSO CONCRETO
 
 router.get("/:entity/:year",(req,res)=>{
