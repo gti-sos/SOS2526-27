@@ -1,13 +1,22 @@
 <script>
     import { onMount } from 'svelte';
+    import { dev } from '$app/environment';
+    import Chart from 'chart.js/auto';
 
+    // Mi API
+    let myAPI = '/api/v1/drinking-water-services';
+
+    if (dev) {
+        myAPI = 'http://localhost:10000' + myAPI;
+    }
+
+    // API del Grupo 17
     const g17API = 'https://sos2526-17.onrender.com/api/v1/renewable-energy-consumptions';
 
     let chart = null;
     let mensajeError = $state('');
     let cargando = $state(true);
-    let datos = $state([]);
-    let resumen = $state(null);
+    let tablaDatos = $state([]);
 
     function formatNumber(value) {
         return new Intl.NumberFormat('es-ES', {
@@ -24,190 +33,222 @@
             .replace(/\b\w/g, (letter) => letter.toUpperCase());
     }
 
-    async function loadData() {
+    async function loadIntegration() {
         try {
             cargando = true;
             mensajeError = '';
-            datos = [];
-            resumen = null;
+            tablaDatos = [];
 
-            const res = await fetch(g17API);
+            const [resMine, resG17] = await Promise.all([
+                fetch(myAPI),
+                fetch(g17API)
+            ]);
 
-            if (!res.ok) {
-                mensajeError = 'No se pudo acceder a la API del Grupo 17.';
+            if (!resMine.ok || !resG17.ok) {
+                throw new Error('No se pudieron descargar los datos de una o ambas APIs.');
+            }
+
+            const myData = await resMine.json();
+            const g17Data = await resG17.json();
+
+            if (!Array.isArray(myData) || !Array.isArray(g17Data)) {
+                mensajeError = 'Alguna de las APIs no ha devuelto un array válido.';
                 cargando = false;
                 return;
             }
 
-            const data = await res.json();
-
-            if (!Array.isArray(data) || data.length === 0) {
-                mensajeError = 'La API del Grupo 17 no tiene datos disponibles.';
+            if (myData.length === 0 || g17Data.length === 0) {
+                mensajeError = 'Faltan datos. Asegúrate de que ambas APIs tienen datos cargados.';
                 cargando = false;
                 return;
             }
 
-            const cleanData = data
-                .filter((item) => {
-                    return (
-                        item.country &&
-                        item.year !== undefined &&
-                        item.wind !== undefined &&
-                        item.hydro !== undefined &&
-                        item.solar !== undefined &&
-                        item.other !== undefined
-                    );
-                })
-                .map((item) => {
-                    const wind = Number(item.wind) || 0;
-                    const hydro = Number(item.hydro) || 0;
-                    const solar = Number(item.solar) || 0;
-                    const other = Number(item.other) || 0;
-                    const total = wind + hydro + solar + other;
+            // 1. Procesamos MI API: población urbana con servicios básicos de agua potable
+            const myProcessedData = {};
 
-                    return {
-                        country: formatCountry(item.country),
-                        code: item.code || '',
-                        year: Number(item.year),
-                        wind,
-                        hydro,
-                        solar,
-                        other,
-                        total
+            myData.forEach((d) => {
+                if (
+                    !d.entity ||
+                    d.year === undefined ||
+                    d.wat_bas_pop_residence_urban === null ||
+                    d.wat_bas_pop_residence_urban === undefined
+                ) {
+                    return;
+                }
+
+                const country = formatCountry(d.entity);
+
+                if (!myProcessedData[country]) {
+                    myProcessedData[country] = {
+                        waterPopulation: 0,
+                        years: new Set()
                     };
-                })
-                .filter((item) => item.total > 0)
-                .sort((a, b) => b.total - a.total);
+                }
 
-            if (cleanData.length === 0) {
-                mensajeError = 'La API respondió correctamente, pero no hay registros válidos para representar.';
+                myProcessedData[country].waterPopulation += Number(d.wat_bas_pop_residence_urban) || 0;
+                myProcessedData[country].years.add(Number(d.year));
+            });
+
+            // 2. Procesamos G17: consumo total de energías renovables
+            const g17ProcessedData = {};
+
+            g17Data.forEach((d) => {
+                if (
+                    !d.country ||
+                    d.year === undefined ||
+                    d.wind === undefined ||
+                    d.hydro === undefined ||
+                    d.solar === undefined ||
+                    d.other === undefined
+                ) {
+                    return;
+                }
+
+                const country = formatCountry(d.country);
+
+                const wind = Number(d.wind) || 0;
+                const hydro = Number(d.hydro) || 0;
+                const solar = Number(d.solar) || 0;
+                const other = Number(d.other) || 0;
+
+                const renewableTotal = wind + hydro + solar + other;
+
+                if (renewableTotal <= 0) {
+                    return;
+                }
+
+                if (!g17ProcessedData[country]) {
+                    g17ProcessedData[country] = {
+                        renewableConsumption: 0,
+                        years: new Set()
+                    };
+                }
+
+                g17ProcessedData[country].renewableConsumption += renewableTotal;
+                g17ProcessedData[country].years.add(Number(d.year));
+            });
+
+            // 3. Cruzamos solo países/entidades que existen en ambas APIs
+            const labels = Object.keys(myProcessedData).filter((country) => {
+                return g17ProcessedData[country];
+            });
+
+            if (labels.length === 0) {
+                mensajeError =
+                    'No hay países coincidentes entre mi API y la API del Grupo 17 para poder integrarlos.';
                 cargando = false;
                 return;
             }
 
-            datos = cleanData;
+            const waterSeries = labels.map((country) => {
+                return myProcessedData[country].waterPopulation;
+            });
 
-            const totals = cleanData.reduce(
-                (acc, item) => {
-                    acc.wind += item.wind;
-                    acc.hydro += item.hydro;
-                    acc.solar += item.solar;
-                    acc.other += item.other;
-                    acc.total += item.total;
-                    return acc;
-                },
-                {
-                    wind: 0,
-                    hydro: 0,
-                    solar: 0,
-                    other: 0,
-                    total: 0
-                }
-            );
+            const renewableSeries = labels.map((country) => {
+                return g17ProcessedData[country].renewableConsumption;
+            });
 
-            const percentages = {
-                wind: totals.total ? (totals.wind / totals.total) * 100 : 0,
-                hydro: totals.total ? (totals.hydro / totals.total) * 100 : 0,
-                solar: totals.total ? (totals.solar / totals.total) * 100 : 0,
-                other: totals.total ? (totals.other / totals.total) * 100 : 0
-            };
+            tablaDatos = labels.map((country, index) => {
+                return {
+                    country,
+                    waterPopulation: waterSeries[index],
+                    renewableConsumption: renewableSeries[index],
+                    myYears: Array.from(myProcessedData[country].years).sort((a, b) => a - b).join(', '),
+                    g17Years: Array.from(g17ProcessedData[country].years).sort((a, b) => a - b).join(', ')
+                };
+            });
 
-            resumen = {
-                records: cleanData.length,
-                total: totals.total,
-                topRecord: cleanData[0],
-                totals,
-                percentages
-            };
+            // 4. Dibujamos la gráfica
+            const ctx = document.getElementById('integration-chart');
 
-            await renderChart();
+            if (chart) {
+                chart.destroy();
+            }
 
-            cargando = false;
-        } catch (error) {
-            console.error('Error cargando datos del Grupo 17:', error);
-            mensajeError = 'Error de conexión o de procesamiento al cargar la API del Grupo 17.';
-            cargando = false;
-        }
-    }
-
-    async function renderChart() {
-        const ApexCharts = (await import('apexcharts')).default;
-
-        const labels = ['Eólica', 'Hidráulica', 'Solar', 'Otras'];
-        const values = [
-            Number(resumen.percentages.wind.toFixed(2)),
-            Number(resumen.percentages.hydro.toFixed(2)),
-            Number(resumen.percentages.solar.toFixed(2)),
-            Number(resumen.percentages.other.toFixed(2))
-        ];
-
-        const options = {
-            series: values,
-            chart: {
-                type: 'radialBar',
-                height: 540,
-                toolbar: {
-                    show: true
-                }
-            },
-            title: {
-                text: 'Distribución del consumo de energías renovables',
-                align: 'center'
-            },
-            subtitle: {
-                text: 'Consumo directo de la API renewable-energy-consumptions del Grupo 17',
-                align: 'center'
-            },
-            labels,
-            plotOptions: {
-                radialBar: {
-                    dataLabels: {
-                        name: {
-                            fontSize: '16px'
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Población urbana con agua potable básica',
+                            data: waterSeries,
+                            backgroundColor: 'rgba(52, 152, 219, 0.8)',
+                            yAxisID: 'y'
                         },
-                        value: {
-                            fontSize: '15px',
-                            formatter: function (value) {
-                                return Number(value).toFixed(2) + '%';
+                        {
+                            label: 'Consumo total de energías renovables G17',
+                            data: renewableSeries,
+                            backgroundColor: 'rgba(46, 204, 113, 0.8)',
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Integración: agua potable urbana y energías renovables'
+                        },
+                        subtitle: {
+                            display: true,
+                            text: 'Comparación entre mi API drinking-water-services y la API renewable-energy-consumptions del Grupo 17'
+                        },
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const label = context.dataset.label || '';
+                                    const value = context.raw || 0;
+                                    return `${label}: ${formatNumber(value)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Población urbana con agua potable básica'
                             }
                         },
-                        total: {
-                            show: true,
-                            label: 'Total',
-                            formatter: function () {
-                                return '100%';
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Consumo renovable total'
                             }
                         }
                     }
                 }
-            },
-            tooltip: {
-                y: {
-                    formatter: function (value) {
-                        return Number(value).toFixed(2) + '% del total';
-                    }
-                }
-            },
-            legend: {
-                show: true,
-                position: 'bottom'
-            }
-        };
+            });
 
-        const divChart = document.getElementById('apex-chart');
-
-        if (chart) {
-            chart.destroy();
+            cargando = false;
+        } catch (error) {
+            console.error('Error cargando la integración con G17:', error);
+            mensajeError = 'Error al cargar la integración. Verifica las conexiones de red y las rutas de las APIs.';
+            cargando = false;
         }
-
-        chart = new ApexCharts(divChart, options);
-        chart.render();
     }
 
     onMount(() => {
-        if (typeof window !== 'undefined') {
-            loadData();
-        }
+        loadIntegration();
 
         return () => {
             if (chart) {
@@ -218,110 +259,83 @@
 </script>
 
 <svelte:head>
-    <title>Consumo API Grupo 17</title>
+    <title>Integración con G17</title>
 </svelte:head>
 
 <main class="container">
     <header class="header">
         <div>
-            <h1>Consumo de energías renovables</h1>
+            <h1>Integración: agua potable y energías renovables</h1>
             <p class="subtitle">
-                Consumo directo de la API <strong>renewable-energy-consumptions</strong> del Grupo 17.
+                Comparación entre mi API <strong>drinking-water-services</strong> y la API
+                <strong>renewable-energy-consumptions</strong> del Grupo 17.
             </p>
         </div>
 
         <button class="btn-back" onclick={() => window.location.href = '/integrations'}>
-            ⬅ Volver
+            ⬅ Volver a Integraciones
         </button>
     </header>
 
     <section class="info-box">
-        <h2>Descripción del uso</h2>
+        <h2>Descripción de la integración</h2>
+
         <p>
-            Esta vista consume mediante <strong>fetch</strong> la API RESTful del Grupo 17,
-            recibe los datos en formato <strong>JSON</strong> y representa el reparto acumulado
-            del consumo de energías renovables entre eólica, hidráulica, solar y otras fuentes.
+            Esta vista realiza dos peticiones mediante <strong>fetch</strong>: una a mi API de
+            servicios de agua potable urbana y otra a la API del Grupo 17 sobre consumo de energías
+            renovables. Ambas APIs devuelven datos en formato <strong>JSON</strong>.
+        </p>
+
+        <p>
+            Después, los datos se procesan y se agrupan por país. En mi API se suma la variable
+            <strong>wat_bas_pop_residence_urban</strong>, que representa la población urbana con
+            servicios básicos de agua potable. En la API del Grupo 17 se suman las variables
+            <strong>wind</strong>, <strong>hydro</strong>, <strong>solar</strong> y
+            <strong>other</strong> para obtener el consumo renovable total.
+        </p>
+
+        <p>
+            Finalmente, solo se representan los países que aparecen en ambas APIs, permitiendo una
+            comparación integrada entre acceso urbano al agua potable y consumo de energías
+            renovables.
         </p>
     </section>
 
     {#if cargando}
-        <p class="loading-msg">Cargando datos de la API del Grupo 17...</p>
+        <p class="loading-msg">Haciendo fetch a las APIs y procesando datos...</p>
     {/if}
 
     {#if mensajeError}
         <div class="alert error">{mensajeError}</div>
     {/if}
 
-    {#if resumen}
-        <section class="summary-grid">
-            <article class="summary-card">
-                <span class="label">Registros obtenidos</span>
-                <strong>{resumen.records}</strong>
-            </article>
+    <div class="chart-container" style={cargando || mensajeError ? 'display: none;' : ''}>
+        <canvas id="integration-chart"></canvas>
+    </div>
 
-            <article class="summary-card">
-                <span class="label">Consumo renovable total</span>
-                <strong>{formatNumber(resumen.total)}</strong>
-            </article>
-
-            <article class="summary-card">
-                <span class="label">Mayor registro</span>
-                <strong>
-                    {resumen.topRecord.country} ({resumen.topRecord.year})
-                </strong>
-            </article>
-
-            <article class="summary-card">
-                <span class="label">Fuente dominante</span>
-                <strong>
-                    {resumen.percentages.wind >= resumen.percentages.hydro &&
-                    resumen.percentages.wind >= resumen.percentages.solar &&
-                    resumen.percentages.wind >= resumen.percentages.other
-                        ? 'Eólica'
-                        : resumen.percentages.hydro >= resumen.percentages.solar &&
-                            resumen.percentages.hydro >= resumen.percentages.other
-                          ? 'Hidráulica'
-                          : resumen.percentages.solar >= resumen.percentages.other
-                            ? 'Solar'
-                            : 'Otras'}
-                </strong>
-            </article>
-        </section>
-    {/if}
-
-    <section class="chart-container" style={cargando || mensajeError ? 'display: none;' : ''}>
-        <div id="apex-chart"></div>
-    </section>
-
-    {#if datos.length > 0}
+    {#if tablaDatos.length > 0}
         <section class="table-section">
-            <h2>Datos obtenidos de la API</h2>
+            <h2>Datos integrados</h2>
 
             <table>
                 <thead>
                     <tr>
-                        <th>País</th>
-                        <th>Código</th>
-                        <th>Año</th>
-                        <th>Eólica</th>
-                        <th>Hidráulica</th>
-                        <th>Solar</th>
-                        <th>Otras</th>
-                        <th>Total</th>
+                        <th>País / entidad</th>
+                        <th>Población urbana con agua potable básica</th>
+                        <th>Consumo renovable total G17</th>
+                        <th>Años en mi API</th>
+                        <th>Años en G17</th>
                     </tr>
                 </thead>
 
                 <tbody>
-                    {#each datos as item (`${item.country}-${item.code}-${item.year}-${item.total}`)}
+                    {#each tablaDatos as item (item.country)}
                         <tr>
                             <td>{item.country}</td>
-                            <td>{item.code}</td>
-                            <td>{item.year}</td>
-                            <td>{formatNumber(item.wind)}</td>
-                            <td>{formatNumber(item.hydro)}</td>
-                            <td>{formatNumber(item.solar)}</td>
-                            <td>{formatNumber(item.other)}</td>
-                            <td>{formatNumber(item.total)}</td>
+                            <td>{formatNumber(item.waterPopulation)}</td>
+                            <td>{formatNumber(item.renewableConsumption)}</td>
+                            <td>{item.myYears}</td>
+                            <td>{item.g17Years}</td>
                         </tr>
                     {/each}
                 </tbody>
@@ -330,12 +344,10 @@
     {/if}
 
     <p class="footer-text">
-        Visualización realizada con <strong>ApexCharts</strong>, tipo <strong>radialBar</strong>.
-        Esta combinación es distinta de <strong>Highcharts + area</strong>,
-        <strong>Highcharts + bar</strong>, <strong>Highcharts + pie</strong>,
-        <strong>ApexCharts + radar</strong> y <strong>ApexCharts + treemap</strong>.
-        Los datos se obtienen mediante <strong>fetch</strong>, se procesan como
-        <strong>JSON</strong> y se muestran mediante gráfica y tabla HTML.
+        Integración realizada con <strong>Chart.js</strong>, tipo <strong>bar</strong>.
+        No se utiliza una gráfica de tipo line. Los datos se obtienen mediante
+        <strong>fetch</strong>, se procesan como <strong>JSON</strong> y se muestran mediante
+        gráfica y tabla HTML.
     </p>
 </main>
 
@@ -360,7 +372,7 @@
     h1 {
         color: #333;
         margin: 0;
-        font-size: 1.7rem;
+        font-size: 1.5rem;
     }
 
     h2 {
@@ -383,41 +395,14 @@
         color: #166534;
     }
 
-    .summary-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 15px;
-        margin-bottom: 25px;
-    }
-
-    .summary-card {
-        background: white;
-        padding: 18px;
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
-        border: 1px solid #eee;
-    }
-
-    .summary-card .label {
-        display: block;
-        color: #777;
-        font-size: 0.85rem;
-        margin-bottom: 8px;
-    }
-
-    .summary-card strong {
-        font-size: 1.15rem;
-        color: #333;
-    }
-
     .chart-container {
         width: 100%;
-        min-height: 560px;
+        height: 520px;
         background: white;
         padding: 20px;
-        border-radius: 10px;
+        border-radius: 8px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        margin-bottom: 25px;
+        margin-bottom: 20px;
     }
 
     .btn-back {
@@ -493,19 +478,13 @@
         margin-top: 20px;
     }
 
-    @media (max-width: 900px) {
-        .summary-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-
-    @media (max-width: 600px) {
-        .summary-grid {
-            grid-template-columns: 1fr;
-        }
-
+    @media (max-width: 700px) {
         .header {
             flex-direction: column;
+        }
+
+        .chart-container {
+            height: 430px;
         }
     }
 </style>
