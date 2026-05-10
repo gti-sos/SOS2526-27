@@ -57,9 +57,11 @@
 		<div>
 			<h1>SOS2526-27</h1>
 			<p class="subtitle">
-				Portal del equipo con acceso a los frontends, APIs, documentación y repositorio.
+				Portal del equipo con acceso a frontends, APIs, documentación, integraciones,
+				consumiciones y repositorio.
 			</p>
 		</div>
+
 		<button class="link-button" onclick={irAAbout}>Sobre el equipo</button>
 	</header>
 
@@ -75,9 +77,27 @@
 	<section class="card highlight">
 		<h2>Dashboard Grupal</h2>
 		<p>Accede a la visualización integrada de todos los datos del equipo en una única matriz global.</p>
+
 		<button class="primary-button" onclick={() => irA('/analytics')}>
 			Ir a la integración grupal
 		</button>
+	</section>
+
+	<section class="card navigation-card">
+		<h2>Entregable D03</h2>
+		<p class="section-description">
+			Accede a las integraciones y consumiciones realizadas para el entregable.
+		</p>
+
+		<div class="main-buttons">
+			<button class="primary-button green" onclick={() => irA('/integrations')}>
+				Ver integraciones
+			</button>
+
+			<button class="primary-button orange" onclick={() => irA('/consumptions')}>
+				Ver consumiciones
+			</button>
+		</div>
 	</section>
 
 	<section class="card">
@@ -94,6 +114,7 @@
 					<th>GitHub</th>
 				</tr>
 			</thead>
+
 			<tbody>
 				{#each equipo as persona (persona.recurso)}
 					<tr>
@@ -150,10 +171,48 @@
 		padding-bottom: 16px;
 	}
 
-	/* Sección destacada */
+	h1 {
+		margin: 0 0 8px 0;
+		font-size: 2rem;
+	}
+
+	h2 {
+		margin-top: 0;
+		font-size: 1.25rem;
+	}
+
+	.subtitle {
+		margin: 0;
+		color: #64748b;
+	}
+
+	.card {
+		background: white;
+		border: 1px solid #e2e8f0;
+		border-radius: 12px;
+		padding: 24px;
+		margin-bottom: 20px;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+	}
+
 	.highlight {
 		border-left: 4px solid #2563eb;
 		background-color: #eff6ff;
+	}
+
+	.navigation-card {
+		border-left: 4px solid #0f172a;
+	}
+
+	.section-description {
+		margin: 6px 0 18px 0;
+		color: #475569;
+	}
+
+	.main-buttons {
+		display: flex;
+		gap: 14px;
+		flex-wrap: wrap;
 	}
 
 	.primary-button {
@@ -165,37 +224,91 @@
 		font-weight: 600;
 		cursor: pointer;
 		margin-top: 10px;
+		white-space: nowrap;
 	}
 
 	.primary-button:hover {
 		background-color: #1d4ed8;
 	}
 
-	h1 { margin: 0 0 8px 0; font-size: 2rem; }
-	h2 { margin-top: 0; font-size: 1.25rem; }
-	.subtitle { margin: 0; color: #64748b; }
-	
+	.primary-button.green {
+		background-color: #16a34a;
+	}
+
+	.primary-button.green:hover {
+		background-color: #15803d;
+	}
+
+	.primary-button.orange {
+		background-color: #f97316;
+	}
+
+	.primary-button.orange:hover {
+		background-color: #ea580c;
+	}
+
 	.link-button {
-		background: none; border: none; padding: 0;
-		color: #2563eb; font: inherit; font-weight: 600; cursor: pointer;
+		background: none;
+		border: none;
+		padding: 0;
+		color: #2563eb;
+		font: inherit;
+		font-weight: 600;
+		cursor: pointer;
 	}
 
-	.card {
-		background: white; border: 1px solid #e2e8f0;
-		border-radius: 12px; padding: 24px; margin-bottom: 20px;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+	.link-button:hover {
+		text-decoration: underline;
 	}
 
-	table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-	th, td { text-align: left; padding: 12px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
-	th { background: #f8fafc; font-weight: 700; }
-	.link-button:hover { text-decoration: underline; }
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		margin-top: 12px;
+	}
+
+	th,
+	td {
+		text-align: left;
+		padding: 12px;
+		border-bottom: 1px solid #e2e8f0;
+		vertical-align: top;
+	}
+
+	th {
+		background: #f8fafc;
+		font-weight: 700;
+	}
 
 	@media (max-width: 900px) {
-		header { flex-direction: column; }
-		table, thead, tbody, tr, th, td { display: block; }
-		thead { display: none; }
-		tr { border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; margin-bottom: 12px; background: white; }
-		td { border-bottom: none; padding: 6px 0; }
+		header {
+			flex-direction: column;
+		}
+
+		table,
+		thead,
+		tbody,
+		tr,
+		th,
+		td {
+			display: block;
+		}
+
+		thead {
+			display: none;
+		}
+
+		tr {
+			border: 1px solid #e2e8f0;
+			border-radius: 10px;
+			padding: 10px;
+			margin-bottom: 12px;
+			background: white;
+		}
+
+		td {
+			border-bottom: none;
+			padding: 6px 0;
+		}
 	}
 </style>

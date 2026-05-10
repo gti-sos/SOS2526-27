@@ -128,8 +128,8 @@
 <main class="container">
     <header class="header">
         <h1>Integración: Agua Potable vs Ventas Online (G23)</h1>
-        <button class="btn-back" onclick={() => window.location.href = '/integrations'}>
-            ⬅ Volver a Integraciones
+        <button class="btn-back" onclick={() => window.location.href = '/'}>
+            ⬅ Volver a la pagina principal
         </button>
     </header>
 

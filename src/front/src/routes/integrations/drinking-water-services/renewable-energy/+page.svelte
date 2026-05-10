@@ -272,8 +272,8 @@
             </p>
         </div>
 
-        <button class="btn-back" onclick={() => window.location.href = '/integrations'}>
-            ⬅ Volver a Integraciones
+        <button class="btn-back" onclick={() => window.location.href = '/'}>
+            ⬅ Volver a la pagina principal
         </button>
     </header>
 
