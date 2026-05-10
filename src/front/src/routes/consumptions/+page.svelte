@@ -6,7 +6,7 @@
 		{
 			nombre: 'World Bank',
 			descripcion: 'Consumición directa de World Bank mediante proxy propio.',
-			ruta: '/integrations/drinking-water-services/world-bank'
+			ruta: '/consumptions/drinking-water-services/world-bank'
 		}
 	];
 
