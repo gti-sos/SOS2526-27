@@ -26,7 +26,6 @@
     "test-world-hydroelectric-plants": "start-server-and-test start http://localhost:10000 test-APS",
     "test-all": "npm run test-ACN && npm run test-ACS && npm run test-APS",
     "test": "npm run build && start-server-and-test start http://localhost:10000 test-all",
-    
     "import-water": "node scripts/import-water-services.js"
   },
   "dependencies": {
@@ -39,6 +38,7 @@
     "highcharts": "^12.6.0",
     "nedb": "^1.8.0",
     "newman": "^6.2.2",
+    "request": "^2.88.2",
     "svelte-spa-router": "^5.0.0"
   },
   "keywords": [],

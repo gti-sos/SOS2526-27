@@ -35,11 +35,15 @@
 		"@highcharts/map-collection": "^2.3.2",
 		"apexcharts": "^5.10.6",
 		"billboard.js": "^3.18.0",
+		"c3": "^0.7.20",
 		"chart.js": "^4.5.1",
 		"chartist": "^1.5.0",
 		"d3": "^7.9.0",
 		"echarts": "^6.0.0",
+		"frappe-charts": "^1.6.2",
 		"highcharts": "^12.6.0",
-		"plotly.js-dist": "^3.5.0"
+		"plotly.js-dist": "^3.5.0",
+		"plotly.js-dist-min": "^3.5.1",
+		"taucharts": "^2.8.0"
 	}
 }
