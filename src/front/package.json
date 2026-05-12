@@ -33,6 +33,7 @@
 	},
 	"dependencies": {
 		"@highcharts/map-collection": "^2.3.2",
+		"@toast-ui/chart": "^4.6.1",
 		"apexcharts": "^5.11.0",
 		"billboard.js": "^3.18.0",
 		"c3": "^0.7.20",

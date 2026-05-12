@@ -87,10 +87,10 @@
               "    pm.response.to.have.status(200);\r",
               "});\r",
               "\r",
-              "pm.test(\"La respuesta es un array con 10 elementos\", function () {\r",
+              "pm.test(\"La respuesta es un array con 17 elementos\", function () {\r",
               "    var jsonData = pm.response.json();\r",
               "    pm.expect(jsonData).to.be.an('array');\r",
-              "    pm.expect(jsonData.length).to.eql(10);\r",
+              "    pm.expect(jsonData.length).to.eql(17);\r",
               "});"
             ],
             "type": "text/javascript",
