@@ -33,17 +33,16 @@ import worldHydroelectricPlants from './src/back/world-hydroelectric-plants.js';
 app.use("/api/v1/world-hydroelectric-plants", worldHydroelectricPlants);
 
 // PROXY
-// Ruta Proxy para Nobel Stats
-app.get("/api/v1/nobel-prize", async (req, res) => {
-    try {
-        const fetch = (await import('node-fetch')).default;
-        const response = await fetch("https://api.nobelprize.org/v1/laureate.json");
-        const data = await response.json();
-        res.json(data);
-    } catch (error) {
-        console.error("Error en el proxy de Nobel:", error);
-        res.status(500).send("Error al obtener datos del Nobel");
-    }
+// Ruta Proxy para Nobel Prize
+app.get("/api/v1/nobel-prize", (req, res) => {
+    fetch("https://api.nobelprize.org/v1/laureate.json")
+        .then(response => response.json())
+        .then(data => {
+            res.json(data);
+        })
+        .catch(error => {
+            res.status(500).send("Error en el proxy");
+        });
 });
 // FIN PROXY
 

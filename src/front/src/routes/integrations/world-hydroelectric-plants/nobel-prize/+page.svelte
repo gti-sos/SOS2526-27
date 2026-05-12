@@ -2,89 +2,106 @@
     import { onMount } from 'svelte';
 
     let chartDiv;
-    let API_MY = "";
-    let API_PROXY = "";
+    // Variables de estado para los datos (usadas para evitar errores de linter)
+    let countries = [];
+    let energyValues = [];
+    let nobelValues = [];
 
     async function loadData() {
-        // URLs automáticas para Localhost y Render
-        API_MY = window.location.origin + "/api/v1/world-hydroelectric-plants";
-        API_PROXY = window.location.origin + "/api/v1/nobel-prize";
+        const API_MY = "/api/v1/world-hydroelectric-plants";
+        const API_PROXY = "/api/v1/nobel-prize";
 
         try {
-            // 1. Datos de tus plantas
             const resMy = await fetch(API_MY);
             const myData = await resMy.json();
 
-            // 2. Datos del Nobel mediante TU PROXY
             const resNobel = await fetch(API_PROXY);
             const nobelData = await resNobel.json();
 
-            // 3. AGRUPAR POR PAÍS Y SUMAR CAPACIDAD
+            if (!myData.length || !nobelData.laureates) return;
+
+            // 1. AGRUPAR POR PAÍS Y SUMAR MW
             const grouped = myData.reduce((acc, current) => {
-                const country = current.country;
+                const country = current.country.trim();
                 if (!acc[country]) acc[country] = 0;
                 acc[country] += current.capacity_mw;
                 return acc;
             }, {});
 
-            // 4. ORDENAR ALFABÉTICAMENTE
-            const sortedCountries = Object.keys(grouped)
-                .sort((a, b) => a.localeCompare(b))
-                .slice(0, 10);
-
-            const energySeries = [];
-            const nobelSeries = [];
-
-            for (const country of sortedCountries) {
-                // Contamos laureados en el JSON que vino del proxy
-                const laureates = nobelData.laureates.filter(l => 
-                    l.bornCountry && l.bornCountry.toLowerCase().includes(country.toLowerCase())
+            // 2. ORDENAR ALFABÉTICAMENTE Y CRUZAR
+            countries = Object.keys(grouped).sort((a, b) => a.localeCompare(b)).slice(0, 10);
+            
+            energyValues = countries.map(c => Math.round(grouped[c]));
+            nobelValues = countries.map(c => {
+                return nobelData.laureates.filter(l => 
+                    l.bornCountry && l.bornCountry.toLowerCase().includes(c.toLowerCase())
                 ).length;
+            });
 
-                energySeries.push(Math.round(grouped[country]));
-                nobelSeries.push(laureates);
-            }
-
-            renderMixedChart(sortedCountries, energySeries, nobelSeries);
+            renderMixedChart();
         } catch (e) {
-            console.log("Error en la integración: " + e.message);
+            console.error("Error cargando integración:", e);
         }
     }
 
-    function renderMixedChart(categories, energy, nobels) {
+    function renderMixedChart() {
         if (!window.ApexCharts || !chartDiv) return;
 
         const options = {
             series: [
-                { name: 'Potencia Hidro (MW)', type: 'column', data: energy },
-                { name: 'Nº Premios Nobel', type: 'line', data: nobels }
+                { name: 'Potencia Hidroeléctrica (MW)', type: 'area', data: energyValues },
+                { name: 'Total Premios Nobel', type: 'column', data: nobelValues }
             ],
-            chart: { height: 450, type: 'line', toolbar: { show: false } },
-            stroke: { width: [0, 4], curve: 'smooth' },
-            title: {
-                text: 'Músculo Industrial vs Excelencia Intelectual',
-                align: 'center'
+            chart: {
+                height: 500,
+                type: 'line', // Tipo base para gráficos mixtos
+                toolbar: { show: false },
+                stacked: false
             },
-            dataLabels: {
-                enabled: true,
-                enabledOnSeries: [0, 1],
-                style: { fontSize: '10px' }
+            stroke: { width: [3, 0], curve: 'smooth' },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    inverseColors: false,
+                    shade: 'light',
+                    type: "vertical",
+                    opacityFrom: 0.85,
+                    opacityTo: 0.55
+                }
             },
-            labels: categories,
-            // DOBLE EJE: Para distinguir los campos perfectamente
+            colors: ['#008FFB', '#FEB019'], // Azul (Energía) y Dorado (Nobel)
+            labels: countries,
+            // DOBLE EJE Y: Distingue los campos perfectamente
             yaxis: [
                 {
-                    title: { text: 'Potencia (MW)', style: { color: '#008FFB' } },
+                    title: { text: 'Capacidad MW (Área Azul)', style: { color: '#008FFB' } },
                     labels: { style: { colors: '#008FFB' } }
                 },
                 {
                     opposite: true,
-                    title: { text: 'Laureados Nobel', style: { color: '#FEB019' } },
+                    title: { text: 'Laureados Nobel (Columnas)', style: { color: '#FEB019' } },
                     labels: { style: { colors: '#FEB019' } }
                 }
             ],
-            colors: ['#008FFB', '#FEB019'],
-            legend: { position: 'top' }
+            // ARREGLO LINTER: Solo pasamos dataPointIndex que es el que usamos
+            tooltip: {
+                custom: function({ dataPointIndex }) {
+                    const c = countries[dataPointIndex];
+                    const mw = energyValues[dataPointIndex];
+                    const nb = nobelValues[dataPointIndex];
+                    return `<div style="padding:15px; background:#fff; border:1px solid #ddd; border-radius:5px;">
+                        <b style="font-size:15px; color:#333;">${c}</b><hr/>
+                        <span style="color:#008FFB;">⚡ Potencia: <b>${mw.toLocaleString()} MW</b></span><br/>
+                        <span style="color:#FEB019;">🏆 Premios Nobel: <b>${nb}</b></span>
+                    </div>`;
+                }
+            },
+            legend: { position: 'top' },
+            title: {
+                text: 'Músculo Industrial vs Excelencia Intelectual',
+                align: 'center',
+                style: { fontSize: '20px', fontWeight: 'bold' }
+            }
         };
 
         new window.ApexCharts(chartDiv, options).render();
@@ -98,33 +115,33 @@
 </svelte:head>
 
 <main class="page-container">
-    <div class="top-nav">
+    <div class="top-header">
         <h1 class="page-title">Uso de Proxy: Nobel & Energy Stats</h1>
-        <button class="btn-volver" on:click={() => window.location.href = "/integrations"}>
+        <button class="btn-back" on:click={() => window.location.href = "/integrations"}>
             ← Volver
         </button>
     </div>
 
     <div class="main-card">
-        <div class="chart-box">
+        <div class="chart-content">
             <div bind:this={chartDiv}></div>
         </div>
     </div>
 
     <div class="analysis-box">
         <p>
-            <span class="icon">🏆</span> 
-            <strong>Análisis de los datos:</strong> Esta integración utiliza un <strong>proxy en el backend</strong> 
-            para cruzar los datos de potencia industrial con la base de datos de la Fundación Nobel. 
-            Mediante un gráfico mixto, se distinguen los <strong>Megavatios</strong> (columnas azules) de los 
-            <strong>Premios Nobel</strong> (línea dorada). La información se presenta agrupada por país y 
-            ordenada alfabéticamente, permitiendo comparar la capacidad técnica frente a la excelencia académica.
+            <span class="icon">🏛️</span> 
+            <strong>Identificación de campos:</strong> Esta visualización mixta separa las unidades de medida mediante un 
+            <strong>doble eje vertical</strong>. El <strong>Área Azul</strong> del fondo cuantifica el volumen de capacidad 
+            energética (MW), mientras que las <strong>Columnas Doradas</strong> del primer plano resaltan los hitos individuales 
+            en forma de Premios Nobel. Los países están agrupados y ordenados alfabéticamente para facilitar la comparación 
+            directa entre el potencial industrial y el capital intelectual nacional.
         </p>
     </div>
 </main>
 
 <style>
-    /* CLONACIÓN EXACTA DEL ESTILO WINE-STATS */
+    /* ESTILO WINE-STATS AL 100% */
     :global(body) {
         background-color: #f8f9fa;
         margin: 0;
@@ -137,7 +154,7 @@
         margin: 0 auto;
     }
 
-    .top-nav {
+    .top-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -148,9 +165,10 @@
         font-size: 28px;
         font-weight: bold;
         color: #000;
+        margin: 0;
     }
 
-    .btn-volver {
+    .btn-back {
         background-color: #6c757d;
         color: white;
         border: none;
@@ -158,6 +176,7 @@
         border-radius: 5px;
         cursor: pointer;
         font-weight: bold;
+        font-size: 14px;
     }
 
     .main-card {
@@ -168,18 +187,18 @@
         margin-bottom: 35px;
     }
 
-    .chart-box {
-        min-height: 450px;
+    .chart-content {
+        min-height: 500px;
     }
 
     /* EL CUADRO DE ANÁLISIS ESPECÍFICO (ROSADO/ROJO) */
     .analysis-box {
-        background-color: #fff5f5;
-        border-left: 6px solid #ff4d4d;
+        background-color: #fff5f5; /* Rosado */
+        border-left: 6px solid #ff4d4d; /* Borde rojo de 6px */
         padding: 25px;
         border-radius: 4px;
         color: #333;
-        font-size: 15px;
+        font-size: 16px;
         line-height: 1.6;
     }
 
