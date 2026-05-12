@@ -29,7 +29,14 @@ const initial_dams = [
     { grand_id: 7, dam_name: "Peace-Canyon", river: "Peace", country: "Canada", year: 1980, dam_hgt: 61, dam_len: 533, area_skm: 8, cap_mcm: 215.9, depth_m: 25.2, dis_avg_ls: 117544 },
     { grand_id: 8, dam_name: "Swan-Lake", river: "Falls Creek", country: "United States", year: 1984, dam_hgt: 53, dam_len: 146, area_skm: 5, cap_mcm: 15, depth_m: 3, dis_avg_ls: 5639 },
     { grand_id: 9, dam_name: "Master-Canyon", river: "Peace", country: "Canada", year: 1988, dam_hgt: 45, dam_len: 241, area_skm: 2, cap_mcm: 5, depth_m: 39, dis_avg_ls: 115831 },
-    { grand_id: 10, dam_name: "Spoon-Lake", river: "Miley river", country: "United States", year: 1992, dam_hgt: 37, dam_len: 628, area_skm: 5, cap_mcm: 49, depth_m: 27.2, dis_avg_ls: 25193 }
+    { grand_id: 10, dam_name: "Spoon-Lake", river: "Miley river", country: "United States", year: 1992, dam_hgt: 37, dam_len: 628, area_skm: 5, cap_mcm: 49, depth_m: 27.2, dis_avg_ls: 25193 },
+    { grand_id: 11, dam_name: "La Almendra", river: "Tormes", country: "España", year: 1970, dam_hgt: 202, dam_len: 567, area_skm: 86, cap_mcm: 2649, depth_m: 25, dis_avg_ls: 15000 },
+    { grand_id: 12, dam_name: "Rappbode", river: "Rappbode", country: "Alemania", year: 1959, dam_hgt: 106, dam_len: 415, area_skm: 4, cap_mcm: 113, depth_m: 89, dis_avg_ls: 2500 },
+    { grand_id: 13, dam_name: "Dnieper", river: "Dnieper", country: "Ucrania", year: 1932, dam_hgt: 60, dam_len: 760, area_skm: 410, cap_mcm: 1120, depth_m: 20, dis_avg_ls: 160000 },
+    { grand_id: 14, dam_name: "Alarcón", river: "Júcar", country: "España", year: 1970, dam_hgt: 71, dam_len: 120, area_skm: 68, cap_mcm: 1112, depth_m: 16, dis_avg_ls: 12000 },
+    { grand_id: 15, dam_name: "Place-Moulin", river: "Buthier", country: "Italy", year: 1965, dam_hgt: 155, dam_len: 678, area_skm: 2, cap_mcm: 105, depth_m: 140, dis_avg_ls: 4500 },
+    { grand_id: 16, dam_name: "Harsprånget", river: "Lule", country: "Sweden", year: 1951, dam_hgt: 50, dam_len: 1320, area_skm: 18, cap_mcm: 1494, depth_m: 34, dis_avg_ls: 868000 },
+    { grand_id: 17, dam_name: "Three-Gorges", river: "Yangtze", country: "China", year: 2003, dam_hgt: 181, dam_len: 2335, area_skm: 1084, cap_mcm: 39300, depth_m: 175, dis_avg_ls: 3120000 }
 ];
 
 // LOAD INITIAL DATA

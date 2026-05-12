@@ -33,7 +33,7 @@
 	},
 	"dependencies": {
 		"@highcharts/map-collection": "^2.3.2",
-		"apexcharts": "^5.10.6",
+		"apexcharts": "^5.11.0",
 		"billboard.js": "^3.18.0",
 		"c3": "^0.7.20",
 		"chart.js": "^4.5.1",

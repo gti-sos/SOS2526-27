@@ -52,6 +52,25 @@ app.get("/api/v1/nobel-prize", (req, res) => {
 // BLOQUE ACN
 import waterDams from './src/back/water-dams.js'; 
 app.use("/api/v1/water-dams", waterDams);
+// PROXY PARA GRUPO 15
+app.get('/api/v1/proxy-g15', async (req, res) => {
+    // URL de la API del compañero del Grupo 15
+    const url = "https://sos2526-15.onrender.com/api/v1/population-densities";
+    
+    try {
+        const response = await fetch(url);
+        if (response.ok) {
+            const data = await response.json();
+            // Enviamos los datos al front-end como si vinieran de nuestro servidor
+            res.json(data); 
+        } else {
+            res.status(response.status).send("Error al contactar con la API del Grupo 15");
+        }
+    } catch (error) {
+        console.error("Error en Proxy G15:", error);
+        res.status(500).send("Error interno en el servidor proxy");
+    }
+});
 // FIN BLOQUE ACN
 
 
