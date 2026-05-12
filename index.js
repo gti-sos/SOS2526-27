@@ -33,20 +33,16 @@ import worldHydroelectricPlants from './src/back/world-hydroelectric-plants.js';
 app.use("/api/v1/world-hydroelectric-plants", worldHydroelectricPlants);
 
 // PROXY
-app.get('/api/v1/proxy-worldbank', async (req, res) => {
-    // URL según pág. 10 de tus apuntes [cite: 110]
-    const url = "https://api.worldbank.org/v2/country/all/indicator/NY.GDP.MKTP.CD?format=json&per_page=300&date=2022";
-    
+// Ruta Proxy para Nobel Stats
+app.get("/api/v1/nobel-prize", async (req, res) => {
     try {
-        const response = await fetch(url);
-        if (response.ok) {
-            const data = await response.json();
-            res.json(data); // Enviamos los datos al front-end [cite: 114]
-        } else {
-            res.status(response.status).send("Error en la API externa");
-        }
+        const fetch = (await import('node-fetch')).default;
+        const response = await fetch("https://api.nobelprize.org/v1/laureate.json");
+        const data = await response.json();
+        res.json(data);
     } catch (error) {
-        res.status(500).send("Error interno del servidor proxy");
+        console.error("Error en el proxy de Nobel:", error);
+        res.status(500).send("Error al obtener datos del Nobel");
     }
 });
 // FIN PROXY
