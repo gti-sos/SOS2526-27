@@ -2,10 +2,6 @@
     import { onMount } from 'svelte';
 
     let chartDiv;
-    // Variables de estado para los datos (usadas para evitar errores de linter)
-    let countries = [];
-    let energyValues = [];
-    let nobelValues = [];
 
     async function loadData() {
         const API_MY = "/api/v1/world-hydroelectric-plants";
@@ -20,7 +16,7 @@
 
             if (!myData.length || !nobelData.laureates) return;
 
-            // 1. AGRUPAR POR PAÍS Y SUMAR MW
+            // 1. AGRUPAR POR PAÍS
             const grouped = myData.reduce((acc, current) => {
                 const country = current.country.trim();
                 if (!acc[country]) acc[country] = 0;
@@ -28,124 +24,113 @@
                 return acc;
             }, {});
 
-            // 2. ORDENAR ALFABÉTICAMENTE Y CRUZAR
-            countries = Object.keys(grouped).sort((a, b) => a.localeCompare(b)).slice(0, 10);
-            
-            energyValues = countries.map(c => Math.round(grouped[c]));
-            nobelValues = countries.map(c => {
-                return nobelData.laureates.filter(l => 
-                    l.bornCountry && l.bornCountry.toLowerCase().includes(c.toLowerCase())
+            const sortedCountries = Object.keys(grouped).sort().slice(0, 8); 
+
+            // 2. CONSTRUIR ESTRUCTURA JERÁRQUICA PARA SUNBURST
+            const sunburstData = sortedCountries.map(country => {
+                const nCount = nobelData.laureates.filter(l => 
+                    l.bornCountry && l.bornCountry.toLowerCase().includes(country.toLowerCase())
                 ).length;
+
+                return {
+                    name: country,
+                    children: [
+                        {
+                            name: 'Potencia',
+                            value: Math.round(grouped[country]),
+                            itemStyle: { color: '#008FFB' } // Azul
+                        },
+                        {
+                            name: 'Nobel',
+                            value: nCount * 100, // Escalamos para que sea visible frente a los MW
+                            realValue: nCount,
+                            itemStyle: { color: '#FEB019' } // Dorado
+                        }
+                    ]
+                };
             });
 
-            renderMixedChart();
+            renderSunburst(sunburstData);
         } catch (e) {
-            console.error("Error cargando integración:", e);
+            console.error("Error en la integración:", e);
         }
     }
 
-    function renderMixedChart() {
-        if (!window.ApexCharts || !chartDiv) return;
+    function renderSunburst(data) {
+        // @ts-ignore
+        if (!window.echarts || !chartDiv) return;
+        // @ts-ignore
+        const myChart = window.echarts.init(chartDiv);
 
-        const options = {
-            series: [
-                { name: 'Potencia Hidroeléctrica (MW)', type: 'area', data: energyValues },
-                { name: 'Total Premios Nobel', type: 'column', data: nobelValues }
-            ],
-            chart: {
-                height: 500,
-                type: 'line', // Tipo base para gráficos mixtos
-                toolbar: { show: false },
-                stacked: false
-            },
-            stroke: { width: [3, 0], curve: 'smooth' },
-            fill: {
-                type: 'gradient',
-                gradient: {
-                    inverseColors: false,
-                    shade: 'light',
-                    type: "vertical",
-                    opacityFrom: 0.85,
-                    opacityTo: 0.55
-                }
-            },
-            colors: ['#008FFB', '#FEB019'], // Azul (Energía) y Dorado (Nobel)
-            labels: countries,
-            // DOBLE EJE Y: Distingue los campos perfectamente
-            yaxis: [
-                {
-                    title: { text: 'Capacidad MW (Área Azul)', style: { color: '#008FFB' } },
-                    labels: { style: { colors: '#008FFB' } }
-                },
-                {
-                    opposite: true,
-                    title: { text: 'Laureados Nobel (Columnas)', style: { color: '#FEB019' } },
-                    labels: { style: { colors: '#FEB019' } }
-                }
-            ],
-            // ARREGLO LINTER: Solo pasamos dataPointIndex que es el que usamos
-            tooltip: {
-                custom: function({ dataPointIndex }) {
-                    const c = countries[dataPointIndex];
-                    const mw = energyValues[dataPointIndex];
-                    const nb = nobelValues[dataPointIndex];
-                    return `<div style="padding:15px; background:#fff; border:1px solid #ddd; border-radius:5px;">
-                        <b style="font-size:15px; color:#333;">${c}</b><hr/>
-                        <span style="color:#008FFB;">⚡ Potencia: <b>${mw.toLocaleString()} MW</b></span><br/>
-                        <span style="color:#FEB019;">🏆 Premios Nobel: <b>${nb}</b></span>
-                    </div>`;
-                }
-            },
-            legend: { position: 'top' },
+        const option = {
             title: {
-                text: 'Músculo Industrial vs Excelencia Intelectual',
-                align: 'center',
-                style: { fontSize: '20px', fontWeight: 'bold' }
+                text: 'Distribución Nobel & Energy',
+                left: 'center',
+                textStyle: { fontSize: 20 }
+            },
+            tooltip: {
+                formatter: function (params) {
+                    const node = params.data;
+                    if (node.children) return `<b>${node.name}</b>`;
+                    const val = node.name === 'Nobel' ? node.realValue : node.value.toLocaleString();
+                    return `${params.treePathInfo[1].name}<br/>${node.name}: <b>${val}</b>`;
+                }
+            },
+            series: {
+                type: 'sunburst',
+                data: data,
+                radius: [0, '90%'],
+                label: { rotate: 'radial' },
+                levels: [
+                    {}, 
+                    { r0: '0%', r: '35%', itemStyle: { borderWidth: 2 }, label: { align: 'right' } }, // Países
+                    { r0: '35%', r: '70%', label: { position: 'outside', padding: 3, silent: false } } // Datos
+                ]
             }
         };
 
-        new window.ApexCharts(chartDiv, options).render();
+        myChart.setOption(option);
     }
 
     onMount(loadData);
 </script>
 
 <svelte:head>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 </svelte:head>
 
 <main class="page-container">
     <div class="top-header">
-        <h1 class="page-title">Uso de Proxy: Nobel & Energy Stats</h1>
-        <button class="btn-back" on:click={() => window.location.href = "/integrations"}>
+        <h1 class="main-title">Uso de Proxy: Nobel & Energy Stats</h1>
+        <button class="back-btn" on:click={() => window.location.href = "/integrations"}>
             ← Volver
         </button>
     </div>
 
     <div class="main-card">
-        <div class="chart-content">
-            <div bind:this={chartDiv}></div>
-        </div>
+        <div bind:this={chartDiv} class="chart-box"></div>
     </div>
 
     <div class="analysis-box">
         <p>
-            <span class="icon">🏛️</span> 
-            <strong>Identificación de campos:</strong> Esta visualización mixta separa las unidades de medida mediante un 
-            <strong>doble eje vertical</strong>. El <strong>Área Azul</strong> del fondo cuantifica el volumen de capacidad 
-            energética (MW), mientras que las <strong>Columnas Doradas</strong> del primer plano resaltan los hitos individuales 
-            en forma de Premios Nobel. Los países están agrupados y ordenados alfabéticamente para facilitar la comparación 
-            directa entre el potencial industrial y el capital intelectual nacional.
+            <span class="icon">☀️</span> 
+            <strong>Identificación de los campos:</strong> Esta visualización de <strong>Rayos de Sol (Sunburst)</strong> 
+            organiza la información de forma concéntrica para distinguir las fuentes de datos. 
+            El <strong>núcleo</strong> identifica al país, mientras que el <strong>anillo exterior</strong> se divide en dos: 
+            los sectores <strong>azules</strong> cuantifican la capacidad hidroeléctrica (MW) y los sectores 
+            <strong>dorados</strong> representan el volumen de Premios Nobel obtenidos. 
+            La amplitud de cada arco permite comparar visualmente el peso de la industria técnica frente al 
+            impacto del capital intelectual.
         </p>
     </div>
 </main>
 
 <style>
-    /* ESTILO WINE-STATS AL 100% */
+    /* ESTILO WINE-STATS CALCADO */
     :global(body) {
         background-color: #f8f9fa;
         margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: -apple-system, system-ui, sans-serif;
     }
 
     .page-container {
@@ -161,40 +146,39 @@
         margin-bottom: 30px;
     }
 
-    .page-title {
+    .main-title {
         font-size: 28px;
         font-weight: bold;
-        color: #000;
         margin: 0;
     }
 
-    .btn-back {
-        background-color: #6c757d;
+    .back-btn {
+        background-color: #64748b;
         color: white;
         border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-weight: 600;
         cursor: pointer;
-        font-weight: bold;
-        font-size: 14px;
     }
 
     .main-card {
         background: white;
-        border-radius: 10px;
+        border-radius: 12px;
         padding: 40px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         margin-bottom: 35px;
     }
 
-    .chart-content {
-        min-height: 500px;
+    .chart-box {
+        width: 100%;
+        height: 550px;
     }
 
-    /* EL CUADRO DE ANÁLISIS ESPECÍFICO (ROSADO/ROJO) */
+    /* EL CUADRO ROSADO CON BORDE ROJO DE 6PX */
     .analysis-box {
-        background-color: #fff5f5; /* Rosado */
-        border-left: 6px solid #ff4d4d; /* Borde rojo de 6px */
+        background-color: #fff5f5;
+        border-left: 6px solid #ff4d4d;
         padding: 25px;
         border-radius: 4px;
         color: #333;

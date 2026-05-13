@@ -44,6 +44,21 @@ app.get("/api/v1/nobel-prize", (req, res) => {
             res.status(500).send("Error en el proxy");
         });
 });
+
+// Ruta Proxy para Universities
+app.get("/api/v1/proxy-universities", async (req, res) => {
+    const country = req.query.country;
+    const url = `http://universities.hipolabs.com/search?country=${country}`;
+    
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        console.error("Error en el proxy de universidades:", error);
+        res.status(500).send("Error al conectar con la API de universidades");
+    }
+});
 // FIN PROXY
 
 // FIN BLOQUE APS

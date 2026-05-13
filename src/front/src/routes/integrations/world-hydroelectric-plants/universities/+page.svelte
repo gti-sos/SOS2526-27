@@ -1,53 +1,52 @@
 <script>
     import { onMount } from 'svelte';
     let chartDiv;
-    let API_URL = "";
 
     async function loadData() {
-        API_URL = window.location.origin + "/api/v1/world-hydroelectric-plants";
+    // Usamos tu ruta relativa, así siempre usará HTTPS si el sitio es HTTPS
+    const MY_API_URL = "/api/v1/world-hydroelectric-plants";
+    const PROXY_URL = "/api/v1/proxy-universities";
 
-        try {
-            const resMy = await fetch(API_URL);
-            const myData = await resMy.json();
+    try {
+        const resMy = await fetch(MY_API_URL);
+        const myData = await resMy.json();
 
-            // 1. AGRUPAR POR PAÍS (Sumar capacidades si el país se repite)
-            const grouped = myData.reduce((acc, current) => {
-                const country = current.country;
-                if (!acc[country]) {
-                    acc[country] = 0;
-                }
-                acc[country] += current.capacity_mw;
-                return acc;
-            }, {});
+        const grouped = myData.reduce((acc, current) => {
+            const country = current.country;
+            if (!acc[country]) acc[country] = 0;
+            acc[country] += current.capacity_mw;
+            return acc;
+        }, {});
 
-            // 2. CONVERTIR A ARRAY Y ORDENAR ALFABÉTICAMENTE
-            const sortedCountries = Object.keys(grouped)
-                .sort((a, b) => a.localeCompare(b))
-                .slice(0, 10); // Tomamos los 10 primeros alfabéticamente
+        const sortedCountries = Object.keys(grouped)
+            .sort((a, b) => a.localeCompare(b))
+            .slice(0, 10);
 
-            const heatmapSeries = [];
+        const heatmapSeries = [];
 
-            // 3. OBTENER DATOS DE LA API EXTERNA PARA CADA PAÍS
-            for (const country of sortedCountries) {
-                try {
-                    const resUni = await fetch(`http://universities.hipolabs.com/search?country=${country}`);
-                    const uniData = await resUni.json();
-                    
-                    heatmapSeries.push({
-                        name: country,
-                        data: [
-                            { x: 'Capacidad (MW)', y: parseFloat(grouped[country].toFixed(2)) },
-                            { x: 'Nº Universidades', y: uniData.length }
-                        ]
-                    });
-                } catch (e) { console.log("Error en " + country + e.message); }
+        for (const country of sortedCountries) {
+            try {
+                // LLAMADA A TU PROXY (Pasa el país como parámetro)
+                const resUni = await fetch(`${PROXY_URL}?country=${country}`);
+                const uniData = await resUni.json();
+                
+                heatmapSeries.push({
+                    name: country,
+                    data: [
+                        { x: 'Capacidad (MW)', y: parseFloat(grouped[country].toFixed(2)) },
+                        { x: 'Nº Universidades', y: uniData.length }
+                    ]
+                });
+            } catch (e) { 
+                console.log("Error en " + country + ": " + e.message); 
             }
-
-            renderHeatmap(heatmapSeries);
-        } catch (e) {
-            "Error: " + e.message;
         }
+
+        renderHeatmap(heatmapSeries);
+    } catch (e) {
+        console.error("Error general:", e.message);
     }
+}
 
     function renderHeatmap(series) {
         if (!window.ApexCharts || !chartDiv) return;
