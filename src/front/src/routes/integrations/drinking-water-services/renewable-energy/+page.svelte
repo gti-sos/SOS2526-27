@@ -166,7 +166,7 @@
             }
 
             chart = new Chart(ctx, {
-                type: 'bar',
+                type: 'polarArea',
                 data: {
                     labels,
                     datasets: [

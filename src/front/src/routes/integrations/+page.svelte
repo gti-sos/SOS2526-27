@@ -32,6 +32,10 @@
             nombre: 'Alcohol Consumption',
             descripcion: 'Integra mi API con la API de consumo de alcohol.',
             ruta: '/integrations/drinking-water-services/alcohol-consumption'
+        },{
+            nombre:'World Bank',
+            descripcion:'Uso de la api World Bank',
+            ruta:'/integrations/drinking-water-services/world-bank'
         }
     ];
 
@@ -92,8 +96,8 @@
         <div>
             <h1>Integraciones</h1>
             <p class="subtitle">
-                Integraciones realizadas combinando la API
-                <strong>drinking-water-services</strong> con APIs externas y APIs de otros grupos SOS.
+                Integraciones realizadas combinando las APIs
+                <strong>drinking-water-services,water-dams y world-hydroelectric-plants</strong> con APIs externas y APIs de otros grupos SOS.
             </p>
         </div>
 

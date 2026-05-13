@@ -94,9 +94,7 @@
 				Ver integraciones
 			</button>
 
-			<button class="primary-button orange" onclick={() => irA('/consumptions')}>
-				Ver consumiciones
-			</button>
+			
 		</div>
 	</section>
 
@@ -239,13 +237,7 @@
 		background-color: #15803d;
 	}
 
-	.primary-button.orange {
-		background-color: #f97316;
-	}
-
-	.primary-button.orange:hover {
-		background-color: #ea580c;
-	}
+	
 
 	.link-button {
 		background: none;

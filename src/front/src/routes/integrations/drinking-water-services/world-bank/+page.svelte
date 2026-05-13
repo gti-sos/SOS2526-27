@@ -122,7 +122,7 @@
         }
 
         chart = new Chart(ctx, {
-            type: 'bar',
+            type: 'doughnut',
             data: {
                 labels: datos.map((item) => `${item.country} (${item.year})`),
                 datasets: [
