@@ -26,7 +26,6 @@ jobs:
       - name: Run all tests (API)
         run: npm test
 
-      .
       - name: Run Playwright tests (e2e)
         run: |
           # Arrancamos el server en segundo plano
