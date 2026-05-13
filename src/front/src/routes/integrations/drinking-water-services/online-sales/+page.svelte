@@ -3,13 +3,11 @@
     import { dev } from '$app/environment';
     import Chart from 'chart.js/auto';
 
-    // Tu API local
     let myAPI = '/api/v1/drinking-water-services';
     if (dev) {
         myAPI = 'http://localhost:10000' + myAPI;
     }
 
-    // La API del G23
     const g23API = 'https://sos2526-23.onrender.com/api/v1/online-sales-popular-marketplaces';
 
     let chart = null;
@@ -36,12 +34,10 @@
                 return;
             }
 
-            // 1. Procesamos TUS datos (con la adaptación de Americas)
             let myProcessedData = {};
             myData.forEach(d => {
                 let nombreEntidad = d.entity;
                 
-                // Adaptación: Convertimos Americas (WHO) en North America para que cruce con el G23
                 if (nombreEntidad === "Americas (WHO)") {
                     nombreEntidad = "North America";
                 }
@@ -128,10 +124,23 @@
 <main class="container">
     <header class="header">
         <h1>Integración: Agua Potable vs Ventas Online (G23)</h1>
-        <button class="btn-back" onclick={() => window.location.href = '/'}>
-            ⬅ Volver a la pagina principal
+        <button class="btn-back" onclick={() => window.location.href = '/integrations'}>
+            ⬅ Volver a la pagina de integraciones
         </button>
     </header>
+      <section class="info-box">
+        <h2>Descripción de la integración</h2>
+
+        <p>
+            En mi API se calcula la media de <strong>wat_bas_pop_residence_urban</strong>, que
+            representa la población urbana con servicios básicos de agua potable. En la API del
+            Grupo 23 se calcula la suma de <strong>total</strong>, que representa el volumen total de ventas
+            online en marketplaces populares por region.
+        </p>
+
+       
+    </section>
+
 
     {#if cargando}
         <p class="loading-msg">Haciendo fetch a las APIs y procesando datos...</p>

@@ -46,13 +46,6 @@
 
             const responseData = await res.json();
 
-            /*
-                La API de World Bank suele devolver:
-                [
-                    { información de paginación },
-                    [ registros ]
-                ]
-            */
             if (!Array.isArray(responseData) || !Array.isArray(responseData[1])) {
                 mensajeError = 'La respuesta de World Bank no tiene el formato esperado.';
                 cargando = false;
@@ -204,23 +197,20 @@
     <header class="header">
         <div>
             <h1>Recursos de agua dulce - World Bank</h1>
-            <p class="subtitle">
-                Integración externa con <strong>World Bank API</strong> usando proxy propio.
-            </p>
+            
         </div>
 
         <button class="btn-back" onclick={() => window.location.href = '/integrations'}>
-            ⬅ Volver
+            ⬅ Volver a la pagina de integraciones
         </button>
     </header>
 
     <section class="info-box">
         <h2>Descripción del uso</h2>
         <p>
-            Esta vista consume mediante <strong>fetch</strong> un proxy propio de tu backend:
-            <code>/api/v1/drinking-water-services/proxy/worldbank</code>.
-            El proxy llama a la API externa de <strong>World Bank</strong>, recibe datos en formato
-            <strong> JSON</strong> y los representa mediante una gráfica y una tabla HTML.
+            
+            
+            El proxy llama a la API externa de <strong>World Bank</strong>
         </p>
     </section>
 
@@ -297,10 +287,7 @@
     {/if}
 
     <p class="footer-text">
-        Visualización realizada con <strong>Chart.js</strong>, tipo <strong>bar</strong>.
-        Esta combinación es distinta de las usadas con Highcharts y ApexCharts.
-        Los datos se obtienen mediante <strong>fetch</strong>, se procesan como
-        <strong>JSON</strong> y se muestran mediante gráfica y tabla HTML.
+        Visualización realizada con <strong>Chart.js</strong>, tipo <strong>doughnut</strong>.
     </p>
 </main>
 
@@ -334,16 +321,6 @@
         font-size: 1.2rem;
     }
 
-    code {
-        background: rgba(0, 0, 0, 0.06);
-        padding: 2px 6px;
-        border-radius: 4px;
-    }
-
-    .subtitle {
-        margin: 8px 0 0;
-        color: #666;
-    }
 
     .info-box {
         background: #eef6ff;

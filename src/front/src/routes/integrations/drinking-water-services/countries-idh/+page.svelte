@@ -95,7 +95,7 @@
                     .filter((year) => Number.isFinite(year))
             );
 
-            // 1. Procesamos MI API usando solo años que también existen en la API del G26
+           
             const myProcessedData = {};
 
             myData.forEach((d) => {
@@ -342,33 +342,24 @@
             </p>
         </div>
 
-        <button class="btn-back" onclick={() => window.location.href = '/'}>
-            ⬅ Volver a la pagina principal
+        <button class="btn-back" onclick={() => window.location.href = '/integrations'}>
+            ⬅ Volver a la pagina de integraciones
         </button>
     </header>
 
     <section class="info-box">
         <h2>Descripción de la integración</h2>
 
-        <p>
-            Esta vista realiza dos peticiones mediante <strong>fetch</strong>: una a mi API de
-            servicios de agua potable urbana y otra a la API del Grupo 26 sobre índice de desarrollo
-            humano por país y año. Ambas APIs devuelven datos en formato <strong>JSON</strong>.
-        </p>
+       
 
         <p>
-            Después, los datos se agrupan por país usando los años disponibles en ambas fuentes.
             En mi API se calcula la media de <strong>wat_bas_pop_residence_urban</strong>, que
             representa la población urbana con servicios básicos de agua potable. En la API del
             Grupo 26 se calcula la media de <strong>hdi_value</strong>, que representa el Índice de
             Desarrollo Humano.
         </p>
 
-        <p>
-            Finalmente, solo se representan los países que aparecen en ambas APIs. La gráfica de
-            dispersión permite observar la relación entre el acceso urbano al agua potable y el
-            nivel medio de desarrollo humano.
-        </p>
+       
     </section>
 
     {#if cargando}
@@ -419,9 +410,7 @@
 
     <p class="footer-text">
         Integración realizada con <strong>ApexCharts</strong>, tipo <strong>scatter</strong>.
-        No se utiliza una gráfica de tipo line. Los datos se obtienen mediante
-        <strong>fetch</strong>, se procesan como <strong>JSON</strong> y se muestran mediante
-        gráfica y tabla HTML.
+        
     </p>
 </main>
 

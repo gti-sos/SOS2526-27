@@ -281,21 +281,14 @@
             </p>
         </div>
 
-        <button class="btn-back" onclick={() => window.location.href = '/'}>
-            ⬅ Volver a la pagina principal
+        <button class="btn-back" onclick={() => window.location.href = '/integrations'}>
+            ⬅ Volver a la pagina de integraciones
         </button>
     </header>
 
     <section class="info-box">
         <h2>Descripción de la integración</h2>
-
-        <p>
-            Esta vista realiza dos peticiones mediante <strong>fetch</strong>: una a mi API de
-            servicios de agua potable urbana y otra a la API externa Open-Meteo, que proporciona
-            la previsión meteorológica diaria de Sevilla. Ambas APIs devuelven datos en formato
-            <strong>JSON</strong>.
-        </p>
-
+        
         <p>
             Para integrar ambas fuentes, se toma el último dato disponible de
             <strong>Spain</strong> en mi API, usando la variable
@@ -303,11 +296,6 @@
             temperaturas máximas, mínimas y precipitación de Sevilla.
         </p>
 
-        <p>
-            La gráfica representa el rango de temperatura diaria mediante un widget
-            <strong>rangeBar</strong>. Además, cada punto queda contextualizado con el dato de
-            población urbana con servicios básicos de agua potable en España.
-        </p>
     </section>
 
     {#if cargando}

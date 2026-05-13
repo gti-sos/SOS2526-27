@@ -3,14 +3,14 @@
     import { dev } from '$app/environment';
     import Chart from 'chart.js/auto';
 
-    // Mi API
+
     let myAPI = '/api/v1/drinking-water-services';
 
     if (dev) {
         myAPI = 'http://localhost:10000' + myAPI;
     }
 
-    // API del Grupo 17
+
     const g17API = 'https://sos2526-17.onrender.com/api/v1/renewable-energy-consumptions';
 
     let chart = null;
@@ -63,7 +63,7 @@
                 return;
             }
 
-            // 1. Procesamos MI API: población urbana con servicios básicos de agua potable
+          
             const myProcessedData = {};
 
             myData.forEach((d) => {
@@ -272,33 +272,23 @@
             </p>
         </div>
 
-        <button class="btn-back" onclick={() => window.location.href = '/'}>
-            ⬅ Volver a la pagina principal
+        <button class="btn-back" onclick={() => window.location.href = '/integrations'}>
+            ⬅ Volver a la pagina de integraciones
         </button>
     </header>
 
     <section class="info-box">
         <h2>Descripción de la integración</h2>
 
-        <p>
-            Esta vista realiza dos peticiones mediante <strong>fetch</strong>: una a mi API de
-            servicios de agua potable urbana y otra a la API del Grupo 17 sobre consumo de energías
-            renovables. Ambas APIs devuelven datos en formato <strong>JSON</strong>.
-        </p>
 
         <p>
-            Después, los datos se procesan y se agrupan por país. En mi API se suma la variable
+            En mi API se suma la variable
             <strong>wat_bas_pop_residence_urban</strong>, que representa la población urbana con
             servicios básicos de agua potable. En la API del Grupo 17 se suman las variables
             <strong>wind</strong>, <strong>hydro</strong>, <strong>solar</strong> y
             <strong>other</strong> para obtener el consumo renovable total.
         </p>
 
-        <p>
-            Finalmente, solo se representan los países que aparecen en ambas APIs, permitiendo una
-            comparación integrada entre acceso urbano al agua potable y consumo de energías
-            renovables.
-        </p>
     </section>
 
     {#if cargando}
@@ -344,10 +334,8 @@
     {/if}
 
     <p class="footer-text">
-        Integración realizada con <strong>Chart.js</strong>, tipo <strong>bar</strong>.
-        No se utiliza una gráfica de tipo line. Los datos se obtienen mediante
-        <strong>fetch</strong>, se procesan como <strong>JSON</strong> y se muestran mediante
-        gráfica y tabla HTML.
+        Integración realizada con <strong>Chart.js</strong>, tipo <strong>polarArea</strong>.
+        
     </p>
 </main>
 
