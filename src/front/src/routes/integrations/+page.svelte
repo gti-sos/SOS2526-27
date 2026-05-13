@@ -5,36 +5,36 @@
     const integracionesDrinkingWater = [
         {
             nombre: 'REST Countries',
-            descripcion: 'Integra mi API con REST Countries mediante código ISO3.',
+            descripcion: 'Relaciona los países de la API de agua potable con información internacional normalizada mediante códigos ISO3.',
             ruta: '/integrations/drinking-water-services/rest-countries'
         },
         {
             nombre: 'Renewable Energy',
-            descripcion: 'Integra mi API con la API de energías renovables.',
+            descripcion: 'Compara los niveles de acceso a servicios de agua potable con indicadores de consumo de energías renovables.',
             ruta: '/integrations/drinking-water-services/renewable-energy'
         },
         {
             nombre: 'Open-Meteo',
-            descripcion: 'Integra mi API con la previsión meteorológica de Open-Meteo.',
+            descripcion: 'Integra datos meteorológicos actuales para contextualizar el acceso al agua potable en función de las condiciones climáticas.',
             ruta: '/integrations/drinking-water-services/open-meteo'
         },
         {
             nombre: 'Online Sales',
-            descripcion: 'Integra mi API con la API de ventas online.',
+            descripcion: 'Relaciona los datos de acceso a agua potable con indicadores de ventas online para analizar posibles patrones socioeconómicos.',
             ruta: '/integrations/drinking-water-services/online-sales'
         },
         {
             nombre: 'Countries IDH',
-            descripcion: 'Integra mi API con la API de índice de desarrollo humano.',
+            descripcion: 'Compara la cobertura de servicios de agua potable con indicadores de desarrollo humano por país y año.',
             ruta: '/integrations/drinking-water-services/countries-idh'
         },
         {
             nombre: 'Alcohol Consumption',
-            descripcion: 'Integra mi API con la API de consumo de alcohol.',
+            descripcion: 'Relaciona la cobertura de agua potable con datos de consumo de alcohol per cápita para explorar diferencias entre países.',
             ruta: '/integrations/drinking-water-services/alcohol-consumption'
         },{
             nombre:'World Bank',
-            descripcion:'Uso de la api World Bank',
+            descripcion:'Consulta datos del Banco Mundial mediante un proxy propio para analizar indicadores internacionales relacionados con el acceso al agua potable',
             ruta:'/integrations/drinking-water-services/world-bank'
         }
     ];
