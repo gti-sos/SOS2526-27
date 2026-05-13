@@ -1,8 +1,13 @@
 name: SOS Integration Tests
 on: [push]
+
 jobs:
   test:
+    # Usamos la imagen oficial de Playwright que ya tiene los navegadores y librerías de sistema
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.44.0-noble 
+
     steps:
       - uses: actions/checkout@v3
 
@@ -10,29 +15,26 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
+          # Activamos el cache de npm para ir más rápido
+          cache: 'npm'
 
-      - name: Install root dependencies
-        # Forzamos la resolución de conflictos de versiones
-        run: npm install --legacy-peer-deps
-
-      - name: Install frontend dependencies
-        # Entramos en la carpeta del front para instalar sus librerías también
+      - name: Install dependencies (Root & Frontend)
         run: |
-          cd src/front
           npm install --legacy-peer-deps
+          cd src/front && npm install --legacy-peer-deps
 
-      - name: Run all tests
-        # Ejecuta el script que configuramos (start-server-and-test + newman)
+      - name: Run all tests (API)
         run: npm test
-        
-      - name: Run server for e2e tests
-        run: npm start &  
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-      - name: Run Playwright tests
-        run: npx playwright test
-      - uses: actions/upload-artifact@v4
+      .
+      - name: Run Playwright tests (e2e)
+        run: |
+          # Arrancamos el server en segundo plano
+          npm start &
+          # Esperamos a que el servidor responda (ajusta el puerto si es necesario)
+          npx playwright test
+
+      - name: Upload Artifacts
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
