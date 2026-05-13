@@ -52,9 +52,9 @@
             ruta: '/integrations/water-dams/esportsearnings-stats'
         },
         {
-            nombre: 'Población Country',
-            descripcion: 'Relación entre la capacidad de las presas y la población total de los países (REST Countries).',
-            ruta: '/integrations/water-dams/poblation-country'
+            nombre: 'Potencial Hidroeléctrico',
+            descripcion: 'Análisis de capacidad física frente a producción energética (EIA Data)',
+            ruta: '/integrations/water-dams/hydroelectric-potential'
         },
         {
             nombre: 'Population Densities',
