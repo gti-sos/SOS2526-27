@@ -45,8 +45,11 @@
         }
     }
 
+    // Anychart - column-3d
+
     async function render3DColumn(data) {
         let attempts = 0;
+
         // Espera a que la librería cargue correctamente
         while (!window.anychart && attempts < 30) {
             await new Promise(r => setTimeout(r, 100));
@@ -57,7 +60,6 @@
         if (!anychart || !chartDiv) return;
         if (chartInstance) chartInstance.dispose();
 
-        // --- CONFIGURACIÓN CON TYPE EXPLÍCITO ---
         const chartConfig = {
             chart: {
                 type: "column-3d", 
@@ -91,17 +93,15 @@
             }
         };
 
-        // Creamos el gráfico desde el objeto
+        // Creamos el gráfico
         chartInstance = anychart.fromJson(chartConfig);
 
-        // --- SOLUCIÓN PARA VALORES ENTEROS ---
         const nobelScale = anychart.scales.linear();
         
-        // Evitamos que salgan decimales (0.5, 1.5...) en el eje de los Nobel
+        // Evitamos que salgan decimales 
         nobelScale.ticks().allowFractional(false);
         nobelScale.minimum(0); // Aseguramos que empiece en 0
 
-        // Vinculamos la serie dorada y el eje derecho a esta escala de enteros
         chartInstance.getSeries(1).yScale(nobelScale);
         chartInstance.yAxis(1).scale(nobelScale);
 
@@ -119,7 +119,7 @@
 
 <main class="page-container">
     <header class="top-header">
-        <h1 class="main-title">Uso de Proxy: Nobel & Energy Stats</h1>
+        <h1 class="main-title">Integración Externa con uso de Proxy: Nobel & Energy Stats</h1>
         <button class="back-btn" onclick={() => window.history.back()}>← Volver</button>
     </header>
 
@@ -130,7 +130,6 @@
     <div class="analysis-box">
         <p>
             <span class="icon">🏛️</span> 
-            <strong>Identificación de los campos:</strong> Widget configurado como <code>type: "column-3d"</code>. 
             Las columnas <b>Azules</b> muestran la capacidad hidroeléctrica (MW) en el eje izquierdo. 
             Las columnas <b>Doradas</b> muestran los Premios Nobel en el eje derecho, utilizando escalas independientes 
             para una visualización precisa de ambas magnitudes.
@@ -139,7 +138,6 @@
 </main>
 
 <style>
-    /* Estilo Wine-stats */
     :global(body) { background-color: #f8f9fa; margin: 0; font-family: sans-serif; }
     .page-container { padding: 40px; max-width: 1100px; margin: 0 auto; }
     .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #cbd5e1; padding-bottom: 16px; }

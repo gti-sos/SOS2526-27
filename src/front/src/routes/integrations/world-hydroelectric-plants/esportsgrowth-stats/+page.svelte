@@ -15,24 +15,24 @@
             // 2. OBTENER LISTA DE PAÍSES
             const countries = [...new Set(esportsData.map(d => d.country))];
 
-            // 3. PREPARAR LAS COLUMNAS PARA BILLBOARD
-            // Cada columna debe ser: ['NombrePais', valorAño1, valorAño2, ...]
+            // 3. COLUMNAS
             const chartColumns = countries.map(country => {
                 const row = [country];
                 years.forEach(year => {
                     const entry = esportsData.find(d => d.country === country && d.year === year);
-                    row.push(entry ? entry.viewership : 0); // Si no hay dato ese año, ponemos 0
+                    row.push(entry ? entry.viewership : 0); 
                 });
                 return row;
             });
 
-            // 4. GENERAR EL WIDGET
+            // billboard.js - área
+
             bb.generate({
                 bindto: "#chart-esports-stacked",
                 data: {
                     columns: chartColumns,
-                    type: area(), // CUMPLE: Es tipo area (relleno), no line
-                    groups: [countries] // ESTO HACE QUE SE APILEN (Stacked)
+                    type: area(), 
+                    groups: [countries] // Agrupar
                 },
                 axis: {
                     x: {
@@ -49,10 +49,10 @@
                     text: "Audiencia de eSports: Reparto por Países y Años"
                 },
                 point: {
-                    show: true // Muestra puntos en los años para facilitar la lectura
+                    show: true 
                 },
                 tooltip: {
-                    order: "desc" // Ordena el tooltip de mayor a menor audiencia
+                    order: "desc" // Ordena de mayor a menor audiencia
                 }
             });
         }
@@ -63,7 +63,7 @@
 
 <main class="container">
     <header class="header">
-        <h1>Uso de Widget: eSports Global (G30)</h1>
+        <h1>Uso de API SOS: eSports-stats (G30)</h1>
         <button class="btn-back" onclick={() => window.history.back()}>⬅ Volver</button>
     </header>
 

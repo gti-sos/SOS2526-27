@@ -3,7 +3,6 @@
     let chartDiv;
 
     async function loadData() {
-    // Usamos tu ruta relativa, así siempre usará HTTPS si el sitio es HTTPS
     const MY_API_URL = "/api/v1/world-hydroelectric-plants";
     const PROXY_URL = "/api/v1/proxy-universities";
 
@@ -26,7 +25,7 @@
 
         for (const country of sortedCountries) {
             try {
-                // LLAMADA A TU PROXY (Pasa el país como parámetro)
+                // LLAMADA A PROXY
                 const resUni = await fetch(`${PROXY_URL}?country=${country}`);
                 const uniData = await resUni.json();
                 
@@ -47,6 +46,8 @@
         console.error("Error general:", e.message);
     }
 }
+
+    // ApexCharts - heat map
 
     function renderHeatmap(series) {
         if (!window.ApexCharts || !chartDiv) return;
@@ -94,7 +95,7 @@
 
 <main class="page-container">
     <div class="top-header">
-        <h1 class="title">Uso de Widget: Education & Energy Stats</h1>
+        <h1 class="title">Integración Externa con uso de Proxy: Education & Energy Stats</h1>
         <button class="btn-back" on:click={() => window.location.href = "/integrations"}>
             ← Volver
         </button>

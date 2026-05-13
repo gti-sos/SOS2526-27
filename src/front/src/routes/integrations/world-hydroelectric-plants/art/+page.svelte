@@ -47,6 +47,8 @@
         }
     }
 
+    //ApexCharts.js - bar
+
     function renderMirrorChart(categories, energy, art) {
         if (!window.ApexCharts || !chartDiv) return;
 
@@ -58,7 +60,7 @@
             chart: {
                 type: 'bar',
                 height: 500,
-                stacked: true, // Esto crea el efecto mariposa al usar valores negativos
+                stacked: true, 
                 toolbar: { show: false }
             },
             colors: ['#3b82f6', '#ef4444'], // Azul para Energía, Rojo para Arte
@@ -114,7 +116,7 @@
 
 <main class="page-container">
     <div class="top-header">
-        <h1 class="page-title">Uso de Widget: Art & Energy Stats</h1>
+        <h1 class="page-title">Integración API Externa: Art & Energy Stats</h1>
         <button class="btn-back" on:click={() => window.location.href = "/integrations"}>
             ← Volver
         </button>
@@ -132,13 +134,12 @@
             <strong>Guía de visualización:</strong> Este gráfico de <strong>Espejo (Mirror Chart)</strong> separa físicamente los dos campos de estudio para evitar confusión. 
             A la <strong>izquierda (Azul)</strong> se detalla la capacidad hidroeléctrica total agrupada, mientras que a la 
             <strong>derecha (Rojo)</strong> se muestra el volumen de patrimonio cultural en el MET. 
-            Los países están ordenados alfabéticamente para facilitar la comparativa directa entre el desarrollo industrial y el histórico.
         </p>
     </div>
 </main>
 
 <style>
-    /* CLONACIÓN EXACTA DEL ESTILO WINE-STATS */
+    
     :global(body) {
         background-color: #f8f9fa;
         margin: 0;
@@ -193,10 +194,9 @@
         min-height: 500px;
     }
 
-    /* EL CUADRO DE ANÁLISIS ESPECÍFICO (ROSADO/ROJO) */
     .analysis-box {
-        background-color: #fff5f5; /* Rosado suave */
-        border-left: 6px solid #ff4d4d; /* Borde rojo grueso de 6px */
+        background-color: #fff5f5; 
+        border-left: 6px solid #ff4d4d; 
         padding: 25px;
         border-radius: 4px;
         color: #2d3436;

@@ -2,11 +2,11 @@
 	import { onMount } from 'svelte';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
 
-	// Usamos ruta relativa para que funcione tanto en local como en Render [cite: 1]
+	// Usamos ruta relativa para que funcione tanto en local como en Render 
 	const API = '/api/v1/world-hydroelectric-plants';
 
 	let plants = $state([]);
-	// Nueva variable derivada que se mantiene siempre ordenada [cite: 1]
+	// Nueva variable derivada que se mantiene siempre ordenada 
 	let sortedPlants = $derived([...plants].sort((a, b) =>
 		a.country.localeCompare(b.country) || a.name.localeCompare(b.name)
 	));
@@ -15,14 +15,14 @@
 	let tipoMensaje = $state('');
 	let primeraCargaPasada = $state(false);
 
-	// Objeto con los 9 campos requeridos para creación [cite: 1]
+	// Objeto con los 9 campos requeridos para creación 
 	let form = $state({
 		country: '', name: '', year: '', river: '',
 		plant_type: '', capacity_mw: '', head_m: '',
 		dam_name: '', res_vol_km3: ''
 	});
 
-	// --- NUEVO: Objeto de búsqueda (13 parámetros) [cite: 1] ---
+	// --- NUEVO: Objeto de búsqueda (13 parámetros) 
 	let search = $state({
 		country: '', name: '', year: '', river: '', plant_type: '',
 		capacity_mw: '', head_m: '', dam_name: '', res_vol_km3: '',
@@ -32,7 +32,7 @@
 	function mostrarExito(texto) { mensaje = texto; tipoMensaje = 'exito'; setTimeout(() => { if(mensaje === texto) mensaje = ''; }, 3000); }
 	function mostrarError(texto) { mensaje = texto; tipoMensaje = 'error'; setTimeout(() => { if(mensaje === texto) mensaje = ''; }, 3000); }
 
-	// FUNCIÓN ACTUALIZADA: Ahora soporta búsquedas sin romper el listado [cite: 1]
+	// FUNCIÓN ACTUALIZADA: Ahora soporta búsquedas sin romper el listado 
 	async function loadPlants() {
 		cargando = true;
 		const queryParams = new SvelteURLSearchParams();
@@ -80,7 +80,7 @@
 		loadPlants();
 	}
 
-	// FUNCIÓN CLAVE: Cargar datos iniciales desde el backend [cite: 1]
+	// FUNCIÓN CLAVE: Cargar datos iniciales desde el backend
 	async function loadInitialData() {
 		cargando = true;
 		try {

@@ -11,21 +11,21 @@
             const myData = await resMy.json();
             const otherData = await resOther.json();
 
-            // 1. Agrupamos TU capacidad MW por país (Sumamos)
+            // 1. Agrupamos Capacidad por país
             const myByCountry = myData.reduce((acc, d) => {
                 const c = d.country.toLowerCase().trim();
                 acc[c] = (acc[c] || 0) + Number(d.capacity_mw);
                 return acc;
             }, {});
 
-            // 2. Agrupamos Muertes (Nation)
+            // 2. Agrupamos Muertes 
             const otherByCountry = otherData.reduce((acc, d) => {
                 const c = d.nation.toLowerCase().trim();
                 acc[c] = (acc[c] || 0) + Number(d.total_death);
                 return acc;
             }, {});
 
-            // 3. Cruzamos datos (Top 8 para legibilidad)
+            // 3. Cruzamos datos 
             const commonCountries = Object.keys(myByCountry)
                 .filter(c => otherByCountry[c])
                 .sort()
@@ -39,10 +39,12 @@
         }
     }
 
+    // Echarts - bar
+
     function renderEcharts(categories, energy, road) {
-        // @ts-ignore
+        
         if (!window.echarts || !chartDiv) return;
-        // @ts-ignore
+        
         const myChart = window.echarts.init(chartDiv);
 
         const option = {
@@ -60,7 +62,6 @@
                 top: 'bottom'
             },
             grid: { left: '3%', right: '4%', bottom: '10%', containLabel: true },
-            // DOBLE EJE X: Para que las dos escalas se vean bien
             xAxis: [
                 {
                     type: 'value',
@@ -110,7 +111,7 @@
 
 <main class="page-container">
     <header class="header-nav">
-        <h1 class="page-title">Integración SOS: Road Fatalities (G11)</h1>
+        <h1 class="page-title">Integración de API SOS: Road Fatalities (G11)</h1>
         <button class="btn-back" onclick={() => window.history.back()}>
             ← Volver
         </button>
@@ -123,8 +124,6 @@
     <div class="analysis-box">
         <p>
             <span class="icon">🔍</span> 
-            <strong>Identificación de los campos:</strong> En este gráfico <strong>Echarts - Bar</strong>, 
-            utilizamos una disposición horizontal con <strong>doble eje de valores</strong>. 
             Las barras <b>Azules</b> representan la capacidad hidroeléctrica acumulada (MW) y se rigen por el eje superior. 
             Las barras <b>Rojas</b> representan las muertes totales por tráfico y se rigen por el eje inferior. 
             Esta estructura agrupada por país permite analizar el balance entre el potencial energético nacional 
@@ -134,7 +133,6 @@
 </main>
 
 <style>
-    /* ESTILO WINE-STATS CALCADO AL 100% */
     :global(body) {
         background-color: #f8f9fa;
         margin: 0;
@@ -152,7 +150,7 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 30px;
-        border-bottom: 2px solid #16a34a; /* Línea verde del header original */
+        border-bottom: 2px solid #16a34a; 
         padding-bottom: 16px;
     }
 
@@ -181,7 +179,6 @@
         margin-bottom: 35px;
     }
 
-    /* EL CUADRO ROSADO CON BORDE ROJO DE 6PX */
     .analysis-box { 
         background: #fff5f5; 
         padding: 25px; 

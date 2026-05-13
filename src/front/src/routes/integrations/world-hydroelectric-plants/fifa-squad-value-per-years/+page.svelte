@@ -5,85 +5,95 @@
     let chartInstance = null;
 
     async function loadChart() {
-        const resMy = await fetch('/api/v1/world-hydroelectric-plants');
-        const resOther = await fetch('https://sos2526-26.onrender.com/api/v2/fifa-squad-value-per-years');
+        // ?limit=1000 para traer todos los años de todos los países
+        const resMy = await fetch('/api/v1/world-hydroelectric-plants?limit=1000');
+        const resOther = await fetch('https://sos2526-26.onrender.com/api/v2/fifa-squad-value-per-years?limit=1000');
 
         if (resMy.ok && resOther.ok) {
             const myData = await resMy.json();
             const fifaData = await resOther.json();
 
-            // 1. Procesamiento: Sumamos TU capacidad (MW) por país
+            // 1. SUMA DE CAPACIDAD (MW)
             const myByCountry = myData.reduce((acc, d) => {
                 const country = d.country.toLowerCase().trim();
-                acc[country] = (acc[country] || 0) + Number(d.capacity_mw);
+                acc[country] = (acc[country] || 0) + Number(d.capacity_mw || 0);
                 return acc;
             }, {});
 
-            // 2. Procesamiento: Media del Valor FIFA por país (Unificamos años)
-            const fifaStats = fifaData.reduce((acc, d) => {
+            // 2. Agrupamos para calcular la media
+            const fifaStats = {};
+            fifaData.forEach(d => {
                 const country = d.country.toLowerCase().trim();
-                if (!acc[country]) acc[country] = { total: 0, count: 0 };
-                acc[country].total += Number(d.total_market_value);
-                acc[country].count += 1;
-                return acc;
-            }, {});
+                const valor = Number(d.total_market_value);
+                
+                if (!fifaStats[country]) {
+                    fifaStats[country] = { suma: 0, contador: 0 };
+                }
+                fifaStats[country].suma += valor;
+                fifaStats[country].contador += 1;
+            });
 
-            // 3. Cruzamos datos
+            // 3. CRUZAR DATOS
             const commonCountries = Object.keys(myByCountry).filter(c => fifaStats[c]);
 
-            const bubbleData = commonCountries.map(c => {
-                const avgFifa = Number((fifaStats[c].total / fifaStats[c].count).toFixed(2));
+            const finalData = commonCountries.map(c => {
+                const mediaCalculada = Number((fifaStats[c].suma / fifaStats[c].contador).toFixed(2));
+                
+                if (c.includes("argentina")) {
+                    console.log(`NUEVO DEBUG ARGENTINA: Suma=${fifaStats[c].suma}, Años=${fifaStats[c].contador}, Media=${mediaCalculada}`);
+                }
+
                 return {
                     x: myByCountry[c],
-                    value: avgFifa,
-                    size: avgFifa,
+                    value: mediaCalculada,
+                    size: mediaCalculada,
                     name: c.toUpperCase()
                 };
             });
 
-            await renderBubble(bubbleData);
+            await renderBubble(finalData);
         }
     }
 
     async function renderBubble(data) {
         let attempts = 0;
-        while ((!window.anychart || typeof window.anychart.bubble !== 'function') && attempts < 30) {
+        while (!window.anychart && attempts < 30) {
             await new Promise(r => setTimeout(r, 100));
             attempts++;
         }
 
         const anychart = window.anychart;
         if (!anychart || !chartDiv) return;
-
         if (chartInstance) chartInstance.dispose();
 
-        chartInstance = anychart.bubble(data);
-
-        // --- PERSONALIZACIÓN DEL TOOLTIP (Lo que pedías) ---
-        const tooltip = chartInstance.tooltip();
-        tooltip.useHtml(true);
-        // Título del tooltip: Nombre del país
-        tooltip.titleFormat("<b>{%name}</b>");
-        // Contenido: Nombres descriptivos y unidades, sin 'size' ni 'x/y'
-        tooltip.format(
-            "<span><b>Capacidad:</b> {%x} MW</span><br/>" +
-            "<span><b>Valor de Mercado:</b> {%value} M€</span>"
-        );
-
-        // Configuración de los Ejes
-        chartInstance.xAxis().title("Capacidad Hidroeléctrica (MW)");
-        chartInstance.yAxis().title("Valor Mercado FIFA (Media M€)");
+        // AnyChart - bubble
         
-        // Estilo de las burbujas
-        const series = chartInstance.getSeries(0);
-        if (series) {
-            series.fill("#3498db 0.6");
-            series.stroke("#3498db");
-            // Etiqueta sobre la burbuja: Solo nombre del país
-            series.labels().enabled(true).format("{%name}").fontColor("#2c3e50").fontSize(10);
-        }
+        const chartConfig = {
+            chart: {
+                type: "bubble", 
+                title: "Media de Valor FIFA vs Capacidad Hidroeléctrica",
+                series: [{
+                    data: data,
+                    fill: "#3498db 0.6",
+                    stroke: "#3498db",
+                    labels: {
+                        enabled: true,
+                        format: "{%name}",
+                        fontColor: "#2c3e50",
+                        fontSize: 10
+                    },
+                    tooltip: {
+                        useHtml: true,
+                        titleFormat: "<b>{%name}</b>",
+                        format: "Capacidad Total: {%x} MW<br/>Media Valor FIFA: {%value} M€"
+                    }
+                }],
+                xAxes: [{ title: "Suma de Capacidad Hidroeléctrica (MW)" }],
+                yAxes: [{ title: "Valor Mercado Medio (M€)" }]
+            }
+        };
 
-        chartInstance.title("Relación: Potencia Industrial vs Valor Deportivo Medio");
+        chartInstance = anychart.fromJson(chartConfig);
         chartInstance.container(chartDiv);
         chartInstance.draw();
     }
@@ -98,7 +108,7 @@
 
 <main class="page-container">
     <header class="top-nav">
-        <h1 class="page-title">Integración SOS: FIFA Squad Value (G26)</h1>
+        <h1 class="page-title">Integración de API SOS: FIFA Squad Value (G26)</h1>
         <button class="btn-back" onclick={() => window.history.back()}>← Volver</button>
     </header>
 
@@ -109,10 +119,7 @@
     <div class="analysis-box">
         <p>
             <span class="icon">📊</span> 
-            <strong>Lógica de unificación:</strong> En este gráfico de burbujas, los datos de mercado de la API externa se han 
-            <strong>promediado por país</strong> para unificar registros de distintos años. 
-            El <b>tamaño y posición vertical</b> indican el valor económico medio de la plantilla, 
-            mientras que la <b>posición horizontal</b> representa la capacidad hidroeléctrica total instalada.
+            Se promedian los valores de mercado de todos los años disponibles (forzando carga total mediante limit).
         </p>
     </div>
 </main>

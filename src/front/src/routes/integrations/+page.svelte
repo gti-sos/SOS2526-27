@@ -39,7 +39,7 @@
         }
     ];
 
-    // TUS INTEGRACIONES (Basadas en image_2a55b8.png)
+
     const integracionesWaterDams = [
         {
             nombre: 'Air Quality',
@@ -140,7 +140,7 @@
         </button>
     </header>
 
-    <!-- SECCIÓN DRINKING WATER -->
+   
     <section class="card green-section">
         <h2>drinking-water-services</h2>
         <div class="button-grid">
@@ -156,7 +156,6 @@
         </div>
     </section>
 
-    <!-- TU NUEVA SECCIÓN WATER DAMS -->
     <section class="card orange-section">
         <h2>water-dams</h2>
         <div class="button-grid">
@@ -172,7 +171,6 @@
         </div>
     </section>
 
-    <!-- SECCIÓN HYDROELECTRIC -->
     <section class="card blue-section">
         <h2>world-hydroelectric-plants</h2>
         <div class="button-grid">
