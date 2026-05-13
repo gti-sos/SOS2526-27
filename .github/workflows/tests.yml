@@ -4,9 +4,9 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
-    # Cambiamos a 'jammy', que es la versión estándar más compatible
     container:
-      image: mcr.microsoft.com/playwright:v1.44.0-jammy
+      # Actualizamos a la versión que te pide el error
+      image: mcr.microsoft.com/playwright:v1.49.1-jammy
 
     steps:
       - name: Checkout code
@@ -29,8 +29,8 @@ jobs:
       - name: Run Playwright tests
         run: |
           npm start &
-          # Esperamos un poco a que el server arranque antes de lanzar los tests
-          sleep 5
+          # Esperamos a que el puerto 10000 esté libre/listo
+          sleep 10
           npx playwright test
 
       - name: Upload results
