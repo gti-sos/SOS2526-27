@@ -5,8 +5,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     container:
-      # Esta imagen es la que coincide con tu local (v1.49.1)
-      image: mcr.microsoft.com/playwright:v1.49.1-jammy
+      
+      image: mcr.microsoft.com/playwright:v1.59.1-jammy
 
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
