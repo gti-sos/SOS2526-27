@@ -4,9 +4,9 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
-    # Contenedor oficial de Playwright para evitar descargas largas
+    # Cambiamos a 'jammy', que es la versión estándar más compatible
     container:
-      image: mcr.microsoft.com/playwright:v1.44.0-noble
+      image: mcr.microsoft.com/playwright:v1.44.0-jammy
 
     steps:
       - name: Checkout code
@@ -27,14 +27,15 @@ jobs:
         run: npm test
 
       - name: Run Playwright tests
-        # Unificamos el arranque y el test en un solo bloque 'run'
         run: |
           npm start &
+          # Esperamos un poco a que el server arranque antes de lanzar los tests
+          sleep 5
           npx playwright test
 
       - name: Upload results
         uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+        if: ${{ always() }}
         with:
           name: playwright-report
           path: playwright-report/
