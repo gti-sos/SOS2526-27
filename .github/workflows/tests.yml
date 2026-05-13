@@ -4,24 +4,21 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
-    # Usamos la versión de Playwright 1.49.1 que es la que pide tu sistema
     container:
+      # Esta imagen es la que coincide con tu local (v1.49.1)
       image: mcr.microsoft.com/playwright:v1.49.1-jammy
 
-    # Forzamos a usar Node 24 para evitar los avisos de depreciación
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-      # Actualizado a v4 para evitar el aviso de Node 20
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Actualizado a v4
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Tu código sigue necesitando Node 20, eso está bien
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
@@ -35,15 +32,6 @@ jobs:
       - name: Run Playwright tests
         run: |
           npm start &
-          # Usamos npx wait-on para no perder tiempo con 'sleep' fijos
-          # Esto empezará el test en cuanto el puerto 10000 responda
-          npx wait-on http://localhost:10000 --timeout 60000
+          # Esperamos hasta 2 minutos a que el puerto 10000 responda
+          npx wait-on http://localhost:10000 --timeout 120000
           npx playwright test
-
-      - name: Upload results
-        uses: actions/upload-artifact@v4
-        if: ${{ always() }}
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
