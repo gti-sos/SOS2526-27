@@ -1,5 +1,7 @@
 import express from 'express';
 import Datastore from 'nedb';
+import fs from "fs";
+import csv from "csv-parser";
 
 const router = express.Router();
 
@@ -27,24 +29,69 @@ const water_services = [
 
 // LOAD INITIAL DATA
 
+/*
+Anteriormente
+
+
 router.get("/loadInitialData",(req,res)=>{
-
     db.count({}, (err,count)=>{
-
         if(count===0){
-
             db.insert(water_services);
             res.sendStatus(201);
-
         }else{
-
             res.sendStatus(409);
+        }
+    });
+});
 
+*/
+
+// Añadido para poder cargar todos los datos del CSV
+router.get("/loadInitialData", (req, res) => {
+    db.count({}, (err, count) => {
+        if (err) {
+            return res.sendStatus(500);
         }
 
-    });
+        if (count !== 0) {
+            return res.sendStatus(409);
+        }
 
+        const results = [];
+
+        fs.createReadStream("./data/drinking-water-services-coverage-urban.csv")
+            .pipe(csv())
+            .on("data", (row) => {
+                const item = {
+                    entity: row.entity,
+                    code: row.code,
+                    year: Number(row.year),
+                    wat_bas_pop_residence_urban:
+                        row.wat_bas_pop__residence_urban === ""
+                            ? null
+                            : Number(row.wat_bas_pop__residence_urban)
+                };
+
+                results.push(item);
+            })
+            .on("end", () => {
+                db.insert(results, (err, newDocs) => {
+                    if (err) {
+                        return res.sendStatus(500);
+                    }
+
+                    res.status(201).json({
+                        inserted: newDocs.length
+                    });
+                });
+            })
+            .on("error", () => {
+                res.sendStatus(500);
+            });
+    });
 });
+
+
 
 
 // GET COLECCIÓN + FILTROS + PAGINACIÓN
