@@ -298,35 +298,23 @@
             </p>
         </div>
 
-        <button class="btn-back" onclick={() => window.location.href = '/'}>
-            ⬅ Volver a la pagina principal
+        <button class="btn-back" onclick={() => window.location.href = '/integrations'}>
+            Volver a la pagina de integraciones
         </button>
     </header>
 
     <section class="info-box">
         <h2>Descripción de la integración</h2>
 
-        <p>
-            Esta vista realiza dos peticiones mediante <strong>fetch</strong>: una a mi API de
-            servicios de agua potable urbana y otra a la API externa REST Countries, que proporciona
-            información general de países europeos. Ambas APIs devuelven datos en formato
-            <strong>JSON</strong>.
-        </p>
 
         <p>
-            La integración se realiza cruzando ambas fuentes mediante el código ISO3:
-            <strong>code</strong> en mi API y <strong>cca3</strong> en REST Countries.
+            
             Para cada país europeo coincidente, se toma el último dato disponible de
             <strong>wat_bas_pop_residence_urban</strong> y se compara con la población total del
             país obtenida desde REST Countries.
         </p>
 
-        <p>
-            A partir de ambas APIs se calcula un indicador combinado:
-            <strong>población urbana con agua potable básica / población total del país</strong>.
-            Los resultados se muestran mediante una gráfica <strong>radialBar</strong> y una tabla
-            HTML, evitando mostrar JSON en bruto.
-        </p>
+       
     </section>
 
     {#if cargando}
