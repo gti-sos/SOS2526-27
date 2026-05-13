@@ -3,37 +3,37 @@ on: [push]
 
 jobs:
   test:
-    # Usamos la imagen oficial de Playwright que ya tiene los navegadores y librerías de sistema
     runs-on: ubuntu-latest
+    # Contenedor oficial de Playwright para evitar descargas largas
     container:
-      image: mcr.microsoft.com/playwright:v1.44.0-noble 
+      image: mcr.microsoft.com/playwright:v1.44.0-noble
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-          # Activamos el cache de npm para ir más rápido
           cache: 'npm'
 
-      - name: Install dependencies (Root & Frontend)
+      - name: Install dependencies
         run: |
           npm install --legacy-peer-deps
           cd src/front && npm install --legacy-peer-deps
 
-      - name: Run all tests (API)
+      - name: Run API tests
         run: npm test
 
-      - name: Run Playwright tests (e2e)
+      - name: Run Playwright tests
+        # Unificamos el arranque y el test en un solo bloque 'run'
         run: |
-          # Arrancamos el server en segundo plano
           npm start &
-          # Esperamos a que el servidor responda (ajusta el puerto si es necesario)
           npx playwright test
 
-      - name: Upload Artifacts
+      - name: Upload results
+        uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
