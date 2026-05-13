@@ -39,6 +39,40 @@
         }
     ];
 
+    // TUS INTEGRACIONES (Basadas en image_2a55b8.png)
+    const integracionesWaterDams = [
+        {
+            nombre: 'Air Quality',
+            descripcion: 'Analiza la pureza del aire en las regiones de las presas mediante la API de WAQI.',
+            ruta: '/integrations/water-dams/air-quality'
+        },
+        {
+            nombre: 'eSports Earnings',
+            descripcion: 'Comparativa curiosa entre las ganancias de eSports y la capacidad de almacenamiento hídrico.',
+            ruta: '/integrations/water-dams/esportsearnings-stats'
+        },
+        {
+            nombre: 'Población Country',
+            descripcion: 'Relación entre la capacidad de las presas y la población total de los países (REST Countries).',
+            ruta: '/integrations/water-dams/poblation-country'
+        },
+        {
+            nombre: 'Population Densities',
+            descripcion: 'Estudio de cómo afecta la densidad de población a la ubicación de grandes presas.',
+            ruta: '/integrations/water-dams/population-densities'
+        },
+        {
+            nombre: 'Water Consumption',
+            descripcion: 'Balance hídrico entre la oferta (presas) y la demanda (consumo anual de agua).',
+            ruta: '/integrations/water-dams/water-consumption'
+        },
+        {
+            nombre: 'Workers Productivity',
+            descripcion: 'Correlación entre la productividad laboral por hora y la infraestructura hídrica nacional.',
+            ruta: '/integrations/water-dams/workers-productivity'
+        }
+    ];
+
     const integracionesHydroelectric = [
         {
             nombre: 'Art & Energy',
@@ -97,7 +131,7 @@
             <h1>Integraciones</h1>
             <p class="subtitle">
                 Integraciones realizadas combinando las APIs
-                <strong>drinking-water-services,water-dams y world-hydroelectric-plants</strong> con APIs externas y APIs de otros grupos SOS.
+                <strong>drinking-water-services, water-dams y world-hydroelectric-plants</strong> con APIs externas y APIs de otros grupos SOS.
             </p>
         </div>
 
@@ -106,15 +140,14 @@
         </button>
     </header>
 
+    <!-- SECCIÓN DRINKING WATER -->
     <section class="card green-section">
         <h2>drinking-water-services</h2>
-
         <div class="button-grid">
             {#each integracionesDrinkingWater as integracion (integracion.ruta)}
                 <article class="mini-card">
                     <h3>{integracion.nombre}</h3>
                     <p>{integracion.descripcion}</p>
-
                     <button class="secondary-button green-btn" onclick={() => irA(integracion.ruta)}>
                         Abrir integración
                     </button>
@@ -123,15 +156,30 @@
         </div>
     </section>
 
+    <!-- TU NUEVA SECCIÓN WATER DAMS -->
+    <section class="card orange-section">
+        <h2>water-dams</h2>
+        <div class="button-grid">
+            {#each integracionesWaterDams as integracion (integracion.ruta)}
+                <article class="mini-card">
+                    <h3>{integracion.nombre}</h3>
+                    <p>{integracion.descripcion}</p>
+                    <button class="secondary-button orange-btn" onclick={() => irA(integracion.ruta)}>
+                        Abrir integración
+                    </button>
+                </article>
+            {/each}
+        </div>
+    </section>
+
+    <!-- SECCIÓN HYDROELECTRIC -->
     <section class="card blue-section">
         <h2>world-hydroelectric-plants</h2>
-
         <div class="button-grid">
             {#each integracionesHydroelectric as integracion (integracion.ruta)}
                 <article class="mini-card">
                     <h3>{integracion.nombre}</h3>
                     <p>{integracion.descripcion}</p>
-
                     <button class="secondary-button blue-btn" onclick={() => irA(integracion.ruta)}>
                         Abrir integración
                     </button>
@@ -197,6 +245,7 @@
 
     /* ESTILOS DE BORDE POR SECCIÓN */
     .green-section { border-left: 4px solid #16a34a; }
+    .orange-section { border-left: 4px solid #f97316; } /* Color para water-dams */
     .blue-section { border-left: 4px solid #0284c7; }
 
     .button-grid {
@@ -211,6 +260,9 @@
         border-radius: 10px;
         padding: 16px;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
 
     .mini-card p {
@@ -233,6 +285,9 @@
     /* ESTILOS DE BOTÓN POR SECCIÓN */
     .green-btn { background-color: #16a34a; }
     .green-btn:hover { background-color: #15803d; }
+
+    .orange-btn { background-color: #f97316; }
+    .orange-btn:hover { background-color: #ea580c; }
 
     .blue-btn { background-color: #0284c7; }
     .blue-btn:hover { background-color: #0369a1; }

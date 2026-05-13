@@ -119,7 +119,7 @@
     </header>
 
     <section class="info-box">
-        <p>Integración <strong>Normal (0,20 pts)</strong>. Comparamos la oferta (capacidad de nuestras presas) frente a la demanda (consumo anual total calculado mediante población y datos de uso de la FAO).</p>
+        <p>Integración en la que comparamos la oferta (capacidad de nuestras presas) frente a la demanda (consumo anual total calculado mediante población y datos de uso de la FAO).</p>
     </section>
 
     <div id="container-chart" style="width: 100%; height: 500px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px;"></div>
