@@ -2,9 +2,9 @@
     import { onMount } from 'svelte';
 
     let chartDiv;
+    let chartInstance = null;
 
     async function loadChart() {
-        console.log("Cargando datos...");
         const resMy = await fetch('/api/v1/world-hydroelectric-plants');
         const resOther = await fetch('https://sos2526-26.onrender.com/api/v2/fifa-squad-value-per-years');
 
@@ -12,81 +12,80 @@
             const myData = await resMy.json();
             const fifaData = await resOther.json();
 
-            console.log("Datos recibidos:", { misPlantas: myData.length, datosFifa: fifaData.length });
-
-            // 1. Procesamiento: Capacidad MW por país
+            // 1. Procesamiento: Sumamos TU capacidad (MW) por país
             const myByCountry = myData.reduce((acc, d) => {
-                if (d.country && d.capacity_mw) {
-                    const country = d.country.toLowerCase().trim();
-                    acc[country] = (acc[country] || 0) + Number(d.capacity_mw);
-                }
+                const country = d.country.toLowerCase().trim();
+                acc[country] = (acc[country] || 0) + Number(d.capacity_mw);
                 return acc;
             }, {});
 
-            // 2. Procesamiento: Valor FIFA
-            const otherStats = fifaData.reduce((acc, d) => {
-                if (d.country && d.total_market_value) {
-                    const country = d.country.toLowerCase().trim();
-                    if (!acc[country]) acc[country] = { total: 0, count: 0 };
-                    acc[country].total += Number(d.total_market_value);
-                    acc[country].count += 1;
-                }
+            // 2. Procesamiento: Media del Valor FIFA por país (Unificamos años)
+            const fifaStats = fifaData.reduce((acc, d) => {
+                const country = d.country.toLowerCase().trim();
+                if (!acc[country]) acc[country] = { total: 0, count: 0 };
+                acc[country].total += Number(d.total_market_value);
+                acc[country].count += 1;
                 return acc;
             }, {});
 
-            console.log("Mis países procesados:", Object.keys(myByCountry));
-            console.log("Países FIFA procesados:", Object.keys(otherStats));
+            // 3. Cruzamos datos
+            const commonCountries = Object.keys(myByCountry).filter(c => fifaStats[c]);
 
-            // 3. Cruzar datos
-            const commonCountries = Object.keys(myByCountry).filter(c => otherStats[c]);
-            
-            console.log("Países comunes encontrados:", commonCountries);
+            const bubbleData = commonCountries.map(c => {
+                const avgFifa = Number((fifaStats[c].total / fifaStats[c].count).toFixed(2));
+                return {
+                    x: myByCountry[c],
+                    value: avgFifa,
+                    size: avgFifa,
+                    name: c.toUpperCase()
+                };
+            });
 
-            if (commonCountries.length === 0) {
-                console.error("ERROR: No hay países en común. Revisa si una API usa nombres en inglés y la otra en español.");
-                return;
-            }
-
-            const chartData = commonCountries.map(c => [
-                c.toUpperCase(),
-                myByCountry[c],
-                Number((otherStats[c].total / otherStats[c].count).toFixed(2))
-            ]);
-
-            renderBipolar(chartData);
-        } else {
-            console.error("Error al obtener datos de las APIs");
+            await renderBubble(bubbleData);
         }
     }
 
-    function renderBipolar(data) {
-        // @ts-ignore
-        const anychart = window.anychart;
-        if (!anychart || !anychart.bipolar || !chartDiv) {
-            console.error("AnyChart no está cargado o falta el div");
-            return;
+    async function renderBubble(data) {
+        let attempts = 0;
+        while ((!window.anychart || typeof window.anychart.bubble !== 'function') && attempts < 30) {
+            await new Promise(r => setTimeout(r, 100));
+            attempts++;
         }
 
-        const chart = anychart.bipolar();
+        const anychart = window.anychart;
+        if (!anychart || !chartDiv) return;
 
-        // Serie Izquierda: Energía (Azul)
-        const series1 = chart.column(data.map(d => [d[0], d[1]]));
-        series1.name('Capacidad Hidroeléctrica (MW)');
-        series1.fill('#3498db');
+        if (chartInstance) chartInstance.dispose();
 
-        // Serie Derecha: Valor FIFA (Dorado)
-        const series2 = chart.column(data.map(d => [d[0], d[2]]));
-        series2.name('Valor Mercado FIFA (M€)');
-        series2.fill('#f1c40f');
+        chartInstance = anychart.bubble(data);
 
-        chart.title('Relación: Infraestructura Energética vs Potencia Futbolística');
-        chart.legend(true);
-        chart.yAxis(0).title('Potencia (MW)');
-        chart.yAxis(1).title('Valor FIFA (M€)');
+        // --- PERSONALIZACIÓN DEL TOOLTIP (Lo que pedías) ---
+        const tooltip = chartInstance.tooltip();
+        tooltip.useHtml(true);
+        // Título del tooltip: Nombre del país
+        tooltip.titleFormat("<b>{%name}</b>");
+        // Contenido: Nombres descriptivos y unidades, sin 'size' ni 'x/y'
+        tooltip.format(
+            "<span><b>Capacidad:</b> {%x} MW</span><br/>" +
+            "<span><b>Valor de Mercado:</b> {%value} M€</span>"
+        );
 
-        chart.container(chartDiv);
-        chart.draw();
-        console.log("Gráfica dibujada con éxito");
+        // Configuración de los Ejes
+        chartInstance.xAxis().title("Capacidad Hidroeléctrica (MW)");
+        chartInstance.yAxis().title("Valor Mercado FIFA (Media M€)");
+        
+        // Estilo de las burbujas
+        const series = chartInstance.getSeries(0);
+        if (series) {
+            series.fill("#3498db 0.6");
+            series.stroke("#3498db");
+            // Etiqueta sobre la burbuja: Solo nombre del país
+            series.labels().enabled(true).format("{%name}").fontColor("#2c3e50").fontSize(10);
+        }
+
+        chartInstance.title("Relación: Potencia Industrial vs Valor Deportivo Medio");
+        chartInstance.container(chartDiv);
+        chartInstance.draw();
     }
 
     onMount(loadChart);
@@ -100,32 +99,31 @@
 <main class="page-container">
     <header class="top-nav">
         <h1 class="page-title">Integración SOS: FIFA Squad Value (G26)</h1>
-        <button class="btn-back" onclick={() => window.history.back()}>
-            ← Volver
-        </button>
+        <button class="btn-back" onclick={() => window.history.back()}>← Volver</button>
     </header>
 
     <div class="main-card">
-        <div id="chart-container" bind:this={chartDiv} style="width: 100%; height: 500px;"></div>
+        <div bind:this={chartDiv} style="width: 100%; height: 550px;"></div>
     </div>
     
     <div class="analysis-box">
         <p>
-            <span class="icon">⚽</span> 
-            <strong>Identificación de campos:</strong> En este gráfico <strong>Bipolar</strong>, separamos la 
-            <b>Capacidad Hidroeléctrica (MW)</b> a la izquierda y el <b>Valor Mercado FIFA (M€)</b> a la derecha. 
-            Si la gráfica aparece vacía, abre la consola (F12) para ver la depuración de datos.
+            <span class="icon">📊</span> 
+            <strong>Lógica de unificación:</strong> En este gráfico de burbujas, los datos de mercado de la API externa se han 
+            <strong>promediado por país</strong> para unificar registros de distintos años. 
+            El <b>tamaño y posición vertical</b> indican el valor económico medio de la plantilla, 
+            mientras que la <b>posición horizontal</b> representa la capacidad hidroeléctrica total instalada.
         </p>
     </div>
 </main>
 
 <style>
-    /* Estilo Wine-stats */
     :global(body) { background-color: #f8f9fa; margin: 0; font-family: sans-serif; }
     .page-container { padding: 40px; max-width: 1100px; margin: 0 auto; }
-    .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #cbd5e1; padding-bottom: 16px; }
-    .page-title { font-size: 28px; font-weight: bold; color: #1e293b; }
+    .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #16a34a; padding-bottom: 16px; }
+    .page-title { font-size: 28px; font-weight: bold; }
     .btn-back { background: #64748b; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-    .main-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 35px; }
+    .main-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 35px; }
     .analysis-box { background: #fff5f5; padding: 25px; border-left: 6px solid #ff4d4d; border-radius: 4px; color: #333; line-height: 1.6; }
+    .icon { margin-right: 12px; }
 </style>

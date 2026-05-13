@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
 
     let chartDiv;
+    let chartInstance = null;
 
     async function loadData() {
         const API_MY = "/api/v1/world-hydroelectric-plants";
@@ -10,183 +11,141 @@
         try {
             const resMy = await fetch(API_MY);
             const myData = await resMy.json();
-
             const resNobel = await fetch(API_PROXY);
             const nobelData = await resNobel.json();
 
             if (!myData.length || !nobelData.laureates) return;
 
-            // 1. AGRUPAR POR PAÍS
-            const grouped = myData.reduce((acc, current) => {
+            // 1. Agrupar Capacidad MW por país
+            const groupedMW = myData.reduce((acc, current) => {
                 const country = current.country.trim();
                 if (!acc[country]) acc[country] = 0;
                 acc[country] += current.capacity_mw;
                 return acc;
             }, {});
 
-            const sortedCountries = Object.keys(grouped).sort().slice(0, 8); 
+            const sortedCountries = Object.keys(groupedMW).sort().slice(0, 8); 
 
-            // 2. CONSTRUIR ESTRUCTURA JERÁRQUICA PARA SUNBURST
-            const sunburstData = sortedCountries.map(country => {
+            // 2. Preparar los datos
+            const finalData = sortedCountries.map(country => {
                 const nCount = nobelData.laureates.filter(l => 
                     l.bornCountry && l.bornCountry.toLowerCase().includes(country.toLowerCase())
                 ).length;
 
                 return {
-                    name: country,
-                    children: [
-                        {
-                            name: 'Potencia',
-                            value: Math.round(grouped[country]),
-                            itemStyle: { color: '#008FFB' } // Azul
-                        },
-                        {
-                            name: 'Nobel',
-                            value: nCount * 100, // Escalamos para que sea visible frente a los MW
-                            realValue: nCount,
-                            itemStyle: { color: '#FEB019' } // Dorado
-                        }
-                    ]
+                    x: country.toUpperCase(),
+                    energy: Math.round(groupedMW[country]),
+                    nobel: nCount
                 };
             });
 
-            renderSunburst(sunburstData);
+            render3DColumn(finalData);
         } catch (e) {
-            console.error("Error en la integración:", e);
+            console.error("Error cargando datos:", e);
         }
     }
 
-    function renderSunburst(data) {
-        // @ts-ignore
-        if (!window.echarts || !chartDiv) return;
-        // @ts-ignore
-        const myChart = window.echarts.init(chartDiv);
+    async function render3DColumn(data) {
+        let attempts = 0;
+        // Espera a que la librería cargue correctamente
+        while (!window.anychart && attempts < 30) {
+            await new Promise(r => setTimeout(r, 100));
+            attempts++;
+        }
 
-        const option = {
-            title: {
-                text: 'Distribución Nobel & Energy',
-                left: 'center',
-                textStyle: { fontSize: 20 }
-            },
-            tooltip: {
-                formatter: function (params) {
-                    const node = params.data;
-                    if (node.children) return `<b>${node.name}</b>`;
-                    const val = node.name === 'Nobel' ? node.realValue : node.value.toLocaleString();
-                    return `${params.treePathInfo[1].name}<br/>${node.name}: <b>${val}</b>`;
-                }
-            },
-            series: {
-                type: 'sunburst',
-                data: data,
-                radius: [0, '90%'],
-                label: { rotate: 'radial' },
-                levels: [
-                    {}, 
-                    { r0: '0%', r: '35%', itemStyle: { borderWidth: 2 }, label: { align: 'right' } }, // Países
-                    { r0: '35%', r: '70%', label: { position: 'outside', padding: 3, silent: false } } // Datos
-                ]
+        const anychart = window.anychart;
+        if (!anychart || !chartDiv) return;
+        if (chartInstance) chartInstance.dispose();
+
+        // --- CONFIGURACIÓN CON TYPE EXPLÍCITO ---
+        const chartConfig = {
+            chart: {
+                type: "column-3d", 
+                title: "Comparativa 3D: Potencia Industrial vs Capital Intelectual",
+                series: [
+                    {
+                        seriesType: "column",
+                        name: "Capacidad Hidroeléctrica",
+                        data: data.map(d => ({x: d.x, value: d.energy})),
+                        fill: "#3498db",
+                        tooltip: { format: "Capacidad: {%Value} MW" }
+                    },
+                    {
+                        seriesType: "column",
+                        name: "Premios Nobel",
+                        data: data.map(d => ({x: d.x, value: d.nobel})),
+                        fill: "#f1c40f",
+                        yScale: 1, 
+                        tooltip: { format: "Premios Nobel: {%Value}" }
+                    }
+                ],
+                yAxes: [
+                    { title: "Capacidad (MW)" },
+                    { 
+                        title: "Cantidad de Premios Nobel",
+                        orientation: "right",
+                        enabled: true
+                    }
+                ],
+                legend: { enabled: true, padding: [0, 0, 20, 0] }
             }
         };
 
-        myChart.setOption(option);
+        // Creamos el gráfico desde el objeto
+        chartInstance = anychart.fromJson(chartConfig);
+
+        // --- SOLUCIÓN PARA VALORES ENTEROS ---
+        const nobelScale = anychart.scales.linear();
+        
+        // Evitamos que salgan decimales (0.5, 1.5...) en el eje de los Nobel
+        nobelScale.ticks().allowFractional(false);
+        nobelScale.minimum(0); // Aseguramos que empiece en 0
+
+        // Vinculamos la serie dorada y el eje derecho a esta escala de enteros
+        chartInstance.getSeries(1).yScale(nobelScale);
+        chartInstance.yAxis(1).scale(nobelScale);
+
+        chartInstance.container(chartDiv);
+        chartInstance.draw();
     }
 
     onMount(loadData);
 </script>
 
 <svelte:head>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.anychart.com/releases/8.11.0/css/anychart-ui.min.css">
 </svelte:head>
 
 <main class="page-container">
-    <div class="top-header">
+    <header class="top-header">
         <h1 class="main-title">Uso de Proxy: Nobel & Energy Stats</h1>
-        <button class="back-btn" on:click={() => window.location.href = "/integrations"}>
-            ← Volver
-        </button>
-    </div>
+        <button class="back-btn" onclick={() => window.history.back()}>← Volver</button>
+    </header>
 
     <div class="main-card">
-        <div bind:this={chartDiv} class="chart-box"></div>
+        <div bind:this={chartDiv} style="width: 100%; height: 550px;"></div>
     </div>
 
     <div class="analysis-box">
         <p>
-            <span class="icon">☀️</span> 
-            <strong>Identificación de los campos:</strong> Esta visualización de <strong>Rayos de Sol (Sunburst)</strong> 
-            organiza la información de forma concéntrica para distinguir las fuentes de datos. 
-            El <strong>núcleo</strong> identifica al país, mientras que el <strong>anillo exterior</strong> se divide en dos: 
-            los sectores <strong>azules</strong> cuantifican la capacidad hidroeléctrica (MW) y los sectores 
-            <strong>dorados</strong> representan el volumen de Premios Nobel obtenidos. 
-            La amplitud de cada arco permite comparar visualmente el peso de la industria técnica frente al 
-            impacto del capital intelectual.
+            <span class="icon">🏛️</span> 
+            <strong>Identificación de los campos:</strong> Widget configurado como <code>type: "column-3d"</code>. 
+            Las columnas <b>Azules</b> muestran la capacidad hidroeléctrica (MW) en el eje izquierdo. 
+            Las columnas <b>Doradas</b> muestran los Premios Nobel en el eje derecho, utilizando escalas independientes 
+            para una visualización precisa de ambas magnitudes.
         </p>
     </div>
 </main>
 
 <style>
-    /* ESTILO WINE-STATS CALCADO */
-    :global(body) {
-        background-color: #f8f9fa;
-        margin: 0;
-        font-family: -apple-system, system-ui, sans-serif;
-    }
-
-    .page-container {
-        padding: 40px;
-        max-width: 1100px;
-        margin: 0 auto;
-    }
-
-    .top-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-    }
-
-    .main-title {
-        font-size: 28px;
-        font-weight: bold;
-        margin: 0;
-    }
-
-    .back-btn {
-        background-color: #64748b;
-        color: white;
-        border: none;
-        padding: 10px 18px;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-    .main-card {
-        background: white;
-        border-radius: 12px;
-        padding: 40px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        margin-bottom: 35px;
-    }
-
-    .chart-box {
-        width: 100%;
-        height: 550px;
-    }
-
-    /* EL CUADRO ROSADO CON BORDE ROJO DE 6PX */
-    .analysis-box {
-        background-color: #fff5f5;
-        border-left: 6px solid #ff4d4d;
-        padding: 25px;
-        border-radius: 4px;
-        color: #333;
-        font-size: 16px;
-        line-height: 1.6;
-    }
-
-    .icon {
-        margin-right: 10px;
-    }
+    /* Estilo Wine-stats */
+    :global(body) { background-color: #f8f9fa; margin: 0; font-family: sans-serif; }
+    .page-container { padding: 40px; max-width: 1100px; margin: 0 auto; }
+    .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #cbd5e1; padding-bottom: 16px; }
+    .main-title { font-size: 28px; font-weight: bold; color: #1e293b; }
+    .back-btn { background: #64748b; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .main-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 35px; }
+    .analysis-box { background: #fff5f5; border-left: 6px solid #ff4d4d; padding: 25px; border-radius: 4px; color: #333; line-height: 1.6; }
+    .icon { margin-right: 12px; }
 </style>
