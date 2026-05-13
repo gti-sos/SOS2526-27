@@ -28,7 +28,7 @@
             Highcharts.mapChart('map-container', {
                 chart: { 
                     map: worldMap,
-                    backgroundColor: 'transparent' // Para que luzca bien con el fondo del contenedor
+                    backgroundColor: 'transparent' 
                 },
                 title: { text: 'Capacidad Hidroeléctrica por País' },
                 legend: {
@@ -87,7 +87,7 @@
 </main>
 
 <style>
-    /* Estilo unificado con la gráfica individual */
+    
     .container { 
         padding: 30px; 
         max-width: 1200px; 
@@ -111,8 +111,8 @@
     #map-container {
         width: 100%;
         height: 600px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08); /* Sombra suave */
-        border-radius: 12px; /* Bordes redondeados */
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+        border-radius: 12px; 
         border: 1px solid #ddd;
         background: #fdfdfd;
         padding: 10px;

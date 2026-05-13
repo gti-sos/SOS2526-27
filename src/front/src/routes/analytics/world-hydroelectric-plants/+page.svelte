@@ -23,7 +23,7 @@
 
             Highcharts.chart('final-chart', {
                 chart: { 
-                    type: 'column', // <--- Cambiado a columnas para mejor comparativa
+                    type: 'column', 
                     backgroundColor: '#fdfdfd'
                 },
                 title: { text: 'Análisis Comparativo por País' },
@@ -33,9 +33,9 @@
                     crosshair: true,
                     title: { text: 'País' }
                 },
-                yAxis: [{ // Eje Izquierdo
+                yAxis: [{ 
                     title: { text: 'Potencia (MW) y Salto (m)' },
-                }, { // Eje Derecho
+                }, { 
                     title: { text: 'Volumen Total (km³)' },
                     opposite: true
                 }],
@@ -54,7 +54,7 @@
                     name: 'Volumen Total (km³)',
                     data: countries.map(c => grouped[c].vol),
                     color: '#e74c3c',
-                    yAxis: 1 // Usando el eje derecho para que se vea perfecto
+                    yAxis: 1 
                 }]
             });
         }

@@ -6,7 +6,7 @@
 	const API = '/api/v1/world-hydroelectric-plants';
 
 	let plants = $state([]);
-	// Nueva variable derivada que se mantiene siempre ordenada 
+	 
 	let sortedPlants = $derived([...plants].sort((a, b) =>
 		a.country.localeCompare(b.country) || a.name.localeCompare(b.name)
 	));
@@ -22,7 +22,7 @@
 		dam_name: '', res_vol_km3: ''
 	});
 
-	// --- NUEVO: Objeto de búsqueda (13 parámetros) 
+	//Busqueda
 	let search = $state({
 		country: '', name: '', year: '', river: '', plant_type: '',
 		capacity_mw: '', head_m: '', dam_name: '', res_vol_km3: '',
@@ -32,12 +32,11 @@
 	function mostrarExito(texto) { mensaje = texto; tipoMensaje = 'exito'; setTimeout(() => { if(mensaje === texto) mensaje = ''; }, 3000); }
 	function mostrarError(texto) { mensaje = texto; tipoMensaje = 'error'; setTimeout(() => { if(mensaje === texto) mensaje = ''; }, 3000); }
 
-	// FUNCIÓN ACTUALIZADA: Ahora soporta búsquedas sin romper el listado 
 	async function loadPlants() {
 		cargando = true;
 		const queryParams = new SvelteURLSearchParams();
 
-		// Filtros (los 13 parámetros)
+		
 		Object.entries(search).forEach(([key, value]) => {
 			if (value !== null && String(value).trim() !== '') {
 				queryParams.set(key, String(value).trim());
@@ -52,7 +51,7 @@
 			if (!res.ok) throw new Error();
 			plants = await res.json();
 			
-			// Solo mostramos mensaje automático si hay una BÚSQUEDA activa
+		
 			if (queryString !== "") {
 				if (plants.length === 0) {
 					mostrarError('No se han encontrado resultados para esos filtros.');
@@ -60,7 +59,7 @@
 					mostrarExito(`¡Operación exitosa! Encontradas ${plants.length} centrales.`);
 				}
 			} 
-			// Si no hay búsqueda y la lista está vacía (Error F07)
+		
 			else if (plants.length === 0 && primeraCargaPasada && mensaje === '') {
 				mostrarError('La lista está vacía. Pulsa "Cargar datos iniciales".');
 			}
@@ -72,7 +71,7 @@
 		}
 	}
 
-	// --- NUEVO: Función para resetear búsqueda ---
+
 	function resetSearch() {
 		search = { country: '', name: '', year: '', river: '', plant_type: '', 
 				   capacity_mw: '', head_m: '', dam_name: '', res_vol_km3: '',
@@ -80,7 +79,7 @@
 		loadPlants();
 	}
 
-	// FUNCIÓN CLAVE: Cargar datos iniciales desde el backend
+	// Cargar Datos iniciales
 	async function loadInitialData() {
 		cargando = true;
 		try {
@@ -126,7 +125,7 @@
 		try {
 			const res = await fetch(`${API}/${encodeURIComponent(name)}/${year}`, { method: 'DELETE' });
 			if (res.ok) { 
-				await loadPlants(); // Refrescamos
+				await loadPlants(); 
 				mostrarExito('Dato eliminado correctamente.'); 
 			}
 		} catch { mostrarError('Error al borrar.'); }
@@ -137,7 +136,7 @@
 		try {
 			const res = await fetch(API, { method: 'DELETE' });
 			if (res.ok) { 
-				await loadPlants(); // Refrescamos
+				await loadPlants(); 
 				mostrarExito('Base de datos vaciada correctamente.'); 
 			}
 		} catch { mostrarError('Error al vaciar la base de datos.'); }

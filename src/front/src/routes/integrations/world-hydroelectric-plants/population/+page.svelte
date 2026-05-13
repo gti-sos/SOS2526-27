@@ -3,41 +3,54 @@
 
     async function loadIntegration() {
         try {
-            // 1. Detección de Host (Local vs Render)
             const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
             const backendHost = isLocal ? "http://localhost:10000" : window.location.origin;
 
-            // 2. Carga de datos
+            // 1. CARGA DE DATOS
+            // Usamos CountriesNow API (Población histórica por país)
             const [resMy, resExt] = await Promise.all([
-                fetch(`${backendHost}/api/v1/world-hydroelectric-plants`),
-                fetch('https://restcountries.com/v3.1/all?fields=name,population')
+                fetch(`${backendHost}/api/v1/world-hydroelectric-plants?limit=1000`),
+                fetch('https://countriesnow.space/api/v0.1/countries/population')
             ]);
 
             const myData = await resMy.json();
-            const extData = await resExt.json();
+            const extDataRaw = await resExt.json();
+            const extData = extDataRaw.data; 
 
-            // 3. aAgrupación por país
+            if (!myData.length || !extData) return;
+
+            // 2. AGRUPACIÓN Y CRUCE DE DATOS
             const integratedMap = {};
+            
             myData.forEach(plant => {
                 const countryKey = plant.country.toLowerCase().trim();
+                
                 if (!integratedMap[countryKey]) {
-                    const match = extData.find(e => e.name.common.toLowerCase().trim() === countryKey);
-                    if (match) {
+                    // Buscamos el país 
+                    const match = extData.find(e => e.country.toLowerCase().trim() === countryKey);
+                    
+                    if (match && match.populationCounts) {
+                        // Cogemos el último año disponible de población (el último del array)
+                        const latestPop = match.populationCounts[match.populationCounts.length - 1].value;
+                        
                         integratedMap[countryKey] = {
                             name: plant.country.toUpperCase(),
                             capacity: 0,
-                            population: match.population
+                            population: latestPop
                         };
                     }
                 }
+                
                 if (integratedMap[countryKey]) {
                     integratedMap[countryKey].capacity += Number(plant.capacity_mw);
                 }
             });
 
-            // 4. Ordenación Alfabética
-            const finalData = Object.values(integratedMap).sort((a, b) => a.name.localeCompare(b.name));
-
+            // 3. SELECCIÓN DE DATOS (Ordenados alfabéticamente)
+            const finalData = Object.values(integratedMap)
+            .sort((a, b) => a.name.localeCompare(b.name)) 
+            .slice(0, 12); 
+           
             // Billboard.js - area-step
             window.bb.generate({
                 bindto: "#step-chart",
@@ -48,7 +61,7 @@
                     ],
                     type: "area-step", 
                     axes: {
-                        "Población": "y2" // Doble eje 
+                        "Población": "y2" 
                     }
                 },
                 axis: {
@@ -58,15 +71,24 @@
                         label: "Países"
                     },
                     y: {
-                        label: "Capacidad (MW)"
+                        label: "Potencia Instalada (MW)"
                     },
                     y2: {
                         show: true,
-                        label: "Población Total"
+                        label: "Población",
+                        tick: {
+                            format: d => (d / 1000000).toFixed(1) + "M"
+                        }
                     }
                 },
+                title: {
+                    text: "Cruce: Capacidad Energética vs Población"
+                },
                 color: {
-                    pattern: ["#1f77b4", "#ff7f0e"]
+                    pattern: ["#2980b9", "#c0392b"]
+                },
+                grid: {
+                    y: { show: true }
                 }
             });
 
@@ -90,7 +112,7 @@
 
 <main class="page-container">
     <header class="header">
-        <h1>Integración Externa: Population & Energy</h1>
+        <h1>Integración API Externa: Population & Energy</h1>
         <button class="btn-back" on:click={() => window.history.back()}>⬅ Volver</button>
     </header>
 
@@ -98,17 +120,33 @@
         <div id="step-chart"></div>
     </div>
 
-    <div class="info-panel">
-        <p>🚀 Cruce de datos de capacidad hydroeléctrica (API propia) con población (API externa).</p>
+    <div class="analysis-box">
+        <p>
+            <span class="icon">🏘️</span> 
+            Se han cruzado datos de capacidad con el censo poblacional 
+            obtenido de la API <strong>CountriesNow</strong>. Al usar un gráfico escalonado con <strong>doble eje Y</strong>, 
+            podemos observar si existe una relación directa entre el volumen de población y la infraestructura de 
+            energía renovable de cada nación sin que las escalas se solapen.
+        </p>
     </div>
 </main>
 
 <style>
-    .page-container { padding: 30px; max-width: 1100px; margin: 0 auto; font-family: 'Segoe UI', sans-serif; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .btn-back { background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-    .chart-card { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-    .info-panel { margin-top: 25px; padding: 20px; background: #fdf2f2; border-left: 5px solid #dc2626; color: #991b1b; }
+    :global(body) { background-color: #f8f9fa; margin: 0; font-family: sans-serif; }
+    .page-container { padding: 40px; max-width: 1100px; margin: 0 auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #cbd5e1; padding-bottom: 16px; }
+    .btn-back { background: #64748b; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .chart-card { background: white; border-radius: 12px; padding: 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 35px; }
     
+    .analysis-box { 
+        background-color: #fff5f5; 
+        border-left: 6px solid #ff4d4d; 
+        padding: 25px; 
+        border-radius: 4px; 
+        color: #333; 
+        font-size: 16px; 
+        line-height: 1.6; 
+    }
+    .icon { margin-right: 12px; }
     #step-chart { min-height: 450px; }
 </style>

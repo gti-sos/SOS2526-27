@@ -49,7 +49,6 @@ router.get("/", (req, res) => {
         "from", "to", "limit", "offset"
     ];
 
-    // Si algún parámetro de la URL no está en nuestra lista, devolvemos []
     const hasInvalidParam = Object.keys(req.query).some(p => !allowedParams.includes(p));
     if (hasInvalidParam) {
         return res.status(200).json([]);  // Si algun campo no existe 200 OK + Array Vacio
@@ -73,7 +72,7 @@ router.get("/", (req, res) => {
     if (res_vol_km3) query.res_vol_km3 = Number(res_vol_km3);
     if (from && to) query.year = { $gte: Number(from), $lte: Number(to) };
 
-    let limitValue = parseInt(limit) || 100; // Por defecto 100 si no se envía
+    let limitValue = parseInt(limit) || 100; 
     let offsetValue = parseInt(offset) || 0;
 
     db.find(query, { _id: 0 }).skip(offsetValue).limit(limitValue).exec((err, plants) => {
@@ -81,7 +80,7 @@ router.get("/", (req, res) => {
     });
 });
 
-// GET Recurso concreto -> Retorna OBJECT
+// GET Recurso concreto 
 router.get("/:name/:year", (req, res) => {
     const name = decodeURIComponent(req.params.name);
     const year = Number(req.params.year);
@@ -129,7 +128,7 @@ router.put("/:name/:year", (req, res) => {
     const year = Number(req.params.year);
     const updatedData = req.body;
 
-    // FILTRO 1: ¿Están todos los campos esperados? (Regla del 400 por campos)
+    // Campos esperados
     const camposEsperados = ["country", "name", "year", "river", "plant_type", "capacity_mw", "head_m", "dam_name", "res_vol_km3"];
     const faltanCampos = camposEsperados.some(campo => !updatedData.hasOwnProperty(campo));
     const llavesRecibidas = Object.keys(updatedData);
@@ -139,12 +138,12 @@ router.put("/:name/:year", (req, res) => {
         return res.status(400).send("Bad Request: El JSON no tiene la estructura exacta esperada."); // 400 Bad Request
     }
 
-    // FILTRO 2: ¿Coincide el ID de la URL con el del Body? (Regla del 400 por ID)
+    // Comprobar si coincide id
     if (updatedData.name.trim().toLowerCase() !== name.trim().toLowerCase() || updatedData.year !== year) {
         return res.status(400).send("Bad Request: El ID del recurso no coincide con los datos del cuerpo."); // 400 Bad Request
     }
 
-    // FILTRO 3: ¿Existe el recurso en mi lista? (Regla del 404)
+    // Comprobar si existe el recurso
     db.update({ name: name, year: year }, { $set: updatedData }, {}, (err, numReplaced) => {
         if (numReplaced === 0) {
             res.sendStatus(404); // 404 Not Found 
