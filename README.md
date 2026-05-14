@@ -1,6 +1,6 @@
 # SOS2526-27
 
-## SOS2526-27
+
 
 - **Team**
   - Alejandro Campos Sánchez-Cruzado (https://github.com/alecamsan1)
