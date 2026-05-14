@@ -9,7 +9,9 @@
 			frontend: '/drinking-water-services',
 			api: '/api/v1/drinking-water-services',
 			docs: 'https://documenter.getpostman.com/view/52242576/2sBXieqtPa',
-			github: 'https://github.com/alecamsan1'
+			github: 'https://github.com/alecamsan1',
+			usuarioGithub: '@alecamsan1',
+			video: 'https://youtu.be/P8GjzIzxnnI'
 		},
 		{
 			nombre: 'Alejandro Catalán Noviembre',
@@ -17,7 +19,9 @@
 			frontend: '/water-dams',
 			api: '/api/v1/water-dams',
 			docs: 'https://documenter.getpostman.com/view/52243900/2sBXigNZbh',
-			github: 'https://github.com/alecn-us'
+			github: 'https://github.com/alecn-us',
+			usuarioGithub: '@alecn-us',
+			video: 'https://youtu.be/cJR-4DP7FfQ'
 		},
 		{
 			nombre: 'Adrián Pérez Sánchez',
@@ -25,7 +29,9 @@
 			frontend: '/world-hydroelectric-plants',
 			api: '/api/v1/world-hydroelectric-plants',
 			docs: 'https://documenter.getpostman.com/view/52298948/2sBXigMDpo',
-			github: 'https://github.com/adrianperez17'
+			github: 'https://github.com/adrianperez17',
+			usuarioGithub: '@adrianperez17',
+			video: 'https://youtu.be/_MhJ3sr_JB4'
 		}
 	];
 
@@ -58,7 +64,7 @@
 			<h1>SOS2526-27</h1>
 			<p class="subtitle">
 				Portal del equipo con acceso a frontends, APIs, documentación, integraciones,
-				consumiciones y repositorio.
+				consumiciones, vídeos D03 y repositorio.
 			</p>
 		</div>
 
@@ -67,6 +73,7 @@
 
 	<section class="card">
 		<h2>Repositorio del equipo</h2>
+
 		<p>
 			<button class="primary-button" onclick={() => abrirExterno(repositorioEquipo)}>
 				Ir al repositorio de GitHub
@@ -76,7 +83,10 @@
 
 	<section class="card highlight">
 		<h2>Dashboard Grupal</h2>
-		<p>Accede a la visualización integrada de todos los datos del equipo en una única matriz global.</p>
+
+		<p>
+			Accede a la visualización integrada de todos los datos del equipo en una única matriz global.
+		</p>
 
 		<button class="primary-button" onclick={() => irA('/analytics')}>
 			Ir a la integración grupal
@@ -85,6 +95,7 @@
 
 	<section class="card navigation-card">
 		<h2>Entregable D03</h2>
+
 		<p class="section-description">
 			Accede a las integraciones y consumiciones realizadas para el entregable.
 		</p>
@@ -93,9 +104,30 @@
 			<button class="primary-button green" onclick={() => irA('/integrations')}>
 				Ver integraciones
 			</button>
-
-			
 		</div>
+	</section>
+
+	<section class="card video-section">
+		<h2>Vídeos individuales D03</h2>
+
+		<p class="section-description">
+			Cada miembro del equipo dispone de un vídeo individual, narrado o comentado, explicando
+			las funcionalidades y aspectos principales del entregable D03.
+		</p>
+
+		<div class="video-grid">
+			{#each equipo as persona (persona.usuarioGithub)}
+				<button class="video-card" onclick={() => abrirExterno(persona.video)}>
+					<span class="play-icon">▶</span>
+
+					<span class="video-info">
+						<strong>{persona.nombre}</strong>
+						<small>{persona.recurso} · {persona.usuarioGithub}</small>
+					</span>
+				</button>
+			{/each}
+		</div>
+
 	</section>
 
 	<section class="card">
@@ -110,6 +142,7 @@
 					<th>API base</th>
 					<th>Documentación Postman</th>
 					<th>GitHub</th>
+					<th>Vídeo D03</th>
 				</tr>
 			</thead>
 
@@ -118,24 +151,34 @@
 					<tr>
 						<td>{persona.nombre}</td>
 						<td>{persona.recurso}</td>
+
 						<td>
 							<button class="link-button" onclick={() => irA(persona.frontend)}>
 								Abrir frontend
 							</button>
 						</td>
+
 						<td>
 							<button class="link-button" onclick={() => abrirApi(persona.api)}>
 								Abrir API
 							</button>
 						</td>
+
 						<td>
 							<button class="link-button" onclick={() => abrirExterno(persona.docs)}>
 								Ver documentación
 							</button>
 						</td>
+
 						<td>
 							<button class="link-button" onclick={() => abrirExterno(persona.github)}>
 								Perfil GitHub
+							</button>
+						</td>
+
+						<td>
+							<button class="link-button youtube-link" onclick={() => abrirExterno(persona.video)}>
+								Ver vídeo
 							</button>
 						</td>
 					</tr>
@@ -202,6 +245,10 @@
 		border-left: 4px solid #0f172a;
 	}
 
+	.video-section {
+		border-left: 4px solid #ef4444;
+	}
+
 	.section-description {
 		margin: 6px 0 18px 0;
 		color: #475569;
@@ -239,6 +286,8 @@
 
 	
 
+
+
 	.link-button {
 		background: none;
 		border: none;
@@ -251,6 +300,62 @@
 
 	.link-button:hover {
 		text-decoration: underline;
+	}
+
+	.youtube-link {
+		color: #dc2626;
+	}
+
+	.video-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+		gap: 16px;
+		margin-top: 16px;
+	}
+
+	.video-card {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+		width: 100%;
+		padding: 16px;
+		border: none;
+		border-radius: 12px;
+		background: #ff0000;
+		color: white;
+		cursor: pointer;
+		text-align: left;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+		transition:
+			transform 0.2s ease,
+			background 0.2s ease,
+			box-shadow 0.2s ease;
+	}
+
+	.video-card:hover {
+		background: #cc0000;
+		transform: translateY(-2px);
+		box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+	}
+
+	.play-icon {
+		font-size: 1.6rem;
+		line-height: 1;
+	}
+
+	.video-info {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	.video-info strong {
+		font-size: 1rem;
+	}
+
+	.video-info small {
+		font-size: 0.85rem;
+		opacity: 0.9;
 	}
 
 	table {
